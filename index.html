@@ -159,6 +159,29 @@ button.die{padding:6px}
 .crown{font-family:var(--f-num);font-weight:800;font-size:40px;line-height:1}
 .err{color:var(--pip);font-size:14px}
 .small{font-size:13px}
+.brand h1.long{font-size:21px}
+.subhead h1.long{font-size:21px}
+.guide{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.gmeta{display:flex;flex-direction:column;gap:4px;background:var(--bg);border-radius:10px;padding:10px 12px}
+.gmeta b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.gsteps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:7px;font-size:15px}
+.gsteps li::marker{font-family:var(--f-num);font-weight:700;color:var(--pip)}
+.gbox{border-left:3px solid var(--ink);padding:6px 10px;font-size:14px;background:var(--bg);border-radius:0 8px 8px 0}
+.gbox.tip{border-left-color:var(--ok)}
+.gbox b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.rulesall summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.crew{display:grid;grid-template-columns:repeat(3,1fr) 1.6fr;gap:6px}
+.crewslot{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border:1px dashed var(--line);border-radius:10px}
+.crewslot.on{border-style:solid;border-color:var(--ok);background:var(--ok-soft)}
+.crewslot small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;text-align:center}
+.crewslot .die{width:38px;height:38px;padding:5px}
+.crewslot .die i{width:7px;height:7px}
+.racerow{display:flex;flex-direction:column;gap:6px;padding:6px 8px;border-radius:10px}
+.racerow.cur{background:var(--pip-soft)}
+.seqs{display:flex;flex-wrap:wrap;gap:4px}
+.sq{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;font-family:var(--f-num);font-weight:700;font-size:15px;color:var(--muted)}
+.sq.ok{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sq.next{border:2px solid var(--pip);color:var(--ink)}
 #fx{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:40;padding:24px}
 #fx .fxcard{background:var(--ink);color:var(--paper);border-radius:18px;padding:22px 26px;text-align:center;max-width:360px;transform:scale(.7) rotate(-3deg);opacity:0;transition:transform .25s cubic-bezier(.2,1.6,.4,1),opacity .2s;box-shadow:0 12px 40px rgba(0,0,0,.35)}
 #fx.on .fxcard{transform:scale(1) rotate(-2deg);opacity:1}
@@ -461,12 +484,16 @@ function rulesList(r){
   if(isBluff(r)) return bluffRulesList(r);
   if(isBox(r)) return boxRulesList(r);
   if(isHouse(r)) return houseRulesList(r);
+  if(isBust(r)) return bustRulesList(r);
+  if(isShip(r)) return shipRulesList(r);
+  if(isPoker(r)) return pokerRulesList(r);
+  if(isRace(r)) return raceRulesList(r);
   const L=[];
   const singles=Object.entries(r.singles).filter(([f,p])=>p).map(([f,p])=>`${f}er = ${fmt(p)}`).join(', ');
   L.push(`${r.dice} Würfel.${singles?' '+singles+'.':' Einzelne Würfel zählen nicht.'}`);
   const cl=comboKeys(r).map(k=>describeCount(r,k)).filter(Boolean); if(cl.length) L.push(cl.join('. ')+'.');
   (r.specials||[]).forEach(sp=>L.push(sp.type==='straight'?`Straße ${sp.faces[0]}–${sp.faces[sp.faces.length-1]} = ${fmt(sp.pts)}.`:`Drei Paare = ${fmt(sp.pts)}.`));
-  L.push(`Weiterwürfeln oder aufhören. Niete = Punkte des Zugs weg.${r.carryOver?` Alle ${r.dice} gepunktet = mit ${r.dice} weiter.`:''}`);
+  L.push(`Weiterwürfeln oder aufhören. Niete = Punkte des Zugs weg.${r.carryOver&&r.dice>1?` Alle ${r.dice} gepunktet = mit ${r.dice} weiter.`:''}`);
   if(r.forceTake) L.push('Punktewürfel müssen genommen werden, wie sie fallen. Man darf keine Punkte liegen lassen.');
   if(r.entry) L.push(`Einstieg: Im ersten Zug mindestens ${fmt(r.entry)} Punkte, sonst Niete.`);
   if((r.burn||[]).length) L.push(`Genau ${r.burn.map(fmt).join(' oder ')} verbrennt auf 0.`);
@@ -478,16 +505,16 @@ function rulesList(r){
 
 /* ---------- Zustand ---------- */
 const uid=()=>Math.random().toString(36).slice(2,9);
-function freshTurn(r){ if(r.type==='box') return {tiles:Array(r.tiles).fill(true),dice:null,sel:[],tsel:[],left:2,rollId:null}; if(r.type==='house') return {slots:[null,null,null],die:null,sel:[],rollId:null}; if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
+function freshTurn(r){ if(r.type==='bust') return {total:0,rolls:0,last:null,sel:[],rollId:null}; if(r.type==='ship') return {set:[],cargo:null,last:null,rolls:0,sel:[],left:5,rollId:null}; if(r.type==='poker') return {dice:null,held:[],rolls:0,sel:[],left:5,rollId:null}; if(r.type==='race') return {sel:[]}; if(r.type==='box') return {tiles:Array(r.tiles).fill(true),dice:null,sel:[],tsel:[],left:2,rollId:null}; if(r.type==='house') return {slots:[null,null,null],die:null,sel:[],rollId:null}; if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
 function newGame(names,tplId){
   const rules=clone(tplOf(tplId));
-  const extra=rules.type==='round'?{half:1, pool:rules.deckel, halfPlayers:[], halfLosers:[], round:{maxRolls:null,results:{},order:names.map((_,i)=>i)}}:rules.type==='bluff'?{bluff:{last:null,reveal:null}}:rules.type==='box'?{box:{round:1}}:rules.type==='house'?{house:{res:{},starter:0}}:{};
+  const extra=rules.type==='round'?{half:1, pool:rules.deckel, halfPlayers:[], halfLosers:[], round:{maxRolls:null,results:{},order:names.map((_,i)=>i)}}:rules.type==='bluff'?{bluff:{last:null,reveal:null}}:rules.type==='box'?{box:{round:1}}:rules.type==='house'?{house:{res:{},starter:0}}:['bust','ship','poker'].includes(rules.type)?{rp:{res:{},starter:0}}:rules.type==='race'?{raceLast:null}:{};
   return {v:2, rev:1, code:null, mode:rules.type==='bluff'?'digital':'real', rules, ...extra,
     players:names.map(n=>({id:uid(),name:n,score:0})), cur:0,
     turn:freshTurn(rules),
     log:[{n:1,t:esc(rules.name)+' gestartet – '+esc(names[0])+' fängt an.'}], hist:[], winner:null, stats:freshStats()};
 }
-function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } if(g.rules.type==='box') g.players.forEach(p=>{p.total=0;p.score=0;}); if(g.rules.type==='house') g.players.forEach(p=>{p.wins=0;p.score=0;}); return g; }
+function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } if(g.rules.type==='box') g.players.forEach(p=>{p.total=0;p.score=0;}); if(g.rules.type==='house'||['bust','ship','poker'].includes(g.rules.type)) g.players.forEach(p=>{p.wins=0;p.score=0;}); if(g.rules.type==='race') g.players.forEach(p=>{p.pos=0;p.score=0;}); return g; }
 function migrate(g){ if(g && !g.rules){ g.rules=clone(TEMPLATES.kubiki); } if(g && g.rules.id==='kubiki' && g.rules.forceTake===undefined) g.rules.forceTake=true; return g; }
 /* Welche Würfel eines Wurfs bringen Punkte? (für Vorauswahl bzw. Pflicht-Nehmen) */
 function scoringIdx(r,roll){
@@ -608,7 +635,7 @@ function winText(faces){
   return f?`${(WORD[c[f]]||c[f]).toLowerCase()} ${f}er`:'den Sofortsieg';
 }
 const act={
-  mode(m){ if(G.mode===m) return; G.mode=m; if(isBox(R())){ const t=G.turn; t.dice=null; t.sel=[]; t.tsel=[]; } else if(isHouse(R())){ G.turn.die=null; } else if(isBlock(R())||isRound(R())||isBluff(R())) G.turn=freshTurn(R()); else { G.turn.sel=[]; G.turn.roll=null; G.turn.picked=[]; } commit(); },
+  mode(m){ if(G.mode===m) return; G.mode=m; if(isBust(R())||isRace(R())){ G.turn.sel=[]; } else if(isShip(R())||isPoker(R())){ G.turn=freshTurn(R()); } else if(isBox(R())){ const t=G.turn; t.dice=null; t.sel=[]; t.tsel=[]; } else if(isHouse(R())){ G.turn.die=null; } else if(isBlock(R())||isRound(R())||isBluff(R())) G.turn=freshTurn(R()); else { G.turn.sel=[]; G.turn.roll=null; G.turn.picked=[]; } commit(); },
   face(f){ const t=T(); if(t.sel.length>=t.left) return; t.sel=[...t.sel,+f].sort(); commit(); },
   unsel(i){ const t=T(); t.sel=t.sel.filter((_,k)=>k!==+i); commit(); },
   roll(){ const t=T(); t.roll=Array.from({length:t.left},()=>1+Math.floor(Math.random()*6)); t.picked=scoringIdx(R(),t.roll); t.rollId=uid();
@@ -663,6 +690,9 @@ const act={
   undo(){ const h=G.hist||[]; if(!h.length) return; const prev=h[h.length-1]; const rest=h.slice(0,-1); const rev=G.rev; if(G.endKey&&!prev.winner&&(prefs.history||[]).length){ prefs.history=prefs.history.slice(1); savePrefs(); } G={...prev,hist:rest,rev}; commit(); },
   again(){
     G.endKey=null;
+    if(isRP(R())||isRace(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[];
+      G.players.forEach(p=>{p.wins=0;p.pos=0;p.score=0;}); G.rp={res:{},starter:(wi+1)%G.players.length}; G.raceLast=null;
+      G.cur=(wi+1)%G.players.length; G.turn=freshTurn(R()); addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' fängt an.'); commit(); return; }
     if(isBox(R())||isHouse(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[];
       G.players.forEach(p=>{p.total=0;p.wins=0;p.score=0;}); if(isBox(R())) G.box={round:1}; else G.house={res:{},starter:(wi+1)%G.players.length};
       G.cur=(wi+1)%G.players.length; G.turn=freshTurn(R()); addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' fängt an.'); commit(); return; }
@@ -773,6 +803,7 @@ function editorHTML(){
   if(E.type==='bluff') return bluffEditorHTML();
   if(E.type==='box') return boxEditorHTML();
   if(E.type==='house') return houseEditorHTML();
+  if(['bust','ship','poker','race'].includes(E.type)) return simpleEditorHTML();
   const inp=(path,{ph='',w='',mode='numeric',cls=''}={})=>`<input type="text" class="ein ${cls}" id="e_${path.replace(/\./g,'_')}" data-path="${path}" value="${esc(getPath(E,path)??'')}" placeholder="${ph}" inputmode="${mode}" autocomplete="off" ${w?`style="width:${w}"`:''}>`;
   const tog=(path,label)=>`<label class="tog"><input type="checkbox" id="e_${path.replace(/\./g,'_')}" data-path="${path}" ${getPath(E,path)?'checked':''}><span>${label}</span></label>`;
   const rows=[]; for(let k=3;k<=E.dice;k++) rows.push(k);
@@ -834,9 +865,10 @@ function editorHTML(){
 }
 function editStart(id, asNew){
   const src=tplOf(id); const custom=!!(prefs.custom||{})[id];
-  const fr=isBlock(src)?blockFromRules:isRound(src)?roundFromRules:isBluff(src)?bluffFromRules:isBox(src)?boxFromRules:isHouse(src)?houseFromRules:fromRules;
+  const fr=isBlock(src)?blockFromRules:isRound(src)?roundFromRules:isBluff(src)?bluffFromRules:isBox(src)?boxFromRules:isHouse(src)?houseFromRules:isRP(src)||isRace(src)?simpleFromRules:fromRules;
   if(custom && !asNew){ E=fr(src,id,true); }
   else { E=fr(src,'c_'+uid(),false); E.name=src.name+' (eigene Regeln)'; }
+  E.base=src.base||(TEMPLATES[src.id]?src.id:undefined);
   view='editor'; render(); window.scrollTo(0,0);
 }
 const editActs={
@@ -1082,7 +1114,7 @@ function decodeRules(txt){ const s=txt.trim(); const m=s.match(/(DECKEL|KUBIKI)-
 function normalizeRules(raw){
   if(!raw||typeof raw!=='object') throw 0;
   const id='c_'+uid();
-  const e=isBlock(raw)?blockFromRules(raw,id,false):isRound(raw)?roundFromRules(raw,id,false):isBluff(raw)?bluffFromRules(raw,id,false):isBox(raw)?boxFromRules(raw,id,false):isHouse(raw)?houseFromRules(raw,id,false):isBlock(raw)&&raw.ordered?null:fromRules(raw,id,false);
+  const e=isBlock(raw)?blockFromRules(raw,id,false):isRound(raw)?roundFromRules(raw,id,false):isBluff(raw)?bluffFromRules(raw,id,false):isBox(raw)?boxFromRules(raw,id,false):isHouse(raw)?houseFromRules(raw,id,false):isRP(raw)||isRace(raw)?simpleFromRules(raw,id,false):isBlock(raw)&&raw.ordered?null:fromRules(raw,id,false);
   if(!e) throw 0;
   e.name=String(raw.name||'Geteiltes Spiel').slice(0,40);
   const {rules,errors}=compileAny(e); if(errors.length) throw 0; return rules;
@@ -1138,7 +1170,8 @@ const shareActs={
     }catch(e){ setup.importErr='Die Regeln konnten nicht gelesen werden. Bitte den Text vollständig einfügen.'; render(); }
   }
 };
-function compileAny(E){ return E.type==='block'?compileBlock(E):E.type==='round'?compileRound(E):E.type==='bluff'?compileBluff(E):E.type==='box'?compileBox(E):E.type==='house'?compileHouse(E):compile(E); }
+function compileAny(E){ const res=compileAny0(E); if(E.base) res.rules.base=E.base; return res; }
+function compileAny0(E){ if(['bust','ship','poker','race'].includes(E.type)) return compileSimple(E); return E.type==='block'?compileBlock(E):E.type==='round'?compileRound(E):E.type==='bluff'?compileBluff(E):E.type==='box'?compileBox(E):E.type==='house'?compileHouse(E):compile(E); }
 
 /* ==========================================================
    RUNDEN-VERLIERER (Schocken-Familie)
@@ -1709,21 +1742,24 @@ function rankOrder(r){
   if(isBluff(r)) return P.sort((a,b)=>r.lives?b.lives-a.lives:(a.pen||0)-(b.pen||0));
   if(isRound(r)) return P.sort((a,b)=>(a.deckel||0)-(b.deckel||0));
   if(isBox(r)) return P.sort((a,b)=>(a.total||0)-(b.total||0));
-  if(isHouse(r)) return P.sort((a,b)=>(b.wins||0)-(a.wins||0));
+  if(isHouse(r)||isRP(r)) return P.sort((a,b)=>(b.wins||0)-(a.wins||0));
+  if(isRace(r)) return P.sort((a,b)=>(b.pos||0)-(a.pos||0));
   return P.sort((a,b)=>b.score-a.score);
 }
 function scoreLabel(r,p){
   if(isBluff(r)) return r.lives?p.lives+' Leben':(p.pen||0)+' Strafp.';
   if(isRound(r)) return (p.deckel||0)+' Deckel';
   if(isBox(r)) return (p.total||0)+' Rest';
-  if(isHouse(r)) return (p.wins||0)+' Siege';
+  if(isHouse(r)||isRP(r)) return (p.wins||0)+' Siege';
+  if(isRace(r)) return (p.pos||0)+' von '+raceSeq(r).length;
   return fmt(p.score);
 }
 function scoreBig(r,p){
   if(isBluff(r)) return r.lives?p.lives:(p.pen||0);
   if(isRound(r)) return p.deckel||0;
   if(isBox(r)) return p.total||0;
-  if(isHouse(r)) return p.wins||0;
+  if(isHouse(r)||isRP(r)) return p.wins||0;
+  if(isRace(r)) return (p.pos||0)+'/'+raceSeq(r).length;
   return fmt(p.score);
 }
 
@@ -1753,7 +1789,7 @@ function sfx(kind){
   else if(kind==='tick'){ tone(c,t,1200,0.05,0.08,'square'); }
 }
 function buzz(p){ if(prefs.vibrate===false) return; try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
-const ROLL_ACTS=['roll','broll','rroll','xroll','xagain','boxroll','hroll'];
+const ROLL_ACTS=['roll','broll','rroll','xroll','xagain','boxroll','hroll','bustroll','shiproll','pokroll','jroll'];
 /* Schütteln */
 let lastShake=0, shakeOn=false;
 function onMotion(e){
@@ -1761,7 +1797,7 @@ function onMotion(e){
   const m=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2); const thr=e.acceleration&&e.acceleration.x!=null?16:28;
   const now=Date.now(); if(m<thr||now-lastShake<1200) return;
   if(view!=='game'||!G||G.winner||panel||showStats||showBlock) return;
-  const sel=['roll','broll','rroll','xroll','boxroll','hroll'].map(a=>`[data-act=${a}]:not([disabled])`).join(',')+',[data-act=cont]:not([disabled])';
+  const sel=['roll','broll','rroll','xroll','boxroll','hroll','bustroll','shiproll','pokroll','jroll'].map(a=>`[data-act=${a}]:not([disabled])`).join(',')+',[data-act=cont]:not([disabled])';
   const b=document.querySelector('#app '+sel.split(',').join(',#app ')); if(!b) return;
   lastShake=now; b.click();
 }
@@ -2034,7 +2070,278 @@ function eveningHTML(){
     <p class="muted small" style="margin:0">Klappt das Teilen nicht: Bild lange gedrückt halten und speichern.</p>
   </div></div>`;
 }
-Object.assign(act, editActs, blockActs, shareActs, roundActs, bluffActs, boxActs, houseActs, tabActs, setActs);
+/* ==========================================================
+   WEITERE SPIELE
+   ========================================================== */
+TEMPLATES.boeseeins={
+  id:'boeseeins', name:'Böse Eins', cat:'Familie',
+  tagline:'Ein Würfel, so oft du traust: Augen sammeln – aber eine 1 löscht alles aus diesem Zug.',
+  dice:1, singles:{2:2,3:3,4:4,5:5,6:6}, combos:{}, specials:[],
+  carryOver:true, forceTake:true, entry:0, target:100, exact:false, burn:[], zones:[], steal:null
+};
+TEMPLATES.einundzwanzig={ id:'einundzwanzig', type:'bust', name:'Einundzwanzig', cat:'Kneipe', target:21, wins:3,
+  tagline:'Würfeln und zusammenzählen, so nah wie möglich an 21 – wer drüber kommt, ist raus.' };
+TEMPLATES.quinze={ id:'quinze', type:'bust', name:'Quinze', cat:'Familie', target:15, wins:3,
+  tagline:'Die kleine Schwester von Einundzwanzig: so nah wie möglich an 15 heranwürfeln.' };
+TEMPLATES.kapitaen={ id:'kapitaen', type:'ship', name:'Kapitän & Mannschaft', cat:'Kneipe', rolls:3, wins:5,
+  tagline:'Erst Schiff (6), dann Kapitän (5), dann Mannschaft (4) – die zwei übrigen Würfel sind deine Ladung.' };
+TEMPLATES.wuerfelpoker={ id:'wuerfelpoker', type:'poker', name:'Würfelpoker', cat:'Kneipe', rolls:3, wins:3,
+  tagline:'Fünf Würfel, drei Würfe, Pokerhände: Paar, Drilling, Straße, Full House bis zum Fünfling.' };
+TEMPLATES.jule={ id:'jule', type:'race', name:'Jule', cat:'Familie', again:true, back:true,
+  tagline:'Würfelrennen: Erst 1 bis 6 der Reihe nach würfeln, dann wieder zurück von 6 bis 1.' };
+Object.assign(TEMPLATES.kubiki,{cat:'Kneipe'}); Object.assign(TEMPLATES.zehntausend,{cat:'Familie'}); Object.assign(TEMPLATES.kniffel,{cat:'Familie'});
+Object.assign(TEMPLATES.schocken,{cat:'Kneipe'}); Object.assign(TEMPLATES.maexchen,{cat:'Kneipe'}); Object.assign(TEMPLATES.chicago,{cat:'Familie'});
+Object.assign(TEMPLATES.shutbox,{cat:'Familie'}); Object.assign(TEMPLATES.hausnummer,{cat:'Familie'});
+
+const isBust=r=>r&&r.type==='bust', isShip=r=>r&&r.type==='ship', isPoker=r=>r&&r.type==='poker', isRace=r=>r&&r.type==='race';
+const isRP=r=>isBust(r)||isShip(r)||isPoker(r);
+const rnd=()=>1+Math.floor(Math.random()*6);
+function statRoll(arr){ const s=ST(); arr.forEach(f=>s.faces[f]++); s.dice+=arr.length; s.rolls++; s.expTrip+=P_TRIP[arr.length]||0; if(countTrips(arr)) s.rollTrip++; }
+
+/* ---------- Rundensiege (gemeinsam für 21/15, Kapitän, Poker) ---------- */
+function rpFinish(score,label){
+  const r=R(), p=G.players[G.cur]; G.rp.res[p.id]={s:score,label}; PS(p.id).turns++; if(score>PS(p.id).best) PS(p.id).best=score;
+  addLog(`${esc(p.name)}: ${label}.`);
+  if(G.players.every(pl=>G.rp.res[pl.id])){
+    const vals=G.players.map(pl=>G.rp.res[pl.id].s); const best=Math.max(...vals);
+    if(best<0) addLog('Alle drüber – niemand gewinnt die Runde.');
+    else { const ws=G.players.filter(pl=>G.rp.res[pl.id].s===best); ws.forEach(pl=>{ pl.wins=(pl.wins||0)+1; pl.score=pl.wins; PS(pl.id).trip++; });
+      addLog(`Runde an ${ws.map(pl=>esc(pl.name)).join(' und ')}${ws.length>1?' (Gleichstand)':''}.`); }
+    G.rp.last=G.rp.res; G.rp.res={};
+    const top=[...G.players].sort((a,b)=>(b.wins||0)-(a.wins||0));
+    if((top[0].wins||0)>=r.wins&&(top.length<2||(top[0].wins||0)>(top[1].wins||0))){ G.winner=top[0].id; addLog(`<b>${esc(top[0].name)} gewinnt ${esc(r.name)}!</b>`); return; }
+    G.rp.starter=((G.rp.starter||0)+1)%G.players.length; G.cur=G.rp.starter;
+  } else G.cur=(G.cur+1)%G.players.length;
+  G.turn=freshTurn(r);
+}
+function rpBoard(r,sub){
+  return `<section class="card" style="padding:8px"><div class="top" style="padding:4px 10px 6px"><span class="label">Rundensiege · Ziel ${r.wins}</span><span class="muted small">${sub||''}</span></div>
+    <div class="board">${G.players.map((pl,i)=>{ const cur=G.rp.res[pl.id], last=(G.rp.last||{})[pl.id];
+      return `<div class="prow ${i===G.cur&&!G.winner?'cur':''}"><span class="rank"></span><div style="min-width:0"><div class="nm">${esc(pl.name)}</div><div class="muted small">${cur?'diese Runde: '+esc(cur.label):last?'letzte Runde: '+esc(last.label):'noch nicht dran'}</div></div><span class="sc">${pl.wins||0}</span></div>`; }).join('')}</div></section>`;
+}
+const segHTML=()=>`<div class="seg" role="group" aria-label="Würfel"><button data-act="mode" data-v="real" aria-pressed="${G.mode==='real'}">Echte Würfel</button><button data-act="mode" data-v="digital" aria-pressed="${G.mode==='digital'}">Digitale Würfel</button></div>`;
+const padHTML=(act,dis)=>`<div class="pad">${FACES.map(f=>dieHTML(f,{tag:'button',attrs:`data-act="${act}" data-v="${f}" ${dis?'disabled':''}`})).join('')}</div>`;
+
+/* ---------- Einundzwanzig / Quinze ---------- */
+function bustRulesList(r){ return [`Würfle mit einem Würfel und zähle die Augen zusammen. Ziel: so nah wie möglich an ${r.target}.`,
+  `Du entscheidest nach jedem Wurf: weiterwürfeln oder stehen bleiben. Über ${r.target} = raus für diese Runde.`,
+  'Wenn alle dran waren, gewinnt der höchste Stand, der nicht drüber ist, die Runde. Gleichstand: alle Besten bekommen den Sieg.',
+  `Wer zuerst ${r.wins} ${r.wins===1?'Runde':'Runden'} gewinnt, gewinnt das Spiel.`]; }
+const bustActs={
+  bustroll(){ const t=T(); if(t.done) return; const d=rnd(); statRoll([d]); bustAdd(d); },
+  bustface(f){ bustAdd(+f); },
+  bustadd(f){ bustAdd(+f); },
+  buststay(){ const t=T(); if(!t.total) return; pushHist(); rpFinish(t.total,`steht bei ${t.total}`); commit(); }
+};
+function bustAdd(d){ const t=T(), r=R(); pushHist(); t.total+=d; t.last=d; t.rolls++; t.rollId=uid();
+  if(t.total>r.target){ const p=G.players[G.cur]; PS(p.id).niete++; celebrate('burn','Drüber!',`${p.name} hat ${t.total}`); rpFinish(-1,`${t.total} – drüber`); }
+  else if(t.total===r.target){ celebrate('good',`Genau ${r.target}!`,G.players[G.cur].name); rpFinish(t.total,`genau ${t.total}`); }
+  commit(); }
+function bustGameHTML(){
+  const r=R(), t=T(), p=G.players[G.cur]; const pct=Math.min(100,t.total/r.target*100);
+  return `${gameTop(4)}${rpBoard(r,'nah dran gewinnt')}
+  <section class="card turn">
+    <div class="turnhead"><div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2><div class="muted" style="font-size:14px">noch ${Math.max(0,r.target-t.total)} bis ${r.target}</div></div>
+      <div class="stat"><div class="label">Summe</div><div class="big num">${t.total}</div></div></div>
+    <div class="track" style="height:10px"><span class="fill" style="width:${pct}%"></span></div>
+    ${segHTML()}
+    ${t.last?`<div class="dice rolled" data-roll="${t.rollId}" style="justify-content:center">${dieHTML(t.last)}</div>`:''}
+    ${G.mode==='real'?`${padHTML('bustadd')}<p class="muted small" style="margin:0">Am Tisch würfeln und die Augen antippen – sie werden addiert.</p>`:`<button class="btn primary big" data-act="bustroll">${t.rolls?'Nochmal würfeln':'Würfeln'}</button>`}
+    <button class="btn big" data-act="buststay" ${t.total?'':'disabled'}>Stehen bleiben bei ${t.total}</button>
+  </section>${gameFooter()}`;
+}
+
+/* ---------- Kapitän & Mannschaft ---------- */
+function shipRulesList(r){ return ['5 Würfel, bis zu '+r.rolls+' Würfe pro Zug.',
+  'Zuerst brauchst du eine 6 (Schiff), dann eine 5 (Kapitän), dann eine 4 (Mannschaft) – in dieser Reihenfolge. Passende Würfel werden automatisch beiseitegelegt, auch mehrere im selben Wurf.',
+  'Sind Schiff, Kapitän und Mannschaft da, ist die Augensumme der zwei übrigen Würfel deine Ladung. Mit übrigen Würfen darfst du die Ladung neu würfeln oder behalten.',
+  'Ohne vollständige Mannschaft nach dem letzten Wurf: 0 Punkte.',
+  `Die höchste Ladung gewinnt die Runde. Wer zuerst ${r.wins} Runden gewinnt, gewinnt das Spiel.`]; }
+const SHIPN={6:'Schiff',5:'Kapitän',4:'Mannschaft'};
+function shipTake(t,dice){ const rest=[...dice]; for(const need of [6,5,4]){ if(t.set.includes(need)) continue; const i=rest.indexOf(need); if(i<0) break; t.set.push(need); rest.splice(i,1); } return rest; }
+function shipEval(dice){ const t={set:[]}; const rest=shipTake(t,dice); return t.set.length===3?{ok:true,cargo:sum(rest)}:{ok:false,cargo:0}; }
+const shipActs={
+  shiproll(){ const t=T(), r=R(); if(t.rolls>=r.rolls) return; pushHist();
+    const crewDone=t.set.length===3; const n=crewDone?2:5-t.set.length; const d=Array.from({length:n},rnd); statRoll(d); t.rolls++; t.rollId=uid(); t.last=d;
+    if(crewDone) t.cargo=d; else { const before=t.set.length; const rest=shipTake(t,d); if(t.set.length===3) t.cargo=rest; if(t.set.length>before) sfx('good'); }
+    if(t.rolls>=r.rolls) return shipEnd();
+    commit(); },
+  shipkeep(){ pushHist(); shipEnd(); },
+  shipreal(){ const t=T(); if(t.sel.length!==5) return; pushHist(); const e=shipEval(t.sel); const p=G.players[G.cur];
+    if(e.ok&&e.cargo>=11) celebrate('good','Volle Ladung!',`${p.name}: ${e.cargo}`);
+    rpFinish(e.ok?e.cargo:0, e.ok?`Ladung ${e.cargo}`:'keine Mannschaft'); commit(); }
+};
+function shipEnd(){ const t=T(), p=G.players[G.cur]; const ok=t.set.length===3; const c=ok?sum(t.cargo||[]):0;
+  if(!ok) PS(p.id).niete++; if(ok&&c>=11) celebrate('good','Volle Ladung!',`${p.name}: ${c}`);
+  rpFinish(c, ok?`Ladung ${c}`:'keine Mannschaft'); commit(); }
+function shipGameHTML(){
+  const r=R(), t=T(), p=G.players[G.cur]; const crew=t.set.length===3; const left=r.rolls-t.rolls;
+  const slots=`<div class="crew">${[6,5,4].map(n=>`<div class="crewslot ${t.set.includes(n)?'on':''}">${t.set.includes(n)?dieHTML(n):'<div class="die ghost"></div>'}<small>${SHIPN[n]}</small></div>`).join('')}
+    <div class="crewslot cargo ${t.cargo?'on':''}">${t.cargo?`<div class="dice" style="min-height:0;gap:4px">${t.cargo.map(f=>dieHTML(f)).join('')}</div>`:'<div class="die ghost"></div>'}<small>Ladung${t.cargo?' '+sum(t.cargo):''}</small></div></div>`;
+  let body='';
+  if(G.mode==='real'){ const e=t.sel.length===5?shipEval(t.sel):null;
+    body=`<div class="dice">${t.sel.map((f,i)=>dieHTML(f,{tag:'button',attrs:`data-act="unsel" data-v="${i}"`})).join('')}${'<div class="die ghost"></div>'.repeat(Math.max(0,5-t.sel.length))}</div>
+      ${padHTML('face',t.sel.length>=5)}
+      <p class="muted small" style="margin:0">Am Tisch bis zu ${r.rolls}× würfeln, dann die 5 Würfel am Ende eintippen.</p>
+      <div class="tally"><span class="muted">${e?(e.ok?'Mannschaft komplett':'keine Mannschaft'):'Noch nicht alle 5 Würfel'}</span><span class="num">${e?(e.ok?'Ladung '+e.cargo:'0'):''}</span></div>
+      <button class="btn primary big" data-act="shipreal" ${e?'':'disabled'}>Eintragen</button>`;
+  } else {
+    body=`${t.last&&!crew?`<div class="dice rolled" data-roll="${t.rollId}">${t.last.map(f=>dieHTML(f)).join('')}</div>`:''}
+      ${left>0?`<button class="btn primary big" data-act="shiproll">${!t.rolls?'5 Würfel werfen':crew?'Ladung neu würfeln':'Weiterwürfeln mit '+(5-t.set.length)+' Würfeln'} <span class="btnsub">${left} ${left===1?'Wurf':'Würfe'} übrig</span></button>`:''}
+      ${crew?`<button class="btn big" data-act="shipkeep">Ladung ${sum(t.cargo)} behalten</button>`:''}`;
+  }
+  return `${gameTop(6)}${rpBoard(r,'höchste Ladung gewinnt')}
+  <section class="card turn">
+    <div class="turnhead"><div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2></div>${G.mode==='digital'?`<div class="stat"><div class="label">Wurf</div><div class="big num">${t.rolls}<span style="font-size:24px">/${r.rolls}</span></div></div>`:''}</div>
+    ${segHTML()}${G.mode==='digital'?slots:''}${body}
+  </section>${gameFooter()}`;
+}
+
+/* ---------- Würfelpoker ---------- */
+const PNAME=['Nichts','Paar','Zwei Paare','Drilling','Straße','Full House','Vierling','Fünfling'];
+function pokerHand(d){
+  const c=counts(d); const groups=FACES.map(f=>[c[f],f]).filter(g=>g[0]).sort((a,b)=>b[0]-a[0]||b[1]-a[1]);
+  const shape=groups.map(g=>g[0]).join(''); const s=[...d].sort((a,b)=>a-b).join('');
+  let cat=0;
+  if(shape==='5') cat=7; else if(shape==='41') cat=6; else if(shape==='32') cat=5; else if(s==='12345'||s==='23456') cat=4;
+  else if(shape==='311') cat=3; else if(shape==='221') cat=2; else if(shape==='2111') cat=1;
+  let tb=0; groups.forEach(g=>{ for(let i=0;i<g[0];i++) tb=tb*7+g[1]; });
+  const what=cat===4?`Straße ${s[0]}–${s[4]}`:cat===0?'Nichts, höchste '+groups[0][1]:`${PNAME[cat]} (${groups.filter(g=>g[0]>=2).map(g=>g[1]+'er').join(' + ')})`;
+  return {cat, score:cat*1e5+tb, label:what};
+}
+function pokerRulesList(r){ return [`5 Würfel, bis zu ${r.rolls} Würfe. Zwischen den Würfen beliebige Würfel festhalten.`,
+  'Rangfolge: Fünfling > Vierling > Full House > Straße (1–5 oder 2–6) > Drilling > Zwei Paare > Paar > Nichts.',
+  'Gleiche Hand: Die höheren Augen gewinnen, z. B. 6er-Paar schlägt 5er-Paar.',
+  `Die beste Hand gewinnt die Runde. Wer zuerst ${r.wins} Runden gewinnt, gewinnt das Spiel.`]; }
+const pokerActs={
+  pokroll(){ const t=T(), r=R(); if(t.rolls>=r.rolls) return; const prev=t.dice||[]; const held=t.held||[];
+    t.dice=Array.from({length:5},(_,i)=>held[i]&&prev[i]?prev[i]:rnd()); statRoll(t.dice.filter((_,i)=>!(held[i]&&prev[i]))); t.rolls++; t.rollId=uid(); if(t.rolls>=r.rolls) t.held=[]; commit(); },
+  pokhold(i){ const t=T(); if(!t.dice||t.rolls>=R().rolls) return; i=+i; t.held=[...(t.held||[])]; t.held[i]=!t.held[i]; commit(); },
+  pokdone(){ const t=T(); const d=G.mode==='digital'?t.dice:(t.sel.length===5?t.sel:null); if(!d) return; pushHist(); const h=pokerHand(d); const p=G.players[G.cur];
+    if(h.cat>=6) celebrate('kniffel',PNAME[h.cat]+'!',p.name);
+    rpFinish(h.score,h.label); commit(); }
+};
+function pokerGameHTML(){
+  const r=R(), t=T(), p=G.players[G.cur]; const left=r.rolls-t.rolls;
+  const d=G.mode==='digital'?t.dice:(t.sel.length===5?t.sel:null); const h=d?pokerHand(d):null;
+  let body='';
+  if(G.mode==='real') body=`<div class="dice">${t.sel.map((f,i)=>dieHTML(f,{tag:'button',attrs:`data-act="unsel" data-v="${i}"`})).join('')}${'<div class="die ghost"></div>'.repeat(Math.max(0,5-t.sel.length))}</div>
+      ${padHTML('face',t.sel.length>=5)}<p class="muted small" style="margin:0">Am Tisch bis zu ${r.rolls}× würfeln, dann die 5 Würfel eintippen.</p>`;
+  else body=`${t.dice?`<div class="dice rolled" data-roll="${t.rollId}">${t.dice.map((f,i)=>dieHTML(f,{tag:'button',cls:(t.held||[])[i]?'picked':'',attrs:`data-act="pokhold" data-v="${i}" aria-pressed="${!!(t.held||[])[i]}" ${left<=0?'disabled':''}`})).join('')}</div>
+      <p class="muted small" style="margin:0">${left>0?'Würfel antippen zum Festhalten.':'Keine Würfe mehr.'}</p>`:''}
+      ${left>0?`<button class="btn ${t.dice?'':'primary'} big" data-act="pokroll">${t.rolls?`Nochmal würfeln (${left} übrig)`:'5 Würfel werfen'}</button>`:''}`;
+  return `${gameTop(5)}${rpBoard(r,'beste Hand gewinnt')}
+  <section class="card turn">
+    <div class="turnhead"><div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2></div>${G.mode==='digital'?`<div class="stat"><div class="label">Wurf</div><div class="big num">${t.rolls}<span style="font-size:24px">/${r.rolls}</span></div></div>`:''}</div>
+    ${segHTML()}${body}
+    <div class="tally"><span class="muted">Hand</span><span class="num" style="font-size:22px">${h?esc(h.label):'–'}</span></div>
+    <button class="btn primary big" data-act="pokdone" ${h?'':'disabled'}>Hand zeigen</button>
+  </section>${gameFooter()}`;
+}
+
+/* ---------- Jule (Würfelrennen) ---------- */
+const raceSeq=r=>r.back?[1,2,3,4,5,6,6,5,4,3,2,1]:[1,2,3,4,5,6];
+function raceRulesList(r){ return ['Ein Würfel. Jeder braucht der Reihe nach die Zahlen '+raceSeq(r).join(' – ')+'.',
+  'Würfelst du die Zahl, die du gerade brauchst, wird sie abgehakt'+(r.again?' und du darfst gleich nochmal.':'.'),
+  'Passt der Wurf nicht, ist der Nächste dran.',
+  'Wer zuerst die ganze Reihe geschafft hat, gewinnt.']; }
+function raceThrow(d){ const r=R(), p=G.players[G.cur], seq=raceSeq(r); pushHist(); p.pos=p.pos||0; const need=seq[p.pos]; const hit=d===need;
+  G.raceLast={pid:p.id,die:d,hit,need}; PS(p.id).turns++;
+  if(hit){ p.pos++; p.score=p.pos; PS(p.id).trip++; if(p.pos>=seq.length){ G.winner=p.id; addLog(`<b>${esc(p.name)} ist als Erste:r durch!</b>`); commit(); return; }
+    addLog(`${esc(p.name)} würfelt die ${d} – abgehakt.`); if(!r.again) G.cur=(G.cur+1)%G.players.length; }
+  else { addLog(`${esc(p.name)} würfelt ${d}, braucht ${need}.`); G.cur=(G.cur+1)%G.players.length; }
+  G.turn=freshTurn(r); commit(); }
+const raceActs={ jroll(){ const d=rnd(); statRoll([d]); raceThrow(d); }, jface(f){ raceThrow(+f); } };
+function raceGameHTML(){
+  const r=R(), p=G.players[G.cur], seq=raceSeq(r), L=G.raceLast;
+  const need=seq[p.pos||0];
+  const board=`<section class="card" style="padding:10px 12px;display:flex;flex-direction:column;gap:10px">${G.players.map((pl,i)=>`<div class="racerow ${i===G.cur&&!G.winner?'cur':''}"><b>${esc(pl.name)}</b><div class="seqs">${seq.map((n,k)=>`<span class="sq ${k<(pl.pos||0)?'ok':k===(pl.pos||0)?'next':''}">${n}</span>`).join('')}</div></div>`).join('')}</section>`;
+  return `${gameTop(1)}${board}
+  <section class="card turn">
+    <div class="turnhead"><div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2></div><div class="stat"><div class="label">Braucht</div><div class="big num">${need}</div></div></div>
+    ${segHTML()}
+    ${L?`<div class="hint ${L.hit?'good':'zone'}"><div class="dice" style="min-height:0;margin-bottom:6px">${dieHTML(L.die)}</div>${esc((G.players.find(x=>x.id===L.pid)||{}).name||'')} ${L.hit?'hat die '+L.die+' abgehakt.':'brauchte '+L.need+' – daneben.'}</div>`:''}
+    ${G.mode==='real'?`${padHTML('jface')}<p class="muted small" style="margin:0">Am Tisch würfeln und die Zahl antippen.</p>`:`<button class="btn primary big" data-act="jroll">Würfeln</button>`}
+  </section>${gameFooter()}`;
+}
+
+/* ---------- Editoren der neuen Typen ---------- */
+function simpleFromRules(r,id,isCustom){ return {type:r.type, id, isCustom, confirmDel:false, name:r.name, target:r.target||21, wins:r.wins||3, rolls:r.rolls||3, again:r.again!==false, back:r.back!==false}; }
+function compileSimple(E){ const errors=[]; if(!E.name.trim()) errors.push('Gib dem Spiel einen Namen.');
+  const r={id:E.id, type:E.type, name:E.name.trim()||'Eigenes Spiel'};
+  if(E.type==='bust'){ const n=num(E.target); if(!n||n<6||n>99) errors.push('Ziel: eine Zahl zwischen 6 und 99.'); r.target=n||21; r.wins=E.wins; r.tagline=`Eigene Variante: so nah wie möglich an ${r.target}.`; }
+  if(E.type==='ship'||E.type==='poker'){ r.rolls=E.rolls; r.wins=E.wins; r.tagline=`Eigene Variante: ${r.rolls} Würfe, ${r.wins} Rundensiege.`; }
+  if(E.type==='race'){ r.again=!!E.again; r.back=!!E.back; r.tagline=`Eigene Variante: ${r.back?'1 bis 6 und zurück':'1 bis 6'}.`; }
+  return {rules:r, errors}; }
+function simpleEditorHTML(){
+  return `${editorTop()}<section class="card ecard"><h2 style="font-size:19px">Grundlagen</h2>${eName('z. B. Hausvariante')}
+    ${E.type==='bust'?`<label class="field"><span class="label">Ziel</span><input type="text" class="ein" id="e_target" data-path="target" value="${esc(String(E.target))}" inputmode="numeric"></label>`:''}
+    ${E.type==='ship'||E.type==='poker'?eStepper('Würfe pro Zug','rolls',1,5):''}
+    ${E.type!=='race'?eStepper('Rundensiege zum Gewinnen','wins',1,10):''}
+    ${E.type==='race'?eTog('back','Nach der 6 wieder zurück bis zur 1')+eTog('again','Bei Treffer gleich nochmal würfeln'):''}
+  </section>${editorBottom()}`;
+}
+Object.assign(STEP_LIM,{wins:[1,10],rolls:[1,5]});
+
+/* ==========================================================
+   ANLEITUNGEN
+   ========================================================== */
+const GUIDE={
+  kubiki:{goal:'Als Erste:r genau 1.000 Punkte erreichen.', players:'2–8', time:'20–40 Min.',
+    steps:['Würfle mit 5 Würfeln.','Alle Punktewürfel werden genommen, wie sie fallen: jede 1 = 10, jede 5 = 5, drei Gleiche = Augenzahl × 10 (drei 1er = 100).','Weiterwürfeln mit den restlichen Würfeln oder aufhören und die Punkte aufschreiben. Wirfst du gar nichts Zählbares, ist alles aus diesem Zug weg (Niete).','Zum Einstieg brauchst du mindestens 50 Punkte in einem Zug.','Vorsicht: Genau 555 verbrennt dich auf 0. Zwischen 400 und 499 sowie 600 und 699 kommst du nur mit einem Zug raus, der dich über die Grenze bringt.','Überholst du jemanden, klaust du ihm 50 Punkte – außer er steht in einer Sperrzone.'],
+    example:'Du stehst bei 425 und würfelst 1-1-5 = 25. Aufhören bringt nichts, du brauchst 75 für die 500. Also weiter!', tip:'Kurz vor 1.000 lieber kleine Schritte: Wer drüber kommt, bleibt stehen.'},
+  zehntausend:{goal:'Als Erste:r 10.000 Punkte sammeln.', players:'2–8', time:'30–60 Min.',
+    steps:['Würfle mit 6 Würfeln und lege mindestens einen Punktewürfel raus: 1 = 100, 5 = 50, drei Gleiche = Augenzahl × 100 (drei 1er = 1.000).','Jeder weitere gleiche Würfel verdoppelt: vier 4er = 800, fünf 4er = 1.600.','Straße 1–6 und drei Paare bringen je 1.500.','Mit dem Rest weiterwürfeln oder aufhören. Ohne Punktewürfel ist der Zug verloren.','Hast du alle 6 rausgelegt, darfst du mit allen 6 weiterwürfeln.','Einstieg: Der erste Eintrag braucht mindestens 350 Punkte.'],
+    example:'Wurf: 1-5-3-3-2-6. Du nimmst nur die 1 (100) und würfelst mit 5 Würfeln weiter – die 5 liegen zu lassen, erhöht die Chance auf Drillinge.', tip:'Mit nur 1–2 Würfeln weiterzuwürfeln ist riskant. Ab 300–400 Punkten im Zug lieber aufhören.'},
+  kniffel:{goal:'Nach 13 Runden die meisten Punkte auf dem Block haben.', players:'1–8', time:'30–45 Min.',
+    steps:['Würfle mit 5 Würfeln – bis zu dreimal pro Zug. Zwischen den Würfen darfst du beliebige Würfel liegen lassen.','Danach trägst du das Ergebnis in genau ein freies Feld ein.','Oben (Einser bis Sechser) zählt nur die Summe dieser Zahl. Ab 63 Punkten oben gibt es 35 Bonus.','Unten: Dreier-/Viererpasch (Summe aller Würfel), Full House (25), kleine Straße (30), große Straße (40), Kniffel = fünf Gleiche (50), Chance (Summe).','Passt nichts, musst du ein Feld mit 0 streichen.'],
+    example:'Du hast 6-6-6-2-1. Bei den Sechsern gäbe das 18 – oder du nimmst den Dreierpasch mit 21.', tip:'Für den Bonus brauchst du oben im Schnitt drei Gleiche pro Zahl. Das Kniffel-Feld möglichst lange offen halten.'},
+  schocken:{goal:'Nicht verlieren: Wer am Ende alle Deckel hat, verliert – und zahlt traditionell die Runde.', players:'3–10', time:'20–40 Min.',
+    steps:['Jeder würfelt pro Runde einmal, mit 3 Würfeln und bis zu 3 Würfen. Würfel darf man liegen lassen.','Wer anfängt, legt fest, wie oft die anderen höchstens würfeln dürfen.','Rangfolge: Schock out (1-1-1) > Schock 6 bis 2 (1-1-X) > General (drei Gleiche) > Straße > Rest als Zahl, z. B. 6-4-2 = 642.','Der schlechteste Wurf bekommt Deckel: so viele, wie der beste Wurf wert ist (Schock X = X, General = 3, Straße = 2, sonst 1).','Erst kommen die Deckel vom Stapel, danach gibt sie der beste Wurf ab. Wer alle hat, verliert die Hälfte.','Zwei Hälften; verliert jemand beide, ist er raus. Sonst entscheidet das Finale.'],
+    example:'Anna wirft Schock 4, Ben 642, Chris 321. Chris hat den schlechtesten Wurf und bekommt 4 Deckel.', tip:'Zwei Sechsen darf man in eine Eins umdrehen – dann fehlt nur noch eine Eins zum Schock.'},
+  maexchen:{goal:'Als Letzte:r noch Leben übrig haben.', players:'3–10', time:'15–30 Min.',
+    steps:['Würfle verdeckt mit 2 Würfeln. Die höhere Zahl ist der Zehner: 6 und 3 = 63.','Sag einen Wert an – ehrlich oder geblufft. Er muss höher sein als die letzte Ansage.','Rangfolge: 31 < 32 < … < 65 < Pasch (11 bis 66) < Mäxchen (21).','Der Nächste glaubt dir und würfelt selbst – oder er deckt auf.','Beim Aufdecken: Liegt mindestens das Angesagte drunter, verliert der Aufdecker ein Leben. Sonst der Bluffer.','Bei Mäxchen kostet das Verlieren doppelt.'],
+    example:'Vor dir wurde 55 angesagt, du hast 43. Du kannst „66“ bluffen – oder ehrlich sein und verlieren.', tip:'Knapp über der letzten Ansage bluffen ist unauffälliger als gleich „Mäxchen“ zu rufen.'},
+  chicago:{goal:'Nach 11 Runden die meisten Punkte haben.', players:'2–8', time:'10–15 Min.',
+    steps:['Es gibt 11 Runden, sie heißen 2, 3, 4 … bis 12.','In jeder Runde würfelt jeder einmal mit 2 Würfeln.','Triffst du genau die Rundenzahl als Augensumme, bekommst du so viele Punkte. Sonst 0.'],
+    example:'Runde 8: Du würfelst 5 + 3 = 8 und bekommst 8 Punkte. Mit 6 + 3 = 9 gibt es nichts.', tip:'Reines Glück – perfekt zum Aufwärmen oder für Kinder.'},
+  shutbox:{goal:'Möglichst alle Klappen schließen. Der kleinste Rest gewinnt.', players:'1–6', time:'10–20 Min.',
+    steps:['Die Klappen 1 bis 9 sind offen.','Würfle mit 2 Würfeln und schließe offene Klappen, die zusammen genau die Augensumme ergeben.','Sind 7, 8 und 9 zu, würfelst du mit nur einem Würfel weiter.','Geht nichts mehr, ist dein Zug vorbei. Die Summe der offenen Klappen sind deine Punkte.','Wer alle Klappen schließt, gewinnt sofort. Sonst nach 3 Runden der kleinste Gesamtrest.'],
+    example:'Du würfelst 8: Du kannst die 8 schließen, oder 5 + 3, oder 6 + 2, oder 1 + 3 + 4.', tip:'Große Zahlen zuerst schließen – kleine Klappen sind später leichter zu treffen.'},
+  hausnummer:{goal:'Pro Runde die höchste dreistellige Hausnummer bilden.', players:'2–10', time:'10 Min.',
+    steps:['Jeder würfelt dreimal mit einem Würfel.','Nach jedem Wurf legst du die Zahl sofort auf Hunderter, Zehner oder Einer – das lässt sich nicht mehr ändern.','Nach drei Würfen steht deine Hausnummer, z. B. 641.','Die höchste Nummer gewinnt die Runde. Wer zuerst 5 Runden gewinnt, gewinnt das Spiel.'],
+    example:'Erster Wurf 5: Hunderter? Riskant – eine 6 käme noch besser. Viele legen 5 und 6 nach vorn, 1 und 2 nach hinten.', tip:'Als Variante gewinnt die kleinste Nummer – dann gehören die Einsen nach vorn.'},
+  boeseeins:{goal:'Als Erste:r 100 Punkte sammeln.', players:'2–8', time:'10–20 Min.',
+    steps:['Würfle mit einem Würfel so oft du willst und zähle die Augen zusammen.','Hörst du rechtzeitig auf, werden die Punkte des Zugs gutgeschrieben.','Würfelst du eine 1, ist alles aus diesem Zug weg und der Nächste ist dran.'],
+    example:'Du würfelst 4, 6, 3 = 13. Noch einmal? Mit 1 zu 6 Pech ist alles weg.', tip:'Faustregel: Ab etwa 20 Punkten im Zug lohnt das Aufhören.'},
+  einundzwanzig:{goal:'So nah wie möglich an 21 kommen, ohne drüber zu gehen.', players:'2–10', time:'10–20 Min.',
+    steps:['Würfle mit einem Würfel und zähle die Augen zusammen.','Nach jedem Wurf entscheidest du: weiterwürfeln oder stehen bleiben.','Über 21 bist du für diese Runde raus.','Wenn alle dran waren, gewinnt der höchste Stand bis 21 die Runde. Wer zuerst 3 Runden gewinnt, gewinnt das Spiel.'],
+    example:'Du hast 17. Nur eine 5 oder 6 bringt dich über 21 – also ist ein Wurf noch vertretbar.', tip:'Wer später dran ist, weiß, was er schlagen muss.'},
+  quinze:{goal:'So nah wie möglich an 15 kommen, ohne drüber zu gehen.', players:'2–10', time:'10 Min.',
+    steps:['Wie Einundzwanzig, nur mit dem Ziel 15.','Würfeln, zusammenzählen, rechtzeitig stehen bleiben.','Über 15 bist du raus. Der höchste Stand bis 15 gewinnt die Runde.'],
+    example:'Bei 11 wird jeder Wurf über 4 gefährlich – die Hälfte aller Würfe.', tip:'Kurz und knackig – gut zwischen zwei längeren Spielen.'},
+  kapitaen:{goal:'Mit Schiff, Kapitän und Mannschaft die meiste Ladung an Bord haben.', players:'2–10', time:'10–20 Min.',
+    steps:['Würfle mit 5 Würfeln, bis zu 3 Würfe.','Du brauchst der Reihe nach eine 6 (Schiff), eine 5 (Kapitän) und eine 4 (Mannschaft). Die App legt sie automatisch zur Seite.','Erst wenn alle drei da sind, zählen die zwei übrigen Würfel als Ladung (Augensumme, maximal 12).','Hast du noch Würfe übrig, darfst du die Ladung neu würfeln – oder behalten.','Ohne komplette Mannschaft gibt es 0. Die höchste Ladung gewinnt die Runde.'],
+    example:'Wurf 1: 6-5-2-2-1 → Schiff und Kapitän liegen. Wurf 2: 4-3-6 → Mannschaft da, Ladung 3 + 6 = 9.', tip:'Eine 5 ohne Schiff zählt noch nicht – erst die 6, dann die 5, dann die 4.'},
+  wuerfelpoker:{goal:'Mit fünf Würfeln die beste Pokerhand würfeln.', players:'2–8', time:'15–30 Min.',
+    steps:['Würfle mit 5 Würfeln, bis zu 3 Würfe. Gute Würfel kannst du festhalten.','Rangfolge: Fünfling > Vierling > Full House > Straße > Drilling > Zwei Paare > Paar > Nichts.','Bei gleicher Hand gewinnen die höheren Augen.','Die beste Hand gewinnt die Runde. Wer zuerst 3 Runden gewinnt, gewinnt das Spiel.'],
+    example:'Du hast 5-5-2-2-6. Zwei Paare sind sicher – oder du würfelst die 6 neu und hoffst auf Full House.', tip:'Ein Drilling ist besser als zwei Paare – lieber auf den Drilling gehen.'},
+  jule:{goal:'Als Erste:r die Zahlen 1 bis 6 und wieder zurück bis 1 würfeln.', players:'2–8', time:'10–20 Min.',
+    steps:['Jeder würfelt mit einem Würfel.','Du brauchst der Reihe nach die 1, dann die 2 … bis 6 und danach 6, 5 … bis 1.','Triffst du deine Zahl, wird sie abgehakt und du darfst gleich nochmal.','Daneben? Dann ist der Nächste dran.'],
+    example:'Du brauchst die 3 und würfelst eine 3 – abgehakt, sofort nochmal für die 4.', tip:'Reines Glück, schnell erklärt – ideal mit Kindern.'}
+};
+function guideOf(r){ return GUIDE[r.id]||GUIDE[r.base]||null; }
+function guideHTML(r){
+  const g=guideOf(r); if(!g) return '';
+  return `<div class="guide">
+    <div class="gmeta"><span><b>Ziel</b> ${esc(g.goal)}</span>${g.players?`<span class="muted small">${esc(g.players)} Spieler · ${esc(g.time)}</span>`:''}</div>
+    <div class="label">So geht's</div>
+    <ol class="gsteps">${g.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+    ${g.example?`<div class="gbox"><b>Beispiel</b> ${esc(g.example)}</div>`:''}
+    ${g.tip?`<div class="gbox tip"><b>Tipp</b> ${esc(g.tip)}</div>`:''}
+  </div>`;
+}
+Object.assign(act, editActs, blockActs, shareActs, roundActs, bluffActs, boxActs, houseActs, tabActs, setActs, bustActs, shipActs, pokerActs, raceActs);
 if(!allTemplates()[prefs.tpl]) prefs.tpl='kubiki';
 
 /* ---------- Darstellung ---------- */
@@ -2060,11 +2367,15 @@ function render(){
   app.innerHTML=gameHTML(); renderTop(); renderOverlay(); keepAwake();
 }
 function metaOf(r){
-  if(isBlock(r)) return `${r.dice} Würfel · ${r.rolls} Würfe · ${r.fields.length} Felder`;
+  if(isBlock(r)) return `${r.dice} Würfel · ${r.rolls} ${r.rolls===1?'Wurf':'Würfe'} · ${r.fields.length} Felder`;
   if(isRound(r)) return `${r.dice} Würfel · ${r.deckel} Deckel`;
   if(isBluff(r)) return `2 Würfel · Bluffen · ${r.lives?r.lives+' Leben':'Strafpunkte'}`;
   if(isBox(r)) return `${r.tiles} Klappen · ${r.rounds} Runden · wenig gewinnt`;
   if(isHouse(r)) return `1 Würfel · 3 Stellen · ${r.target} Rundensiege`;
+  if(isBust(r)) return `1 Würfel · Ziel ${r.target} · ${r.wins} Rundensiege`;
+  if(isShip(r)) return `5 Würfel · ${r.rolls} Würfe · ${r.wins} Rundensiege`;
+  if(isPoker(r)) return `5 Würfel · ${r.rolls} Würfe · ${r.wins} Rundensiege`;
+  if(isRace(r)) return `1 Würfel · ${r.back?'1–6 und zurück':'1–6'} · Wettrennen`;
   return `${r.dice} Würfel · Ziel ${r.exact?'genau ':''}${fmt(r.target)}`;
 }
 function achHTML(){
@@ -2076,18 +2387,18 @@ function achHTML(){
   </section>`;
 }
 function subHead(title,back){
-  return `<div class="subhead"><button class="back" data-act="go" data-v="${back}" aria-label="Zurück">←</button><h1>${esc(title)}</h1></div>`;
+  return `<div class="subhead"><button class="back" data-act="go" data-v="${back}" aria-label="Zurück">←</button><h1 class="${title.length>15?'long':''}">${esc(title)}</h1></div>`;
 }
 function setupHTML(){
   const st=setup.step||'home'; const canOnline=!!db; const custom=prefs.custom||{};
   if(st==='pick'){
     return `${subHead('Spiel wählen','home')}
-    <div class="glist">${Object.values(allTemplates()).map(t=>`
+    ${[['Kneipe','Kneipe & Stammtisch'],['Familie','Familie & Freunde'],['eigen','Eigene Spiele']].map(([c,label])=>{ const list=Object.values(allTemplates()).filter(t=>c==='eigen'?custom[t.id]:!custom[t.id]&&(t.cat||'Familie')===c); if(!list.length) return '';
+      return `<div class="label" style="margin-top:4px">${label}</div><div class="glist">${list.map(t=>`
       <div class="grow">
-        <button class="gpick" data-act="tpl" data-v="${t.id}"><b>${esc(t.name)}${custom[t.id]?'<span class="tag">eigenes</span>':''}</b><span class="muted small">${esc(metaOf(t))}</span></button>
-        <button class="ginfo" data-act="info" data-v="${t.id}" aria-label="Regeln von ${esc(t.name)}">Regeln</button>
-      </div>`).join('')}
-    </div>
+        <button class="gpick" data-act="tpl" data-v="${t.id}"><b>${esc(t.name)}</b><span class="muted small">${esc(metaOf(t))}</span></button>
+        <button class="ginfo" data-act="info" data-v="${t.id}" aria-label="Anleitung zu ${esc(t.name)}">${guideOf(t)?'Anleitung':'Regeln'}</button>
+      </div>`).join('')}</div>`; }).join('')}
     <button class="btn ghost" data-act="newpick" aria-expanded="${!!setup.newPick}">+ Eigenes Spiel bauen</button>
     ${setup.newPick?`<div class="choice">
       <button class="opt" data-act="newgame" data-v="push"><span><b>Punkte sammeln</b><small>Wie Kubiki: würfeln, rauslegen, weiter oder aufhören.</small></span></button>
@@ -2099,7 +2410,9 @@ function setupHTML(){
     return `${subHead(t.name,'pick')}
     <section class="card">
       <p class="muted" style="margin:0 0 12px">${esc(t.tagline||metaOf(t))}</p>
-      <ul class="rules">${rulesList(t).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
+      ${guideHTML(t)}
+      ${guideOf(t)?`<details class="rulesall"><summary>Alle Regeln im Detail${t.base||custom[t.id]?' (eure Variante)':''}</summary><ul class="rules" style="margin-top:8px">${rulesList(t).map(l=>`<li>${esc(l)}</li>`).join('')}</ul></details>`
+        :`<ul class="rules">${rulesList(t).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`}
     </section>
     <button class="btn primary big" data-act="tpl" data-v="${t.id}">Mit ${esc(t.name)} spielen</button>
     <div class="row">
@@ -2197,6 +2510,10 @@ function gameHTML(){
   if(isBluff(R())) return bluffGameHTML();
   if(isBox(R())) return boxGameHTML();
   if(isHouse(R())) return houseGameHTML();
+  if(isBust(R())) return bustGameHTML();
+  if(isShip(R())) return shipGameHTML();
+  if(isPoker(R())) return pokerGameHTML();
+  if(isRace(R())) return raceGameHTML();
   const rs=R(), t=T(), p=G.players[G.cur];
   const order=G.players.map((pl,i)=>({...pl,i})).sort((a,b)=>b.score-a.score);
   const rank={}; order.forEach((pl,k)=>rank[pl.i]=k+1);
@@ -2256,7 +2573,7 @@ function gameHTML(){
   ${gameFooter()}`;
 }
 function gameTop(face){
-  return `<div class="top"><div class="brand">${dieHTML(face,{attrs:'style="width:34px;height:34px;padding:4px"'})}<h1>${esc(R().name)}</h1></div>
+  return `<div class="top"><div class="brand">${dieHTML(face,{attrs:'style="width:34px;height:34px;padding:4px"'})}<h1 class="${R().name.length>13?'long':''}">${esc(R().name)}</h1></div>
     <div class="topright"><span class="chip" id="topchip"></span><button class="btn small" data-act="panel" data-v="menu" aria-label="Menü öffnen">Menü</button></div></div>`;
 }
 function gameFooter(){
@@ -2275,11 +2592,11 @@ function panelHTML(){
       <button class="mitem" data-act="panel" data-v="stats"><b>Statistik</b><span class="muted small">Würfel und Spieler</span></button>
       ${isBlock(r)?`<button class="mitem" data-act="panel" data-v="block"><b>Spielblock</b><span class="muted small">alle Felder aller Spieler</span></button>`:''}
       <button class="mitem" data-act="panel" data-v="log"><b>Ganzer Verlauf</b><span class="muted small">${G.log.length} Einträge</span></button>
-      <button class="mitem" data-act="panel" data-v="rules"><b>Regeln</b><span class="muted small">${esc(r.name)}</span></button>
+      <button class="mitem" data-act="panel" data-v="rules"><b>Anleitung & Regeln</b><span class="muted small">${esc(r.name)}</span></button>
       <button class="mitem" data-act="panel" data-v="colors"><b>Würfelfarbe</b><span class="muted small">${esc((DICE[prefs.dice]||DICE.weiss).n)}</span></button>
       <button class="mitem" data-act="panel" data-v="leave"><b>Spiel verlassen</b><span class="muted small">zurück zum Start</span></button>
     </div>`);
-  if(panel==='rules') return wrap('Regeln',`<ul class="rules">${rulesList(r).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`,1);
+  if(panel==='rules') return wrap(r.name,`${guideHTML(r)}${guideOf(r)?'<div class="label" style="margin-top:6px">Alle Regeln</div>':''}<ul class="rules">${rulesList(r).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`,1);
   if(panel==='colors') return wrap('Würfelfarbe',swatchesHTML(),1);
   if(panel==='log') return wrap('Verlauf',`<ol class="log">${G.log.map(l=>`<li><span class="num">${l.n}</span><span>${l.t}</span></li>`).join('')}</ol>`,1);
   if(panel==='leave') return wrap('Spiel verlassen',`<p style="margin:0">${G.code?'Das Spiel läuft auf den anderen Handys weiter. Du kannst mit dem Code '+G.code+' wieder beitreten.':'Der Spielstand geht dabei verloren.'}</p>
@@ -2325,7 +2642,7 @@ function statsHTML(){
   const cell=(x,k)=>`<td class="${['best','trip','stole'].includes(k)&&x[k]>0&&x[k]===best(k)&&pl.length>1?'hl':''}">${fmt(x[k])}</td>`;
   const quote=x=>x.turns?Math.round(x.niete/x.turns*100)+' %':'–';
   const rs=R();
-  const cols=isBox(rs)?[['turns','Züge'],['trip','Box zu'],['best','Höchster Rest']]:isHouse(rs)?[['turns','Runden'],['trip','Rundensiege'],['best','Beste Nummer']]:isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
+  const cols=isRP(rs)?[['turns','Züge'],['trip','Rundensiege'],['niete','Drüber / leer']]:isRace(rs)?[['turns','Würfe'],['trip','Treffer']]:isBox(rs)?[['turns','Züge'],['trip','Box zu'],['best','Höchster Rest']]:isHouse(rs)?[['turns','Runden'],['trip','Rundensiege'],['best','Beste Nummer']]:isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
     ...(rs.steal?[['stole','Geklaut'],['lost','Beklaut']]:[]), ...((rs.burn||[]).length?[['burned','Verbrannt']]:[])];
   return `<div class="overlay" role="dialog" aria-label="Statistik"><div class="card stats">
     <div class="top"><h2 style="font-size:22px">Statistik</h2><button class="btn small" data-act="closestats">Schließen</button></div>
