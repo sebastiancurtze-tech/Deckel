@@ -1,0 +1,1773 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e9eef0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1824" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Deckel">
+<meta name="description" content="Punkte zählen für eure Spieleabende – mit euren Hausregeln.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+html,body{height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}
+img{max-width:100%}[hidden]{display:none!important}
+button{touch-action:manipulation}
+</style>
+<title>Deckel</title>
+<style>
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/barlow-condensed-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/barlow-condensed-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/barlow-condensed-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-style:normal;font-weight:800;font-display:swap;src:url(fonts/barlow-condensed-latin-800-normal.woff2) format('woff2')}
+@font-face{font-family:'Figtree';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/figtree-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Figtree';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/figtree-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Figtree';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/figtree-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Figtree';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/figtree-latin-700-normal.woff2) format('woff2')}
+/* Layout: one column "score pad" — scoreboard strip on top, the active turn as the big working card, log below. */
+:root{
+  --bg:#e9eef0; --paper:#f8fafb; --ink:#14233a; --muted:#5d6b7c; --line:#cfd8df;
+  --pip:#c8322b; --pip-soft:#f6dcd9; --zone:#e4c66a; --zone-soft:#f6edcd; --ok:#2f7d4f; --ok-soft:#d8ecdf;
+  --die:#ffffff; --die-edge:#c9d2da; --focus:#2b6cb0;
+  --coaster:#f4ead2; --coaster-edge:#d9c79c; --coaster-ring:#c8322b; --pencil:#3b3f46;
+  --f-num:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1824; --paper:#172333; --ink:#e7edf3; --muted:#93a2b3; --line:#2a3a4e;
+  --pip:#ef5a4f; --pip-soft:#3a1f22; --zone:#d9b85a; --zone-soft:#33301f; --ok:#5cc489; --ok-soft:#183427;
+  --die:#eef2f5; --die-edge:#9aa8b6; --focus:#7fb2ff; --coaster:#e8dcbf; --coaster-edge:#bfa978; --coaster-ring:#c8322b; --pencil:#3b3f46; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0f1824; --paper:#172333; --ink:#e7edf3; --muted:#93a2b3; --line:#2a3a4e;
+  --pip:#ef5a4f; --pip-soft:#3a1f22; --zone:#d9b85a; --zone-soft:#33301f; --ok:#5cc489; --ok-soft:#183427;
+  --die:#eef2f5; --die-edge:#9aa8b6; --focus:#7fb2ff; --coaster:#e8dcbf; --coaster-edge:#bfa978; --coaster-ring:#c8322b; --pencil:#3b3f46; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3{margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand{min-width:0;flex:1 1 auto}
+.brand h1{font-family:var(--f-num);font-weight:800;font-size:clamp(24px,7vw,30px);letter-spacing:.02em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand .die{flex:0 0 auto}
+.chip{white-space:nowrap;flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 10px;font-size:13px;color:var(--muted)}
+.chip b{color:var(--ink);font-family:var(--f-num);font-size:16px;letter-spacing:.12em}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--ok)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px}
+.label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+.btn{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:12px 14px;font-weight:600}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.red{background:var(--pip);color:#fff;border-color:var(--pip)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.small{padding:7px 10px;font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.btn{flex:1 1 0}
+input[type=text]{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px}
+
+/* scoreboard */
+.board{display:flex;flex-direction:column;gap:2px}
+.prow{display:grid;grid-template-columns:22px minmax(0,1fr) 64px;align-items:center;gap:10px;padding:8px 10px;border-radius:10px}
+.prow.cur{background:var(--pip-soft)}
+.prow .rank{font-family:var(--f-num);color:var(--muted);font-size:15px;text-align:center}
+.prow .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prow .sc{font-family:var(--f-num);font-weight:700;font-size:26px;text-align:right;line-height:1}
+.track{position:relative;height:6px;background:var(--line);border-radius:3px;margin-top:5px;overflow:hidden}
+.track .z{position:absolute;top:0;bottom:0;background:var(--zone);opacity:.55}
+.track .fill{position:absolute;left:0;top:0;bottom:0;background:var(--ink);border-radius:3px}
+.track .burn{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--pip)}
+.prow.cur .track .fill{background:var(--pip)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:6px;vertical-align:1px;background:var(--zone-soft);color:var(--ink)}
+
+/* turn card */
+.turn{border:2px solid var(--ink);padding:16px;display:flex;flex-direction:column;gap:14px}
+.turnhead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.turnhead h2{font-size:22px}
+.big{font-family:var(--f-num);font-weight:800;font-size:52px;line-height:.9}
+.stat{text-align:right}
+.hint{border-radius:10px;padding:9px 12px;font-size:14px;font-weight:500}
+.hint.zone{background:var(--zone-soft)}
+.hint.warn{background:var(--pip-soft)}
+.hint.good{background:var(--ok-soft)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;border-radius:8px;padding:8px;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.tally{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.tally .num{font-size:30px;font-weight:700}
+
+/* dice */
+.dice{display:flex;gap:8px;flex-wrap:wrap;min-height:52px;align-items:center}
+.die{width:48px;height:48px;border-radius:10px;background:var(--die);border:2px solid var(--die-edge);display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:6px;position:relative;transition:transform .12s}
+.die{--dface:var(--die-face,var(--die));--dedge:var(--die-edgec,var(--die-edge));--dpip:var(--die-pip,#1d2633);--dpip15:var(--die-p15,var(--pip));background:var(--dface);border-color:var(--dedge)}
+.die i{width:9px;height:9px;border-radius:50%;background:var(--dpip);place-self:center}
+.die.f1 i{background:var(--dpip15)}
+.die.ghost{background:transparent}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.sw{width:44px;height:44px;padding:5px;border-radius:10px;border:2px solid var(--line);background:var(--paper);display:grid;place-items:center}
+.sw[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink)}
+.sw .die{width:30px;height:30px;padding:3px;border-radius:7px;border-width:2px}
+.sw .die i{width:6px;height:6px}
+.saved{display:flex;gap:6px;flex-wrap:wrap}
+.pchip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:var(--bg);overflow:hidden}
+.pchip button{border:0;background:transparent;padding:7px 4px 7px 12px;font-weight:600;font-size:14px}
+.pchip button.rm{padding:7px 10px 7px 6px;color:var(--muted);font-weight:400}
+.pchip.used{opacity:.45}
+button.die{padding:6px}
+.die.picked{border-color:var(--pip);transform:translateY(-4px);box-shadow:0 4px 0 var(--pip)}
+.die.bad{border-color:var(--zone);border-style:dashed}
+.die.ghost{background:transparent;border-style:dashed;border-color:var(--line)}
+.pad{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pad .die{width:100%;height:auto;aspect-ratio:1;max-width:100%}
+.empty{color:var(--muted);font-size:14px}
+@keyframes rollin{from{transform:rotate(-25deg) scale(.6);opacity:.2}to{transform:none;opacity:1}}
+.rolled .die{animation:rollin .28s ease-out both}
+@media (prefers-reduced-motion:reduce){.rolled .die{animation:none}.die{transition:none}}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.actions .wide{grid-column:1/-1}
+.actions .btn{padding:14px 10px}
+.btnsub{display:block;font-weight:500;font-size:12px;opacity:.8}
+
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.log li{display:flex;gap:8px}
+.log li .num{color:var(--muted);min-width:20px}
+.steal{color:var(--pip);font-weight:600}
+
+/* setup */
+.plist{display:flex;flex-direction:column;gap:8px}
+.pline{display:grid;grid-template-columns:24px minmax(0,1fr) 40px;gap:8px;align-items:center}
+.x{border:1px solid var(--line);background:transparent;border-radius:8px;height:42px}
+.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.choice{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:12px}
+.opt[aria-pressed="true"]{border:2px solid var(--ink);padding:11px}
+.opt small{display:block;color:var(--muted);font-weight:400}
+.overlay{position:fixed;inset:0;background:rgba(10,16,24,.55);display:grid;place-items:center;padding:20px;z-index:20}
+.overlay .card{max-width:420px;width:100%;display:flex;flex-direction:column;gap:12px}
+.crown{font-family:var(--f-num);font-weight:800;font-size:40px;line-height:1}
+.err{color:var(--pip);font-size:14px}
+.small{font-size:13px}
+.cup{display:grid;place-items:center;padding:6px 0}
+.cup svg{width:96px;height:88px}
+.cupwrap{min-height:100px;display:grid;place-items:center}
+.claimbox{display:flex;flex-direction:column;align-items:center;gap:2px}
+.claimbox b{font-family:var(--f-num);font-size:44px;line-height:1}
+.claims{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.claim{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 0;font-family:var(--f-num);font-size:19px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums}
+.claim small{display:block;font-family:var(--f-body);font-size:9px;font-weight:600;letter-spacing:.02em}
+.claim.pasch{background:var(--zone-soft)}
+.claim.top{background:var(--pip-soft);border-color:var(--pip)}
+.claim:disabled{opacity:.28;cursor:not-allowed}
+.claim:not(:disabled):active{transform:scale(.96)}
+.lives{display:flex;gap:4px;margin-top:5px}
+.lives i{width:10px;height:10px;border-radius:50%;border:2px solid var(--pip)}
+.lives i.on{background:var(--pip)}
+.ranks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ranks span{border:1px solid var(--line);border-radius:6px;padding:3px 7px;font-family:var(--f-num);font-size:15px}
+.btn.big{padding:16px;font-size:17px}
+.topright{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.chip:empty{display:none}
+.subhead{display:flex;align-items:center;gap:10px}
+.subhead h1{font-family:var(--f-num);font-weight:800;font-size:26px;letter-spacing:.02em;text-transform:uppercase;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.back{width:40px;height:40px;flex:0 0 auto;border:1px solid var(--line);background:var(--paper);border-radius:10px;font-size:18px;display:grid;place-items:center}
+.glist{display:flex;flex-direction:column;gap:8px}
+.grow{display:grid;grid-template-columns:minmax(0,1fr) auto;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.gpick{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:0;background:transparent;padding:14px 14px;text-align:left;min-width:0}
+.gpick b{font-size:17px}
+.ginfo{border:0;border-left:1px solid var(--line);background:transparent;padding:0 16px;font-size:13px;font-weight:600;color:var(--muted)}
+.gamechip{display:flex;align-items:baseline;gap:10px;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 14px;text-align:left}
+.gamechip b{flex:1;font-size:16px}
+.hero{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:28px 2px 10px}
+.herodice{display:flex;gap:10px;margin-bottom:8px}
+.coaster{width:124px;height:124px;margin:0 0 10px -4px;transform:rotate(-9deg);filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
+.herodice .die:nth-child(1){transform:rotate(-8deg)}
+.herodice .die:nth-child(3){transform:rotate(7deg)}
+.herotitle{font-family:var(--f-num);font-weight:800;font-size:56px;line-height:.9;letter-spacing:.01em;text-transform:uppercase}
+.menu{display:flex;flex-direction:column;gap:8px}
+.mitem{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:13px 14px;text-align:left}
+.mitem b{font-size:16px}
+.codein{font-family:var(--f-num);font-size:34px;letter-spacing:.3em;text-transform:uppercase;text-align:center;width:100%;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px}
+textarea.ein{resize:vertical;font-family:inherit}
+.sheet{display:flex;flex-direction:column;gap:4px}
+.frow{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);background:var(--paper);border-radius:9px;padding:10px 12px;font-weight:600;text-align:left}
+.frow .num{font-size:20px;font-weight:700}
+.frow:not(:disabled){border-color:var(--ink)}
+.frow:not(:disabled) .num{color:var(--pip)}
+.frow.zero:not(:disabled) .num{color:var(--muted);font-size:14px;font-family:var(--f-body);font-weight:500}
+.frow.done{background:var(--bg);border-color:transparent;font-weight:500;opacity:1}
+.frow:disabled{cursor:default}
+.frow:disabled:not(.done){opacity:.6}
+.sheettbl td,.sheettbl th{text-align:center}
+.sheettbl tr.sum td{background:var(--bg);font-weight:600}
+.sheettbl tr.total td{font-size:20px;color:var(--pip)}
+.tplrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
+.tplrow .btn{align-self:stretch}
+.ecard{display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ein{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 10px;font-variant-numeric:tabular-nums}
+select.ein{width:auto}
+.ein:disabled{opacity:.45}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper .btn{width:44px;height:44px;font-size:20px;padding:0}
+.stepper b{font-size:30px;min-width:20px;text-align:center}
+.tog{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.tog input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--pip);flex:0 0 auto}
+.g6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.g6 .cell{display:flex;flex-direction:column;align-items:center;gap:6px}
+.g6 .die,.ctab .die{width:28px;height:28px;padding:3px;border-radius:6px;border-width:2px}
+.g6 .die i,.ctab .die i{width:5px;height:5px}
+.g6 .ein,.ctab .ein{text-align:center;padding:9px 2px;min-width:0}
+.ctab{border-collapse:separate;border-spacing:4px;width:100%;min-width:330px;table-layout:fixed}
+.ctab th{font-family:var(--f-num);font-size:16px;font-weight:700;color:var(--muted)}
+.ctab thead th .die{margin:0 auto}
+.ctab tbody th{width:34px;text-align:left}
+.srow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.srow .tog{flex:1 1 120px}
+.zrow{display:grid;grid-template-columns:auto 1fr auto 1fr 40px;gap:8px;align-items:center}
+.overlay .card.stats{max-width:520px;max-height:calc(100% - 20px);overflow-y:auto}
+.bars{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:end;height:150px;position:relative;padding-top:18px}
+.bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0}
+.bar .b{width:100%;max-width:44px;background:var(--ink);border-radius:5px 5px 0 0;min-height:2px}
+.bar.f1 .b{background:var(--pip)}
+.bar .v{font-family:var(--f-num);font-size:15px;font-variant-numeric:tabular-nums}
+.exp{position:absolute;left:0;right:0;border-top:2px dashed var(--muted);pointer-events:none}
+.exp span{position:absolute;left:0;top:-18px;font-size:11px;color:var(--muted);background:var(--paper);padding:0 4px}
+.barlabels{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;justify-items:center}
+.barlabels .die{width:30px;height:30px;padding:3px;border-radius:7px}
+.barlabels .die i{width:6px;height:6px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpi{background:var(--bg);border-radius:10px;padding:10px}
+.kpi .num{font-size:26px;font-weight:700;line-height:1}
+.kpi small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.tblwrap{overflow-x:auto;margin:0 -4px}
+.tbl{border-collapse:collapse;width:100%;font-size:14px;min-width:460px}
+.tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;text-align:right;padding:6px 6px;border-bottom:1px solid var(--line)}
+.tbl td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line);font-family:var(--f-num);font-size:17px;font-variant-numeric:tabular-nums}
+.tbl th:first-child,.tbl td:first-child{text-align:left;font-family:var(--f-body);font-size:14px;font-weight:600}
+.tbl td.hl{color:var(--pip);font-weight:700}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="ov"></div>
+
+<script>
+(()=>{
+const LS='kubiki-zaehler-v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>typeof n==='number'?n.toLocaleString('de-DE'):n;
+
+/* ==========================================================
+   REGELSÄTZE
+   Ein Regelsatz beschreibt ein Würfelspiel vom Typ
+   „Punkte sammeln, weiterwürfeln oder aufhören“ als Daten.
+   ---------------------------------------------------------
+   dice        Anzahl Würfel
+   singles     Einzelwerte {Augenzahl: Punkte}
+   combos      {Anzahl Gleiche: {Augenzahl: Punkte | "win"}}
+   specials    Sonderwürfe [{type:"straight", faces, pts} | {type:"pairs3", pts}]
+   carryOver   Alle Würfel gepunktet → mit allen weiter
+   entry       Mindestpunkte für den ersten Eintrag (0 = aus)
+   target      Zielpunktzahl
+   exact       Ziel muss genau getroffen werden, drüber = stehen bleiben
+   burn        Punktstände, die auf 0 verbrennen
+   zones       Sperrzonen [[von, bis]] – raus nur mit einem Zug auf ≥ bis
+   steal       Klau beim Überholen {amount, protectZones} | null
+   ========================================================== */
+const FACES=[1,2,3,4,5,6];
+const tbl=fn=>Object.fromEntries(FACES.map(f=>[f,fn(f)]));
+const TEMPLATES={
+  kubiki:{
+    id:'kubiki', name:'Kubiki', tagline:'Eure Hausregeln: 5 Würfel, Ziel genau 1.000, Sperrzonen, 555 verbrennt, Klau beim Überholen.',
+    dice:5,
+    singles:{1:10,5:5},
+    combos:{
+      3:tbl(f=>f===1?100:f*10),
+      4:tbl(f=>(f===1?100:f*10)*2),
+      5:tbl(f=>f===1?'win':f*100)
+    },
+    specials:[],
+    carryOver:true, entry:50, target:1000, exact:true,
+    burn:[555], zones:[[400,500],[600,700]],
+    steal:{amount:50, protectZones:true}
+  },
+  zehntausend:{
+    id:'zehntausend', name:'Zehntausend', tagline:'Der Klassiker: 6 Würfel, Ziel 10.000, Einstieg mit 350, Straße und drei Paare.',
+    dice:6,
+    singles:{1:100,5:50},
+    combos:{
+      3:tbl(f=>f===1?1000:f*100),
+      4:tbl(f=>(f===1?1000:f*100)*2),
+      5:tbl(f=>(f===1?1000:f*100)*4),
+      6:tbl(f=>(f===1?1000:f*100)*8)
+    },
+    specials:[{type:'straight',faces:[1,2,3,4,5,6],pts:1500},{type:'pairs3',pts:1500}],
+    carryOver:true, entry:350, target:10000, exact:false,
+    burn:[], zones:[], steal:null
+  }
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const R=()=>G.rules;
+
+/* ---------- Engine ---------- */
+function counts(faces){ const c=[0,0,0,0,0,0,0]; faces.forEach(f=>c[f]++); return c; }
+const hasV=v=>v==='win'||typeof v==='number';
+function comboKeys(r){ return Object.keys(r.combos||{}).map(Number).filter(k=>FACES.some(f=>hasV(r.combos[k][f]))).sort((a,b)=>a-b); }
+function bestCombo(r,f,n){ return comboKeys(r).reverse().find(k=>k<=n&&hasV(r.combos[k][f])); }
+function special(r,faces){
+  const c=counts(faces);
+  for(const sp of r.specials||[]){
+    if(sp.type==='straight' && faces.length===sp.faces.length && sp.faces.every(f=>c[f]===1)) return sp;
+    if(sp.type==='pairs3' && faces.length===6 && c.filter(n=>n===2).length===3) return sp;
+  }
+  return null;
+}
+function scoreFaces(r,faces){
+  if(!faces.length) return {pts:0,ok:false,win:false};
+  const sp=special(r,faces); if(sp) return {pts:sp.pts,ok:true,win:false,special:sp};
+  const c=counts(faces);
+  let pts=0, ok=true, win=false;
+  for(const f of FACES){
+    let n=c[f];
+    for(let k=bestCombo(r,f,n); k; k=bestCombo(r,f,n)){
+      const v=r.combos[k][f];
+      if(v==='win') win=true; else pts+=v;
+      n-=k;
+    }
+    if(n>0){ if(r.singles[f]) pts+=r.singles[f]*n; else ok=false; }
+  }
+  return {pts, ok, win:win&&ok};
+}
+function canScore(r,roll){
+  const c=counts(roll);
+  if(FACES.some(f=>r.singles[f]&&c[f]>0)) return true;
+  if(FACES.some(f=>bestCombo(r,f,c[f]))) return true;
+  for(const sp of r.specials||[]){
+    if(sp.type==='straight' && sp.faces.every(f=>c[f]>0)) return true;
+    if(sp.type==='pairs3' && roll.length===6 && c.filter(n=>n===2).length===3) return true;
+  }
+  return false;
+}
+function zoneOf(r,s){ return (r.zones||[]).find(([a,b])=>s>=a&&s<b)||null; }
+function bankResult(G, extra){
+  const r=G.rules, p=G.players[G.cur]; const old=p.score; const total=G.turn.pts+extra;
+  if(r.entry && !(p.in||old>0) && total<r.entry) return {blocked:true, entry:true, old, nw:old, total};
+  let nw=old+total; const z=zoneOf(r,old);
+  if(z && nw<z[1]) return {blocked:true, zone:true, old, nw:old, need:z[1]-old, total};
+  if(r.exact && nw>r.target) return {blocked:true, over:true, old, nw:old, total};
+  let burned=false; if((r.burn||[]).includes(nw)){burned=true; nw=0;}
+  const steals=[];
+  if(!burned && r.steal) G.players.forEach((o,i)=>{
+    if(i!==G.cur && o.score>old && o.score<nw && !(r.steal.protectZones && zoneOf(r,o.score))) steals.push(i);
+  });
+  return {blocked:false, old, nw, burned, steals, total, win:r.exact? nw===r.target : nw>=r.target};
+}
+
+/* ---------- Regeltext aus dem Regelsatz ---------- */
+const WORD={2:'Zwei',3:'Drei',4:'Vier',5:'Fünf',6:'Sechs'};
+const MULT={2:'doppelter',3:'dreifacher',4:'vierfacher',8:'achtfacher'};
+function describeCount(r,k){
+  const v=r.combos[k], b=r.combos[3], W=WORD[k];
+  const nums=FACES.filter(f=>typeof v[f]==='number');
+  const extra=FACES.filter(f=>v[f]==='win').map(f=>`${W} ${f}er = Sofortsieg`);
+  let main='';
+  if(nums.length+extra.length<6){
+    main=nums.length?`${W} Gleiche: `+nums.map(f=>`${f}er ${fmt(v[f])}`).join(', ')+' (sonst zählen sie nicht)':'';
+    return [main,...extra].filter(Boolean).join('. ');
+  }
+  if(k!==3 && b && nums.every(f=>typeof b[f]==='number') && nums.length){
+    const m=v[nums[0]]/b[nums[0]];
+    if(MULT[m] && nums.every(f=>v[f]===b[f]*m)) main=`${W} Gleiche = ${MULT[m]} Drilling`;
+  }
+  if(!main){
+    const others=nums.filter(f=>f!==1);
+    const m=others.length?v[others[0]]/others[0]:null;
+    if(m && others.every(f=>v[f]===f*m)){
+      main=`${W} Gleiche = Augenzahl × ${fmt(m)}`;
+      if(typeof v[1]==='number') main+=`, ${W.toLowerCase()} 1er = ${fmt(v[1])}`;
+    } else main=`${W} Gleiche: `+nums.map(f=>`${f}er ${fmt(v[f])}`).join(', ');
+  }
+  return [main,...extra].join('. ');
+}
+function rulesList(r){
+  if(isBlock(r)) return blockRulesList(r);
+  if(isRound(r)) return roundRulesList(r);
+  if(isBluff(r)) return bluffRulesList(r);
+  const L=[];
+  const singles=Object.entries(r.singles).filter(([f,p])=>p).map(([f,p])=>`${f}er = ${fmt(p)}`).join(', ');
+  L.push(`${r.dice} Würfel.${singles?' '+singles+'.':' Einzelne Würfel zählen nicht.'}`);
+  const cl=comboKeys(r).map(k=>describeCount(r,k)).filter(Boolean); if(cl.length) L.push(cl.join('. ')+'.');
+  (r.specials||[]).forEach(sp=>L.push(sp.type==='straight'?`Straße ${sp.faces[0]}–${sp.faces[sp.faces.length-1]} = ${fmt(sp.pts)}.`:`Drei Paare = ${fmt(sp.pts)}.`));
+  L.push(`Weiterwürfeln oder aufhören. Niete = Punkte des Zugs weg.${r.carryOver?` Alle ${r.dice} gepunktet = mit ${r.dice} weiter.`:''}`);
+  if(r.entry) L.push(`Einstieg: Im ersten Zug mindestens ${fmt(r.entry)} Punkte, sonst Niete.`);
+  if((r.burn||[]).length) L.push(`Genau ${r.burn.map(fmt).join(' oder ')} verbrennt auf 0.`);
+  if((r.zones||[]).length) L.push(`Sperrzonen ${r.zones.map(([a,b])=>fmt(a)+'–'+fmt(b-1)).join(' und ')}: nur mit einem Zug auf ${r.zones.map(z=>fmt(z[1])).join(' bzw. ')} raus, sonst stehen bleiben.`);
+  if(r.steal) L.push(`Wer einen Spieler überholt, klaut ihm ${fmt(r.steal.amount)} Punkte.${r.steal.protectZones?' Wer in einer Sperrzone steht, kann nicht beklaut werden.':''}`);
+  L.push(r.exact?`Wer zuerst genau ${fmt(r.target)} erreicht, gewinnt. Wer drüber kommt, bleibt stehen.`:`Wer zuerst ${fmt(r.target)} erreicht, gewinnt.`);
+  return L;
+}
+
+/* ---------- Zustand ---------- */
+const uid=()=>Math.random().toString(36).slice(2,9);
+function freshTurn(r){ if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
+function newGame(names,tplId){
+  const rules=clone(tplOf(tplId));
+  const extra=rules.type==='round'?{half:1, pool:rules.deckel, halfPlayers:[], halfLosers:[], round:{maxRolls:null,results:{},order:names.map((_,i)=>i)}}:rules.type==='bluff'?{bluff:{last:null,reveal:null}}:{};
+  return {v:2, rev:1, code:null, mode:rules.type==='bluff'?'digital':'real', rules, ...extra,
+    players:names.map(n=>({id:uid(),name:n,score:0})), cur:0,
+    turn:freshTurn(rules),
+    log:[{n:1,t:esc(rules.name)+' gestartet – '+esc(names[0])+' fängt an.'}], hist:[], winner:null, stats:freshStats()};
+}
+function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } return g; }
+function migrate(g){ if(g && !g.rules){ g.rules=clone(TEMPLATES.kubiki); } return g; }
+function freshStats(){return {faces:[0,0,0,0,0,0,0], dice:0, rolls:0, rollTrip:0, expTrip:0, pl:{}};}
+/* Wahrscheinlichkeit für mindestens drei Gleiche bei n Würfeln (exakt durchgezählt) */
+const P_TRIP=[0,1,2,3,4,5,6].map(n=>{ if(n<3) return 0; let hit=0,tot=6**n; for(let i=0;i<tot;i++){ const c=[0,0,0,0,0,0]; let x=i; for(let d=0;d<n;d++){c[x%6]++; x=Math.floor(x/6);} if(c.some(v=>v>=3)) hit++; } return hit/tot; });
+function ST(){ if(!G.stats) G.stats=freshStats(); return G.stats; }
+function PS(id){ const s=ST(); if(!s.pl[id]) s.pl[id]={turns:0,niete:0,best:0,trip:0,stole:0,lost:0,burned:0}; return s.pl[id]; }
+function countTrips(faces){ return counts(faces).filter(n=>n>=3).length; }
+function recordPick(id,faces){ PS(id).trip+=countTrips(faces); }
+let showStats=false;
+const DICE={
+  weiss:{n:'Weiß'},
+  schwarz:{n:'Schwarz',face:'#1c2230',edge:'#000',pip:'#f4f4f4',p15:'#ff6b5e'},
+  rot:{n:'Rot',face:'#c8322b',edge:'#8f1f1a',pip:'#fff',p15:'#fff'},
+  blau:{n:'Blau',face:'#2459a8',edge:'#163b73',pip:'#fff',p15:'#ffd25e'},
+  gruen:{n:'Grün',face:'#2f7d4f',edge:'#1d5434',pip:'#fff',p15:'#ffd25e'},
+  elfenbein:{n:'Elfenbein',face:'#efe4c8',edge:'#c9b78c',pip:'#3a2a12',p15:'#b2281f'},
+  gold:{n:'Gold',face:'#d6a93a',edge:'#9c7618',pip:'#2a1f08',p15:'#8b1a12'}
+};
+const LS_PREF='kubiki-prefs-v1';
+let prefs={dice:'weiss',saved:[],tpl:'kubiki',history:[]};
+try{ prefs={...prefs,...JSON.parse(localStorage.getItem(LS_PREF)||'{}')}; }catch(e){}
+if(!allTemplates()[prefs.tpl]) prefs.tpl='kubiki';
+function savePrefs(){ try{localStorage.setItem(LS_PREF,JSON.stringify(prefs))}catch(e){} }
+function applyDice(){
+  const d=DICE[prefs.dice]||DICE.weiss; const r=document.documentElement.style;
+  const set=(k,v)=>v?r.setProperty(k,v):r.removeProperty(k);
+  set('--die-face',d.face); set('--die-edgec',d.edge); set('--die-pip',d.pip); set('--die-p15',d.p15);
+}
+function swatchesHTML(){ return `<div class="swatches" role="group" aria-label="Würfelfarbe">${Object.entries(DICE).map(([k,d])=>`<button class="sw" data-act="dice" data-v="${k}" aria-pressed="${prefs.dice===k}" title="${d.n}" aria-label="${d.n}">${dieHTML(5,{attrs:k==='weiss'?'style="--dface:var(--die);--dedge:var(--die-edge);--dpip:#1d2633;--dpip15:var(--pip)"':`style="--dface:${d.face};--dedge:${d.edge};--dpip:${d.pip};--dpip15:${d.p15}"`})}</button>`).join('')}</div>`; }
+let G=null;           // laufendes Spiel
+let view='setup';     // setup | game
+let setup={step:'home', names:['Anna','Ben','Chris','Dana'], online:false, joinCode:'', err:''};
+let db=null, unsub=null, synced=false, writeChain=Promise.resolve();
+
+function loadLocal(){try{const s=localStorage.getItem(LS);return s?JSON.parse(s):null}catch(e){return null}}
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify({G,view}))}catch(e){}}
+
+function snapshotForHist(){const c=JSON.parse(JSON.stringify(G)); delete c.hist; return c;}
+function pushHist(){G.hist=[...(G.hist||[]).slice(-14), snapshotForHist()];}
+function addLog(t){const n=(G.log[0]?.n||0)+1; G.log=[{n,t},...G.log].slice(0,40);}
+
+function recordEnd(){
+  const r=R(), w=G.players.find(p=>p.id===G.winner); if(!w) return;
+  let ranking;
+  if(isRound(r)) ranking=[{n:w.name,v:'verloren'}];
+  else if(isBluff(r)) ranking=[...G.players].sort((a,b)=>r.lives?b.lives-a.lives:(a.pen||0)-(b.pen||0)).map(p=>({n:p.name,v:r.lives?p.lives+' Leben':(p.pen||0)+' Strafp.'}));
+  else ranking=[...G.players].sort((a,b)=>b.score-a.score).map(p=>({n:p.name,v:fmt(p.score)}));
+  prefs.history=[{at:Date.now(), game:r.name, loserGame:isRound(r), who:w.name, players:G.players.map(p=>p.name), ranking}, ...(prefs.history||[])].slice(0,200);
+  savePrefs();
+}
+function commit(){
+  if(G.winner && !G.endKey){ G.endKey=uid(); recordEnd(); }
+  G.rev=(G.rev||0)+1; saveLocal(); render();
+  if(G.code && db){
+    const data=JSON.parse(JSON.stringify(G));
+    writeChain=writeChain.then(()=>db.doc('games/'+G.code).set(data)).catch(e=>{
+      synced=false; renderTop(); });
+  }
+}
+
+/* ---------- Online ---------- */
+(async()=>{
+  await Promise.resolve();
+  try{ db = window.claude ? await window.claude.use('db') : null; }catch(e){ db=null; }
+  if(view==='setup') render();
+  if(db && G && G.code) subscribe(G.code);
+})();
+function subscribe(code){
+  if(unsub) unsub();
+  unsub=db.doc('games/'+code).onSnapshot(s=>{
+    synced=true;
+    if(!s.exists) return;
+    const d=migrate(JSON.parse(JSON.stringify(s.data())));
+    if(!G || d.rev>G.rev || G.code!==code){ G=d; view='game'; saveLocal(); render(); }
+    else renderTop();
+  },()=>{synced=false; renderTop();});
+}
+async function createOnline(names,tpl){
+  const L='ABCDEFGHJKLMNPQRSTUVWXYZ'; let code='';
+  for(let tries=0;tries<5;tries++){
+    code=Array.from({length:4},()=>L[Math.floor(Math.random()*L.length)]).join('');
+    const s=await db.doc('games/'+code).get(); if(!s.exists) break;
+  }
+  G=finishNew(newGame(names,tpl)); G.code=code; view='game';
+  await db.doc('games/'+code).set(JSON.parse(JSON.stringify(G)));
+  saveLocal(); subscribe(code); render();
+}
+async function joinOnline(code){
+  code=code.trim().toUpperCase();
+  if(!/^[A-Z]{4}$/.test(code)){setup.err='Der Code hat 4 Buchstaben, z. B. KRBX.';render();return;}
+  try{
+    const s=await db.doc('games/'+code).get();
+    if(!s.exists){setup.err='Kein Spiel mit dem Code '+code+' gefunden.';render();return;}
+    G=migrate(JSON.parse(JSON.stringify(s.data()))); view='game'; saveLocal(); subscribe(code); render();
+  }catch(e){setup.err='Verbindung fehlgeschlagen. Bitte noch einmal versuchen.';render();}
+}
+
+/* ---------- Spielzüge ---------- */
+const T=()=>G.turn;
+function selFaces(){ const t=T(); return G.mode==='digital' && t.roll ? t.picked.map(i=>t.roll[i]) : t.sel; }
+function nextPlayer(){
+  G.cur=(G.cur+1)%G.players.length;
+  G.turn=freshTurn(R());
+}
+function winText(faces){
+  const c=counts(faces); const f=FACES.find(f=>c[f]>=3&&Object.keys(R().combos).some(k=>R().combos[k][f]==='win'&&c[f]>=+k));
+  return f?`${(WORD[c[f]]||c[f]).toLowerCase()} ${f}er`:'den Sofortsieg';
+}
+const act={
+  mode(m){ if(G.mode===m) return; G.mode=m; if(isBlock(R())||isRound(R())||isBluff(R())) G.turn=freshTurn(R()); else { G.turn.sel=[]; G.turn.roll=null; G.turn.picked=[]; } commit(); },
+  face(f){ const t=T(); if(t.sel.length>=t.left) return; t.sel=[...t.sel,+f].sort(); commit(); },
+  unsel(i){ const t=T(); t.sel=t.sel.filter((_,k)=>k!==+i); commit(); },
+  roll(){ const t=T(); t.roll=Array.from({length:t.left},()=>1+Math.floor(Math.random()*6)); t.picked=[]; t.rollId=uid();
+    const s=ST(); t.roll.forEach(f=>s.faces[f]++); s.dice+=t.roll.length; s.rolls++; s.expTrip+=P_TRIP[t.roll.length]||0; if(countTrips(t.roll)) s.rollTrip++;
+    commit(); },
+  pick(i){ const t=T(); i=+i; t.picked=t.picked.includes(i)?t.picked.filter(x=>x!==i):[...t.picked,i]; commit(); },
+  cont(){
+    const r=scoreFaces(R(),selFaces()); if(!r.ok) return;
+    if(r.win) return act.stop();
+    const t=T(); const used=selFaces().length;
+    if(t.left-used===0 && !R().carryOver) return;
+    pushHist();
+    recordPick(G.players[G.cur].id, selFaces());
+    t.pts+=r.pts; t.left-=used;
+    if(t.left===0){t.left=R().dice; addLog(esc(G.players[G.cur].name)+' hat alle Würfel gepunktet – Anschluss mit '+R().dice+' Würfeln.');}
+    t.sel=[]; t.roll=null; t.picked=[]; commit();
+  },
+  stop(){
+    const rs=R();
+    const f=selFaces(); const r=f.length?scoreFaces(rs,f):{pts:0,ok:true}; if(!r.ok) return;
+    if(r.win){ pushHist(); const p=G.players[G.cur]; const ps=PS(p.id); ps.turns++; recordPick(p.id,f);
+      p.score=Math.max(p.score,rs.target); p.in=true; G.winner=p.id; addLog('<b>'+esc(p.name)+' würfelt '+winText(f)+' und gewinnt sofort!</b>'); commit(); return; }
+    if(T().pts+r.pts<=0) return;
+    pushHist();
+    const p=G.players[G.cur]; const b=bankResult(G,r.pts);
+    const ps=PS(p.id); ps.turns++; if(f.length) recordPick(p.id,f);
+    if(b.blocked){ ps.niete++; } else { ps.best=Math.max(ps.best,b.total); if(b.burned) ps.burned++; }
+    if(b.entry){
+      addLog(esc(p.name)+' schafft den Einstieg nicht ('+fmt(b.total)+' von mindestens '+fmt(rs.entry)+') – Niete.');
+    } else if(b.over){
+      addLog(esc(p.name)+' würde mit '+fmt(b.total)+' Punkten über '+fmt(rs.target)+' kommen und bleibt bei '+fmt(b.old)+'.');
+    } else if(b.blocked){
+      addLog(esc(p.name)+' bleibt in der Sperrzone stehen ('+fmt(b.total)+' Punkte reichten nicht, '+fmt(b.need)+' nötig).');
+    } else {
+      p.score=b.nw; p.in=true;
+      let t=esc(p.name)+' schreibt '+fmt(b.total)+' → <b>'+fmt(b.nw)+'</b>.';
+      if(b.burned) t=esc(p.name)+' landet auf '+fmt(b.old+b.total)+' und <span class="steal">verbrennt auf 0</span>.';
+      addLog(t);
+      b.steals.forEach(i=>{
+        const o=G.players[i]; const amt=rs.steal.amount; let s=Math.max(0,o.score-amt); let extra='';
+        if((rs.burn||[]).includes(s)){s=0; extra=' und verbrennt auf 0'; PS(o.id).burned++;}
+        { const k=Math.min(amt,o.score); ps.stole+=k; PS(o.id).lost+=k; }
+        o.score=s; addLog('<span class="steal">'+esc(p.name)+' überholt '+esc(o.name)+' und klaut '+fmt(amt)+'</span> ('+esc(o.name)+': '+fmt(s)+extra+').');
+      });
+      if(b.win){ G.winner=p.id; addLog('<b>'+esc(p.name)+' gewinnt mit '+fmt(b.nw)+' Punkten!</b>'); }
+    }
+    if(!G.winner) nextPlayer();
+    commit();
+  },
+  niete(){ pushHist(); const p=G.players[G.cur]; { const ps=PS(p.id); ps.turns++; ps.niete++; } addLog(esc(p.name)+' wirft eine Niete'+(T().pts?' – '+fmt(T().pts)+' Punkte weg.':'.')); nextPlayer(); commit(); },
+  undo(){ const h=G.hist||[]; if(!h.length) return; const prev=h[h.length-1]; const rest=h.slice(0,-1); const rev=G.rev; if(G.endKey&&!prev.winner&&(prefs.history||[]).length){ prefs.history=prefs.history.slice(1); savePrefs(); } G={...prev,hist:rest,rev}; commit(); },
+  again(){
+    G.endKey=null;
+    if(isBluff(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[]; G.players.forEach(p=>{p.lives=R().lives; p.pen=0;});
+      G.bluff={last:null,reveal:null}; G.cur=(wi+1)%G.players.length; G.turn=freshTurn(R()); addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' fängt an.'); commit(); return; }
+    if(isRound(R())){ const li=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[]; G.half=1; G.halfLosers=[];
+      initHalf(G.players.map(p=>p.id), li); addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' fängt an.'); commit(); return; }
+    G.players.forEach(p=>{p.score=0; p.in=false; p.sheet={};}); G.winner=null; G.hist=[];
+    G.cur=(G.cur+1)%G.players.length; G.turn=freshTurn(R());
+    addLog('Neue Runde – '+esc(G.players[G.cur].name)+' fängt an.'); commit(); },
+  stats(){ showStats=true; renderOverlay(); },
+  closestats(){ showStats=false; renderOverlay(); },
+  resetstats(){ pushHist(); G.stats=freshStats(); commit(); },
+  dice(k){ if(!DICE[k]) return; prefs.dice=k; savePrefs(); applyDice(); render(); },
+  tpl(k){ if(!allTemplates()[k]) return; prefs.tpl=k; savePrefs(); setup.step='players'; setup.err=''; render(); window.scrollTo(0,0); },
+  go(st){ setup.step=st||'home'; setup.err=''; setup.newPick=false; setup.importErr=''; setup.importMsg=''; render(); window.scrollTo(0,0); },
+  info(id){ setup.infoId=id; setup.step='info'; render(); window.scrollTo(0,0); },
+  panel(v){ if(v==='stats'){ panel=null; showStats=true; } else if(v==='block'){ panel=null; showBlock=true; } else panel=v||null; renderOverlay(); },
+  addsaved(n){ const cur=setup.names.map(s=>s.trim()); if(cur.includes(n)) return; const i=setup.names.findIndex(s=>!s.trim()); if(i>=0) setup.names[i]=n; else setup.names=[...setup.names,n]; render(); },
+  rmsaved(n){ prefs.saved=prefs.saved.filter(x=>x!==n); savePrefs(); render(); },
+  clearnames(){ setup.names=['','']; render(); },
+  samenew(){ const names=G.players.map(p=>p.name); act.leave(); setup.names=names; setup.step='pick'; render(); window.scrollTo(0,0); },
+  clearhist(v){ if(v===undefined){ setup.confirmClear=true; render(); return; } if(v==='1'){ prefs.history=[]; savePrefs(); } setup.confirmClear=false; render(); },
+  leave(){ panel=null; setup.step='home'; showStats=false; showBlock=false; if(unsub){unsub();unsub=null;} G=null; view='setup'; setup.err=''; saveLocal(); render(); },
+  addp(){ setup.names=[...setup.names,'']; render(); const ins=document.querySelectorAll('.pline input'); ins[ins.length-1]?.focus(); },
+  delp(i){ setup.names=setup.names.filter((_,k)=>k!==+i); render(); },
+  online(v){ setup.online=v==='1'; render(); },
+  start(){
+    const names=setup.names.map(s=>s.trim()).filter(Boolean);
+    if(names.length<2){setup.err='Mindestens 2 Spieler eintragen.';render();return;}
+    setup.err='';
+    prefs.saved=[...names,...prefs.saved.filter(x=>!names.includes(x))].slice(0,40); savePrefs();
+    if(setup.online && db){ createOnline(names,prefs.tpl).catch(()=>{setup.err='Spiel konnte nicht angelegt werden. Bitte noch einmal versuchen.';render();}); }
+    else { G=finishNew(newGame(names,prefs.tpl)); view='game'; commit(); }
+  },
+  join(){ joinOnline(setup.joinCode); }
+};
+
+/* ---------- Regel-Editor ---------- */
+const STRAIGHTS={'1-5':[1,2,3,4,5],'2-6':[2,3,4,5,6],'1-6':[1,2,3,4,5,6]};
+function allTemplates(){ return {...TEMPLATES, ...(prefs.custom||{})}; }
+function tplOf(id){ return allTemplates()[id]||TEMPLATES.kubiki; }
+let E=null; // Formularzustand des Editors
+function fromRules(r,id,isCustom){
+  const st=(r.specials||[]).find(s=>s.type==='straight'), pr=(r.specials||[]).find(s=>s.type==='pairs3');
+  const combos={}; for(let k=3;k<=6;k++){ combos[k]={}; FACES.forEach(f=>{ const v=r.combos?.[k]?.[f]; combos[k][f]=v==='win'?'S':(typeof v==='number'?String(v):''); }); }
+  return { id, isCustom, confirmDel:false,
+    name:r.name, dice:r.dice,
+    singles:Object.fromEntries(FACES.map(f=>[f, r.singles[f]?String(r.singles[f]):''])),
+    combos,
+    straight:{on:!!st, range:st?(Object.keys(STRAIGHTS).find(k=>STRAIGHTS[k].join()===st.faces.join())||'1-6'):(r.dice>=6?'1-6':'1-5'), pts:st?String(st.pts):''},
+    pairs:{on:!!pr, pts:pr?String(pr.pts):''},
+    carryOver:!!r.carryOver, entry:r.entry?String(r.entry):'', target:String(r.target), exact:!!r.exact,
+    burn:(r.burn||[]).join(', '),
+    zones:(r.zones||[]).map(([a,b])=>[String(a),String(b-1)]),
+    steal:{on:!!r.steal, amount:r.steal?String(r.steal.amount):'50', protect:r.steal?!!r.steal.protectZones:true}
+  };
+}
+const num=v=>{ const t=String(v??'').replace(/\./g,'').trim(); if(t==='') return null; const n=Number(t); return Number.isFinite(n)?Math.round(n):NaN; };
+function compile(E){
+  const errors=[];
+  const r={id:E.id, name:E.name.trim()||'Eigenes Spiel', tagline:'', dice:E.dice, singles:{}, combos:{}, specials:[],
+    carryOver:E.carryOver, entry:0, target:0, exact:E.exact, burn:[], zones:[], steal:null};
+  if(!E.name.trim()) errors.push('Gib dem Spiel einen Namen.');
+  FACES.forEach(f=>{ const n=num(E.singles[f]); if(Number.isNaN(n)) errors.push(`Einzelwert für die ${f} ist keine Zahl.`); else if(n) r.singles[f]=n; });
+  for(let k=3;k<=E.dice;k++){
+    const row={};
+    FACES.forEach(f=>{ const raw=String(E.combos[k][f]||'').trim();
+      if(/^s(ieg)?$/i.test(raw)) row[f]='win';
+      else { const n=num(raw); if(Number.isNaN(n)) errors.push(`${WORD[k]} Gleiche, ${f}er: „${raw}“ ist keine Zahl. Erlaubt sind Zahlen oder S für Sofortsieg.`); else if(n!==null) row[f]=n; }
+    });
+    if(Object.keys(row).length) r.combos[k]=row;
+  }
+  if(E.straight.on){
+    const faces=STRAIGHTS[E.straight.range]; const n=num(E.straight.pts);
+    if(faces.length>E.dice) errors.push(`Die Straße ${E.straight.range} braucht ${faces.length} Würfel.`);
+    else if(!n) errors.push('Gib Punkte für die Straße an.');
+    else r.specials.push({type:'straight',faces,pts:n});
+  }
+  if(E.pairs.on){
+    const n=num(E.pairs.pts);
+    if(E.dice<6) errors.push('Drei Paare gehen nur mit 6 Würfeln.');
+    else if(!n) errors.push('Gib Punkte für drei Paare an.');
+    else r.specials.push({type:'pairs3',pts:n});
+  }
+  const en=num(E.entry); if(Number.isNaN(en)) errors.push('Einstieg ist keine Zahl.'); else r.entry=en||0;
+  const tg=num(E.target); if(!tg||tg<1) errors.push('Gib eine Zielpunktzahl an.'); else r.target=tg;
+  E.burn.split(/[,;\s]+/).filter(Boolean).forEach(x=>{ const n=num(x); if(!n||Number.isNaN(n)) errors.push(`Verbrennen: „${x}“ ist keine Zahl.`); else r.burn.push(n); });
+  E.zones.forEach(([a,b],i)=>{ const A=num(a), B=num(b);
+    if(A===null&&B===null) return;
+    if(!A&&A!==0||!B||Number.isNaN(A)||Number.isNaN(B)||B<=A) errors.push(`Sperrzone ${i+1}: „bis“ muss größer sein als „von“.`);
+    else r.zones.push([A,B+1]); });
+  if(E.steal.on){ const n=num(E.steal.amount); if(!n) errors.push('Gib an, wie viele Punkte geklaut werden.'); else r.steal={amount:n, protectZones:E.steal.protect}; }
+  if(!Object.keys(r.singles).length && !comboKeys(r).length && !r.specials.length) errors.push('Mindestens ein Wurf muss Punkte bringen.');
+  r.tagline=`Eigenes Spiel: ${r.dice} Würfel, Ziel ${r.exact?'genau ':''}${fmt(r.target||0)}.`;
+  return {rules:r, errors};
+}
+function getPath(o,p){ return p.split('.').reduce((x,k)=>x?.[k],o); }
+function setPath(o,p,v){ const ks=p.split('.'); const last=ks.pop(); const t=ks.reduce((x,k)=>x[k],o); t[last]=v; }
+function editorPreview(){
+  const {rules,errors}=compileAny(E);
+  return `${errors.length?`<div class="hint warn"><b>Noch nicht speicherbar:</b><ul class="rules" style="margin-top:6px">${errors.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>`:''}
+    <ul class="rules">${rulesList(rules).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`;
+}
+function editorHTML(){
+  if(E.type==='block') return blockEditorHTML();
+  if(E.type==='round') return roundEditorHTML();
+  if(E.type==='bluff') return bluffEditorHTML();
+  const inp=(path,{ph='',w='',mode='numeric',cls=''}={})=>`<input type="text" class="ein ${cls}" id="e_${path.replace(/\./g,'_')}" data-path="${path}" value="${esc(getPath(E,path)??'')}" placeholder="${ph}" inputmode="${mode}" autocomplete="off" ${w?`style="width:${w}"`:''}>`;
+  const tog=(path,label)=>`<label class="tog"><input type="checkbox" id="e_${path.replace(/\./g,'_')}" data-path="${path}" ${getPath(E,path)?'checked':''}><span>${label}</span></label>`;
+  const rows=[]; for(let k=3;k<=E.dice;k++) rows.push(k);
+  return `
+  <div class="top"><button class="btn small ghost" data-act="ecancel">← Zurück</button><span class="chip">Regel-Editor</span></div>
+  <section class="card ecard">
+    <h2 style="font-size:19px">Grundlagen</h2>
+    <label class="field"><span class="label">Name des Spiels</span>${inp('name',{mode:'text',ph:'z. B. Kubiki Turnier'})}</label>
+    <div class="field"><span class="label">Würfel</span>
+      <div class="stepper"><button class="btn small" data-act="edice" data-v="-1" ${E.dice<=3?'disabled':''} aria-label="Ein Würfel weniger">−</button><b class="num">${E.dice}</b><button class="btn small" data-act="edice" data-v="1" ${E.dice>=6?'disabled':''} aria-label="Ein Würfel mehr">+</button></div></div>
+    <div class="two">
+      <label class="field"><span class="label">Ziel</span>${inp('target',{ph:'1000'})}</label>
+      <label class="field"><span class="label">Einstieg ab</span>${inp('entry',{ph:'0 = kein Einstieg'})}</label>
+    </div>
+    ${tog('exact','Ziel muss genau getroffen werden, drüber = stehen bleiben')}
+    ${tog('carryOver',`Alle Würfel gepunktet = mit allen ${E.dice} weiter`)}
+  </section>
+
+  <section class="card ecard">
+    <h2 style="font-size:19px">Punkte</h2>
+    <div class="label">Einzelne Würfel</div>
+    <div class="g6">${FACES.map(f=>`<label class="cell">${dieHTML(f)}${inp('singles.'+f,{ph:'–'})}</label>`).join('')}</div>
+    <div class="label" style="margin-top:6px">Gleiche Würfel</div>
+    <div class="tblwrap"><table class="ctab"><thead><tr><th></th>${FACES.map(f=>`<th>${dieHTML(f)}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(k=>`<tr><th scope="row">${k}×</th>${FACES.map(f=>`<td>${inp(`combos.${k}.${f}`,{ph:'–',mode:'text'})}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="muted small">Leer = zählt nicht. <b>S</b> = Sofortsieg. Fehlt ein Wert, zählt die nächstkleinere Kombination plus Einzelwürfel.</p>
+    <div class="row">${rows.filter(k=>k>3).map(k=>`<button class="btn small" data-act="efill" data-v="${k}">${k}× = Drilling × ${2**(k-3)}</button>`).join('')}</div>
+  </section>
+
+  <section class="card ecard">
+    <h2 style="font-size:19px">Sonderwürfe</h2>
+    <div class="srow">${tog('straight.on','Straße')}
+      <select id="e_straight_range" data-path="straight.range" class="ein" ${E.straight.on?'':'disabled'}>${Object.keys(STRAIGHTS).filter(k=>STRAIGHTS[k].length<=E.dice).map(k=>`<option value="${k}" ${E.straight.range===k?'selected':''}>${k.replace('-','–')}</option>`).join('')}</select>
+      ${inp('straight.pts',{ph:'Punkte',w:'90px'})}</div>
+    <div class="srow">${tog('pairs.on','Drei Paare')}${E.dice<6?'<span class="muted small">nur mit 6 Würfeln</span>':inp('pairs.pts',{ph:'Punkte',w:'90px'})}</div>
+  </section>
+
+  <section class="card ecard">
+    <h2 style="font-size:19px">Hausregeln</h2>
+    <label class="field"><span class="label">Verbrennt auf 0 bei genau</span>${inp('burn',{mode:'text',ph:'z. B. 555 – mehrere mit Komma'})}</label>
+    <div class="label">Sperrzonen</div>
+    ${E.zones.map((z,i)=>`<div class="zrow"><span class="muted small">von</span>${inp(`zones.${i}.0`,{ph:'400'})}<span class="muted small">bis</span>${inp(`zones.${i}.1`,{ph:'499'})}<button class="x" data-act="ezdel" data-v="${i}" aria-label="Sperrzone entfernen">✕</button></div>`).join('')}
+    <button class="btn small ghost" data-act="ezadd" style="align-self:flex-start">+ Sperrzone</button>
+    ${tog('steal.on','Klau beim Überholen')}
+    ${E.steal.on?`<div class="two"><label class="field"><span class="label">Geklaute Punkte</span>${inp('steal.amount',{ph:'50'})}</label></div>
+    ${tog('steal.protect','In der Sperrzone kann man nicht beklaut werden')}`:''}
+  </section>
+
+  <section class="card ecard">
+    <h2 style="font-size:19px">So liest sich das Spiel</h2>
+    <div id="epreview">${editorPreview()}</div>
+  </section>
+
+  <div class="row">
+    ${E.isCustom?(E.confirmDel?`<button class="btn red" data-act="edel" data-v="1">Wirklich löschen</button><button class="btn" data-act="edel" data-v="0">Behalten</button>`:`<button class="btn ghost" data-act="edel">Spiel löschen</button>`):''}
+    <button class="btn primary" data-act="esave" style="flex:2">Speichern</button>
+  </div>`;
+}
+function editStart(id, asNew){
+  const src=tplOf(id); const custom=!!(prefs.custom||{})[id];
+  const fr=isBlock(src)?blockFromRules:isRound(src)?roundFromRules:isBluff(src)?bluffFromRules:fromRules;
+  if(custom && !asNew){ E=fr(src,id,true); }
+  else { E=fr(src,'c_'+uid(),false); E.name=src.name+' (eigene Regeln)'; }
+  view='editor'; render(); window.scrollTo(0,0);
+}
+const editActs={
+  edit(id){ editStart(id,false); },
+  copy(id){ editStart(id,true); },
+  ecancel(){ E=null; view='setup'; setup.step=setup.infoId&&allTemplates()[setup.infoId]?'info':'pick'; render(); },
+  edice(d){ E.dice=Math.min(6,Math.max(3,E.dice+(+d))); if(!STRAIGHTS[E.straight.range]||STRAIGHTS[E.straight.range].length>E.dice) E.straight.range=E.dice>=6?'1-6':'1-5'; if(E.dice<5) E.straight.on=false; if(E.dice<6) E.pairs.on=false; render(); },
+  efill(k){ k=+k; const m=2**(k-3); FACES.forEach(f=>{ const b=num(E.combos[3][f]); if(b) E.combos[k][f]=String(b*m); }); render(); },
+  ezadd(){ E.zones.push(['','']); render(); },
+  ezdel(i){ E.zones.splice(+i,1); render(); },
+  edel(v){ if(v===undefined){ E.confirmDel=true; render(); return; }
+    if(v==='0'){ E.confirmDel=false; render(); return; }
+    const c={...(prefs.custom||{})}; delete c[E.id]; prefs.custom=c; if(prefs.tpl===E.id) prefs.tpl='kubiki'; savePrefs(); E=null; view='setup'; setup.step='pick'; render(); },
+  esave(){ const {rules,errors}=compileAny(E); if(errors.length){ $('#epreview').innerHTML=editorPreview(); $('#epreview').scrollIntoView({behavior:'smooth',block:'center'}); return; }
+    prefs.custom={...(prefs.custom||{}), [rules.id]:rules}; prefs.tpl=rules.id; savePrefs(); E=null; view='setup'; setup.infoId=rules.id; setup.step='info'; render(); window.scrollTo(0,0); }
+};
+function editorInput(el){
+  const p=el.dataset.path; const v=el.type==='checkbox'?el.checked:el.value; setPath(E,p,v);
+  if(el.type==='checkbox'||el.tagName==='SELECT') render(); else { const pv=$('#epreview'); if(pv) pv.innerHTML=editorPreview(); }
+}
+
+/* ==========================================================
+   BLOCK-SPIELE (Kniffel-Familie)
+   type:"block" · dice · rolls (Würfe pro Zug) · bonus {threshold, pts}
+   fields [{id, name, sec:"upper"|"lower", kind, face?, n?, len?, pts?}]
+     kind face      Summe der Augen einer Zahl
+     kind kind      n Gleiche → pts oder Summe aller Würfel
+     kind fullhouse Drilling + Paar → pts
+     kind straight  len aufeinanderfolgende → pts
+     kind chance    Summe aller Würfel
+   ========================================================== */
+TEMPLATES.kniffel={
+  id:'kniffel', type:'block', name:'Kniffel', tagline:'Der Block-Klassiker: 5 Würfel, bis zu 3 Würfe, 13 Felder, Bonus ab 63.',
+  dice:5, rolls:3, bonus:{threshold:63, pts:35},
+  fields:[
+    {id:'f1',name:'Einser',sec:'upper',kind:'face',face:1},
+    {id:'f2',name:'Zweier',sec:'upper',kind:'face',face:2},
+    {id:'f3',name:'Dreier',sec:'upper',kind:'face',face:3},
+    {id:'f4',name:'Vierer',sec:'upper',kind:'face',face:4},
+    {id:'f5',name:'Fünfer',sec:'upper',kind:'face',face:5},
+    {id:'f6',name:'Sechser',sec:'upper',kind:'face',face:6},
+    {id:'k3',name:'Dreierpasch',sec:'lower',kind:'kind',n:3},
+    {id:'k4',name:'Viererpasch',sec:'lower',kind:'kind',n:4},
+    {id:'fh',name:'Full House',sec:'lower',kind:'fullhouse',pts:25},
+    {id:'ks',name:'Kleine Straße',sec:'lower',kind:'straight',len:4,pts:30},
+    {id:'gs',name:'Große Straße',sec:'lower',kind:'straight',len:5,pts:40},
+    {id:'kn',name:'Kniffel',sec:'lower',kind:'kind',n:5,pts:50},
+    {id:'ch',name:'Chance',sec:'lower',kind:'chance'}
+  ]
+};
+const isBlock=r=>r&&r.type==='block';
+const sum=a=>a.reduce((x,y)=>x+y,0);
+function fieldScore(fd,dice){
+  const c=counts(dice);
+  switch(fd.kind){
+    case 'face': return c[fd.face]*fd.face;
+    case 'kind': return c.some(n=>n>=fd.n)?(fd.pts??sum(dice)):0;
+    case 'fullhouse': { const v=c.filter(n=>n>0).sort(); return v.length===2&&v[0]===2&&v[1]===3?fd.pts:0; }
+    case 'straight': { let run=0,best=0; for(const f of FACES){ run=c[f]?run+1:0; best=Math.max(best,run); } return best>=fd.len?fd.pts:0; }
+    case 'chance': return sum(dice);
+  }
+  return 0;
+}
+function sheetTotals(r,sheet){
+  const up=sum(r.fields.filter(f=>f.sec==='upper').map(f=>sheet[f.id]||0));
+  const low=sum(r.fields.filter(f=>f.sec==='lower').map(f=>sheet[f.id]||0));
+  const bonus=r.bonus&&r.bonus.pts&&up>=r.bonus.threshold?r.bonus.pts:0;
+  return {up,low,bonus,total:up+low+bonus};
+}
+const filled=(r,p)=>r.fields.filter(f=>p.sheet&&p.sheet[f.id]!=null).length;
+function blockDice(){ const t=T(); return G.mode==='digital'?(t.roll||[]):t.sel; }
+function fieldDesc(f){
+  switch(f.kind){
+    case 'face': return `Summe aller ${f.face}er`;
+    case 'kind': return `${WORD[f.n]||f.n} Gleiche: ${f.pts!=null?fmt(f.pts)+' Punkte':'Summe aller Würfel'}`;
+    case 'fullhouse': return `Drei Gleiche und zwei Gleiche: ${fmt(f.pts)} Punkte`;
+    case 'straight': return `${f.len} aufeinanderfolgende Zahlen: ${fmt(f.pts)} Punkte`;
+    case 'chance': return 'Summe aller Würfel';
+  }
+  return '';
+}
+function blockRulesList(r){
+  const L=[`${r.dice} Würfel, bis zu ${r.rolls} ${r.rolls===1?'Wurf':'Würfe'} pro Zug. Zwischen den Würfen beliebige Würfel festhalten.`,
+    'Nach dem Zug genau ein Feld eintragen. Passt nichts, wird ein Feld mit 0 gestrichen.'];
+  const up=r.fields.filter(f=>f.sec==='upper'), low=r.fields.filter(f=>f.sec==='lower');
+  if(up.length) L.push(`Oben: ${up.map(f=>f.name).join(', ')} – jeweils die Summe dieser Zahl.${r.bonus&&r.bonus.pts?` Bonus +${fmt(r.bonus.pts)} ab ${fmt(r.bonus.threshold)} Punkten oben.`:''}`);
+  low.forEach(f=>L.push(`${f.name}: ${fieldDesc(f)}.`));
+  L.push('Das Spiel endet, wenn alle Felder gefüllt sind. Die höchste Summe gewinnt.');
+  return L;
+}
+let showBlock=false;
+const blockActs={
+  broll(){ const t=T(), r=R(); if(t.rolls>=r.rolls) return;
+    const prev=t.roll||[]; const held=t.held||[];
+    const nr=Array.from({length:r.dice},(_,i)=>held[i]&&prev[i]?prev[i]:1+Math.floor(Math.random()*6));
+    const s=ST(); const fresh=nr.filter((_,i)=>!(held[i]&&prev[i])); fresh.forEach(f=>s.faces[f]++); s.dice+=fresh.length; s.rolls++;
+    t.roll=nr; t.rolls++; t.rollId=uid(); if(t.rolls>=r.rolls) t.held=[]; commit(); },
+  bhold(i){ const t=T(); if(!t.roll||t.rolls>=R().rolls) return; i=+i; t.held=[...(t.held||[])]; t.held[i]=!t.held[i]; commit(); },
+  bpick(id){
+    const r=R(), p=G.players[G.cur], d=blockDice(); if(d.length!==r.dice) return;
+    p.sheet=p.sheet||{}; if(p.sheet[id]!=null) return;
+    const fd=r.fields.find(f=>f.id===id); if(!fd) return;
+    pushHist();
+    const v=fieldScore(fd,d); const before=sheetTotals(r,p.sheet);
+    p.sheet[id]=v; const after=sheetTotals(r,p.sheet); p.score=after.total;
+    const ps=PS(p.id); ps.turns++; if(v===0) ps.niete++; ps.best=Math.max(ps.best,v);
+    if(fd.kind==='kind'&&fd.n===r.dice&&v>0) ps.trip++;
+    addLog(v?`${esc(p.name)} trägt <b>${fmt(v)}</b> bei ${esc(fd.name)} ein.`:`${esc(p.name)} streicht ${esc(fd.name)}.`);
+    if(!before.bonus&&after.bonus) addLog(`<b>${esc(p.name)} holt den Bonus (+${fmt(after.bonus)}).</b>`);
+    if(G.players.every(pl=>filled(r,pl)===r.fields.length)){
+      const w=[...G.players].sort((a,b)=>b.score-a.score)[0]; G.winner=w.id;
+      addLog(`<b>${esc(w.name)} gewinnt mit ${fmt(w.score)} Punkten!</b>`);
+    } else {
+      do { G.cur=(G.cur+1)%G.players.length; } while(filled(r,G.players[G.cur])===r.fields.length);
+      G.turn=freshTurn(r);
+    }
+    commit();
+  },
+  block(){ showBlock=true; renderOverlay(); },
+  closeblock(){ showBlock=false; renderOverlay(); }
+};
+function blockGameHTML(){
+  const r=R(), t=T(), p=G.players[G.cur]; p.sheet=p.sheet||{};
+  const order=G.players.map((pl,i)=>({...pl,i})).sort((a,b)=>b.score-a.score);
+  const rank={}; order.forEach((pl,k)=>rank[pl.i]=k+1);
+  const d=blockDice(); const ready=d.length===r.dice;
+  let input='';
+  if(G.mode==='real'){
+    const ghosts=Math.max(0,r.dice-t.sel.length);
+    input=`<div><div class="label" style="margin-bottom:6px">Würfel nach dem letzten Wurf</div>
+      <div class="dice">${t.sel.map((f,i)=>dieHTML(f,{tag:'button',attrs:`data-act="unsel" data-v="${i}" title="Antippen zum Entfernen"`})).join('')}${'<div class="die ghost"></div>'.repeat(ghosts)}</div></div>
+      <div class="pad">${FACES.map(f=>dieHTML(f,{tag:'button',attrs:`data-act="face" data-v="${f}" ${t.sel.length>=r.dice?'disabled':''}`})).join('')}</div>
+      <p class="muted small" style="margin:0">Am Tisch bis zu ${r.rolls}× würfeln, dann alle ${r.dice} Würfel antippen und unten ein Feld wählen.</p>`;
+  } else {
+    const left=r.rolls-t.rolls;
+    input=`${t.roll?`<div class="dice rolled" data-roll="${t.rollId||''}">${t.roll.map((f,i)=>dieHTML(f,{tag:'button',cls:(t.held||[])[i]?'picked':'',attrs:`data-act="bhold" data-v="${i}" aria-pressed="${!!(t.held||[])[i]}" ${left<=0?'disabled':''}`})).join('')}</div>
+      <p class="muted small" style="margin:0">${left>0?'Würfel antippen zum Festhalten, dann weiterwürfeln oder ein Feld wählen.':'Keine Würfe mehr – wähle ein Feld.'}</p>`:''}
+      ${left>0?`<button class="btn primary" data-act="broll" style="padding:16px;font-size:17px">${t.rolls?`Weiterwürfeln (${left} übrig)`:`${r.dice} Würfel werfen`}</button>`:''}`;
+  }
+  const tot=sheetTotals(r,p.sheet);
+  const frow=f=>{ const v=p.sheet[f.id]; const pot=ready&&v==null?fieldScore(f,d):null;
+    return `<button class="frow ${v!=null?'done':''} ${pot===0?'zero':''}" data-act="bpick" data-v="${f.id}" ${v!=null||!ready?'disabled':''}>
+      <span>${esc(f.name)}</span><span class="num">${v!=null?fmt(v):pot!=null?(pot?'+'+fmt(pot):'streichen'):'–'}</span></button>`; };
+  const up=r.fields.filter(f=>f.sec==='upper'), low=r.fields.filter(f=>f.sec==='lower');
+  return `
+  ${gameTop(5)}
+  <section class="card" style="padding:8px">
+    <div class="board">${G.players.map((pl,i)=>`
+      <div class="prow ${i===G.cur?'cur':''}"><span class="rank">${rank[i]}.</span>
+        <div style="min-width:0"><div class="nm">${esc(pl.name)}</div><div class="muted small">${filled(r,pl)} von ${r.fields.length} Feldern</div></div>
+        <span class="sc">${fmt(pl.score)}</span></div>`).join('')}</div>
+  </section>
+  <section class="card turn">
+    <div class="turnhead">
+      <div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2><div class="muted num" style="font-size:18px">Summe ${fmt(tot.total)}</div></div>
+      ${G.mode==='digital'?`<div class="stat"><div class="label">Wurf</div><div class="big num">${t.rolls}<span style="font-size:24px">/${r.rolls}</span></div></div>`:`<div class="stat"><div class="label">Felder</div><div class="big num">${filled(r,p)}<span style="font-size:24px">/${r.fields.length}</span></div></div>`}
+    </div>
+    <div class="seg" role="group" aria-label="Würfel">
+      <button data-act="mode" data-v="real" aria-pressed="${G.mode==='real'}">Echte Würfel</button>
+      <button data-act="mode" data-v="digital" aria-pressed="${G.mode==='digital'}">Digitale Würfel</button>
+    </div>
+    ${input}
+    <div class="sheet">
+      ${up.length?`<div class="label">Oben <span class="muted" style="text-transform:none;letter-spacing:0">· ${fmt(tot.up)}${r.bonus&&r.bonus.pts?` von ${fmt(r.bonus.threshold)} für den Bonus${tot.bonus?' ✓':''}`:''}</span></div>${up.map(frow).join('')}`:''}
+      ${low.length?`<div class="label" style="margin-top:8px">Unten</div>${low.map(frow).join('')}`:''}
+    </div>
+  </section>
+  ${gameFooter()}`;
+}
+function blockSheetHTML(){
+  const r=R(); const pl=G.players.map(p=>({p,s:p.sheet||{},t:sheetTotals(r,p.sheet||{})}));
+  const cell=(x,f)=>x.s[f.id]==null?'<td class="muted">·</td>':`<td>${x.s[f.id]===0?'<span class="muted">0</span>':fmt(x.s[f.id])}</td>`;
+  const up=r.fields.filter(f=>f.sec==='upper'), low=r.fields.filter(f=>f.sec==='lower');
+  const sumrow=(label,k,cls='')=>`<tr class="${cls}"><td>${label}</td>${pl.map(x=>`<td>${fmt(x.t[k])}</td>`).join('')}</tr>`;
+  return `<div class="overlay" role="dialog" aria-label="Spielblock"><div class="card stats">
+    <div class="top"><h2 style="font-size:22px">Spielblock</h2><button class="btn small" data-act="closeblock">Schließen</button></div>
+    <div class="tblwrap"><table class="tbl sheettbl" style="min-width:${120+pl.length*64}px"><thead><tr><th>Feld</th>${pl.map(x=>`<th>${esc(x.p.name)}</th>`).join('')}</tr></thead><tbody>
+      ${up.map(f=>`<tr><td>${esc(f.name)}</td>${pl.map(x=>cell(x,f)).join('')}</tr>`).join('')}
+      ${up.length?sumrow('Summe oben','up','sum')+(r.bonus&&r.bonus.pts?sumrow(`Bonus (ab ${fmt(r.bonus.threshold)})`,'bonus','sum'):''):''}
+      ${low.map(f=>`<tr><td>${esc(f.name)}</td>${pl.map(x=>cell(x,f)).join('')}</tr>`).join('')}
+      ${sumrow('Gesamt','total','sum total')}
+    </tbody></table></div>
+  </div></div>`;
+}
+
+/* ---------- Block-Editor ---------- */
+function blockFromRules(r,id,isCustom){
+  const base=TEMPLATES.kniffel.fields;
+  return {type:'block', id, isCustom, confirmDel:false, name:r.name, rolls:r.rolls||3,
+    bonusOn:!!(r.bonus&&r.bonus.pts), bonusT:String(r.bonus?.threshold??63), bonusP:String(r.bonus?.pts??35),
+    fields:base.map(b=>{ const f=(r.fields||[]).find(x=>x.id===b.id); return {id:b.id, on:!!f, pts:f&&f.pts!=null?String(f.pts):(b.pts!=null?String(b.pts):'')}; })};
+}
+function compileBlock(E){
+  const errors=[]; const base=TEMPLATES.kniffel;
+  const r={id:E.id, type:'block', name:E.name.trim()||'Eigenes Spiel', tagline:'', dice:base.dice, rolls:E.rolls, bonus:null, fields:[]};
+  if(!E.name.trim()) errors.push('Gib dem Spiel einen Namen.');
+  E.fields.forEach(ef=>{ if(!ef.on) return; const b=base.fields.find(x=>x.id===ef.id); const f={...b};
+    if(b.pts!=null){ const n=num(ef.pts); if(!n||Number.isNaN(n)) errors.push(`${b.name}: Gib Punkte an.`); else f.pts=n; }
+    r.fields.push(f); });
+  if(!r.fields.length) errors.push('Mindestens ein Feld muss aktiv sein.');
+  if(E.bonusOn){ const t=num(E.bonusT), p=num(E.bonusP); if(!t||!p||Number.isNaN(t)||Number.isNaN(p)) errors.push('Bonus: Gib Schwelle und Punkte an.'); else r.bonus={threshold:t, pts:p}; }
+  r.tagline=`Eigenes Block-Spiel: ${r.dice} Würfel, ${r.rolls} Würfe, ${r.fields.length} Felder.`;
+  return {rules:r, errors};
+}
+function blockEditorHTML(){
+  const base=TEMPLATES.kniffel.fields;
+  const inp=(path,{ph='',w='',mode='numeric'}={})=>`<input type="text" class="ein" id="e_${path.replace(/\./g,'_')}" data-path="${path}" value="${esc(getPath(E,path)??'')}" placeholder="${ph}" inputmode="${mode}" autocomplete="off" ${w?`style="width:${w}"`:''}>`;
+  const tog=(path,label)=>`<label class="tog"><input type="checkbox" id="e_${path.replace(/\./g,'_')}" data-path="${path}" ${getPath(E,path)?'checked':''}><span>${label}</span></label>`;
+  return `
+  <div class="top"><button class="btn small ghost" data-act="ecancel">← Zurück</button><span class="chip">Regel-Editor</span></div>
+  <section class="card ecard">
+    <h2 style="font-size:19px">Grundlagen</h2>
+    <label class="field"><span class="label">Name des Spiels</span>${inp('name',{mode:'text',ph:'z. B. Kniffel mit 2 Würfen'})}</label>
+    <div class="field"><span class="label">Würfe pro Zug</span>
+      <div class="stepper"><button class="btn small" data-act="erolls" data-v="-1" ${E.rolls<=1?'disabled':''} aria-label="Ein Wurf weniger">−</button><b class="num">${E.rolls}</b><button class="btn small" data-act="erolls" data-v="1" ${E.rolls>=5?'disabled':''} aria-label="Ein Wurf mehr">+</button></div></div>
+    ${tog('bonusOn','Bonus für den oberen Teil')}
+    ${E.bonusOn?`<div class="two"><label class="field"><span class="label">ab Punkten oben</span>${inp('bonusT',{ph:'63'})}</label><label class="field"><span class="label">Bonuspunkte</span>${inp('bonusP',{ph:'35'})}</label></div>`:''}
+  </section>
+  <section class="card ecard">
+    <h2 style="font-size:19px">Felder</h2>
+    ${E.fields.map((ef,i)=>{ const b=base.find(x=>x.id===ef.id); return `<div class="srow">${tog(`fields.${i}.on`,`${esc(b.name)}${b.pts==null?` <span class="muted small">· ${esc(fieldDesc(b))}</span>`:''}`)}${b.pts!=null?inp(`fields.${i}.pts`,{ph:'Punkte',w:'90px'}):''}</div>`; }).join('')}
+  </section>
+  <section class="card ecard">
+    <h2 style="font-size:19px">So liest sich das Spiel</h2>
+    <div id="epreview">${editorPreview()}</div>
+  </section>
+  <div class="row">
+    ${E.isCustom?(E.confirmDel?`<button class="btn red" data-act="edel" data-v="1">Wirklich löschen</button><button class="btn" data-act="edel" data-v="0">Behalten</button>`:`<button class="btn ghost" data-act="edel">Spiel löschen</button>`):''}
+    <button class="btn primary" data-act="esave" style="flex:2">Speichern</button>
+  </div>`;
+}
+Object.assign(editActs,{ erolls(d){ E.rolls=Math.min(5,Math.max(1,E.rolls+(+d))); render(); } });
+
+/* ---------- Regeln teilen ---------- */
+const SHARE_PREFIX='DECKEL-REGELN:';
+let share=null; // {rules, code, busy, err, copied}
+function encodeRules(r){ const o=clone(r); delete o.id; return SHARE_PREFIX+btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+function decodeRules(txt){ const s=txt.trim(); const m=s.match(/(DECKEL|KUBIKI)-REGELN:/); if(!m) return null; const i=m.index; return JSON.parse(decodeURIComponent(escape(atob(s.slice(i+m[0].length).replace(/\s+/g,''))))); }
+function normalizeRules(raw){
+  if(!raw||typeof raw!=='object') throw 0;
+  const id='c_'+uid();
+  const e=isBlock(raw)?blockFromRules(raw,id,false):isRound(raw)?roundFromRules(raw,id,false):isBluff(raw)?bluffFromRules(raw,id,false):fromRules(raw,id,false);
+  e.name=String(raw.name||'Geteiltes Spiel').slice(0,40);
+  const {rules,errors}=compileAny(e); if(errors.length) throw 0; return rules;
+}
+function shareHTML(){
+  const s=share; const txt=encodeRules(s.rules);
+  return `<div class="overlay" role="dialog" aria-label="Regeln teilen"><div class="card stats">
+    <div class="top"><h2 style="font-size:22px">${esc(s.rules.name)} teilen</h2><button class="btn small" data-act="closeshare">Schließen</button></div>
+    ${db?`<div class="label">Code</div>
+      ${s.code?`<div class="crown" style="letter-spacing:.15em">${s.code}</div><p class="muted small" style="margin:0">Die anderen geben den Code auf ihrer Startseite unter „Regeln empfangen“ ein.</p>`
+        :s.busy?'<p class="muted" style="margin:0">Code wird erstellt …</p>'
+        :`<button class="btn primary" data-act="sharecode">Code erstellen</button>`}
+      ${s.err?`<div class="err">${esc(s.err)}</div>`:''}`:''}
+    <div class="label" style="margin-top:6px">${db?'Oder als Text':'Als Text'}</div>
+    <p class="muted small" style="margin:0">Funktioniert immer, z. B. per WhatsApp: Text kopieren, verschicken, beim anderen unter „Regeln empfangen“ einfügen.</p>
+    <textarea id="sharetxt" class="ein" rows="3" readonly style="font-size:12px;word-break:break-all">${esc(txt)}</textarea>
+    <button class="btn" data-act="copyshare">${s.copied?'Kopiert ✓':'Text kopieren'}</button>
+  </div></div>`;
+}
+const shareActs={
+  share(id){ share={rules:clone(tplOf(id||prefs.tpl))}; render(); },
+  closeshare(){ share=null; render(); },
+  async sharecode(){
+    if(!db||!share) return; share.busy=true; share.err=''; render();
+    try{
+      const L='ABCDEFGHJKLMNPQRSTUVWXYZ'; let code='';
+      for(let i=0;i<5;i++){ code=Array.from({length:5},()=>L[Math.floor(Math.random()*L.length)]).join(''); const s=await db.doc('rulesets/'+code).get(); if(!s.exists) break; }
+      const o=clone(share.rules); delete o.id;
+      await db.doc('rulesets/'+code).set({rules:o, at:Date.now()});
+      share.code=code;
+    }catch(e){ share.err='Der Code konnte nicht erstellt werden. Teile die Regeln als Text.'; }
+    share.busy=false; render();
+  },
+  copyshare(){
+    const ta=$('#sharetxt'); if(!ta) return;
+    const done=()=>{ if(share){ share.copied=true; render(); } };
+    try{ navigator.clipboard.writeText(ta.value).then(done,()=>{ ta.select(); }); }catch(e){ ta.select(); }
+  },
+  async importrules(){
+    const raw=(setup.importTxt||'').trim(); setup.importMsg=''; setup.importErr='';
+    if(!raw){ setup.importErr='Code oder Text eingeben.'; render(); return; }
+    try{
+      let r;
+      if(/^[A-Za-z]{5}$/.test(raw)){
+        if(!db){ setup.importErr='Codes gehen nur in der Claude-App. Lass dir die Regeln als Text schicken.'; render(); return; }
+        const s=await db.doc('rulesets/'+raw.toUpperCase()).get();
+        if(!s.exists){ setup.importErr='Zu diesem Code gibt es keine Regeln.'; render(); return; }
+        r=s.data().rules;
+      } else { r=decodeRules(raw); if(!r){ setup.importErr='Das ist weder ein Code noch ein Regel-Text.'; render(); return; } }
+      const rules=normalizeRules(r);
+      prefs.custom={...(prefs.custom||{}),[rules.id]:rules}; prefs.tpl=rules.id; savePrefs();
+      setup.importTxt=''; setup.importMsg=`„${rules.name}“ ist jetzt in deiner Spielauswahl.`; render();
+    }catch(e){ setup.importErr='Die Regeln konnten nicht gelesen werden. Bitte den Text vollständig einfügen.'; render(); }
+  }
+};
+function compileAny(E){ return E.type==='block'?compileBlock(E):E.type==='round'?compileRound(E):E.type==='bluff'?compileBluff(E):compile(E); }
+
+/* ==========================================================
+   RUNDEN-VERLIERER (Schocken-Familie)
+   type:"round" · dice · rolls (max. Würfe) · deckel (Stapel) · halves (2 Hälften + Finale)
+   Jede Runde würfelt jeder einmal. Der Erste legt die Zahl der Würfe fest.
+   Der schlechteste Wurf kassiert so viele Deckel, wie der beste Wurf wert ist.
+   ========================================================== */
+TEMPLATES.schocken={
+  id:'schocken', type:'round', name:'Schocken', tagline:'Kneipenklassiker: 3 Würfel, 13 Deckel, der schlechteste Wurf kassiert. Zwei Hälften und Finale.',
+  dice:3, rolls:3, deckel:13, halves:true, flip:true
+};
+const isRound=r=>r&&r.type==='round';
+function rankThrow(d){
+  const s=[...d].sort((a,b)=>b-a); const c=counts(d);
+  if(c[1]===3) return {cat:5,sub:0,label:'Schock out',deckel:'all'};
+  if(c[1]===2){ const x=s[0]; return {cat:4,sub:x,label:`Schock ${x}`,deckel:x}; }
+  if(s[0]===s[1]&&s[1]===s[2]) return {cat:3,sub:s[0],label:`General (${s.join('-')})`,deckel:3};
+  if(s[0]-s[1]===1&&s[1]-s[2]===1) return {cat:2,sub:s[0],label:`Straße (${[...s].reverse().join('-')})`,deckel:2};
+  return {cat:1,sub:s[0]*100+s[1]*10+s[2],label:s.join(''),deckel:1};
+}
+/* a besser als b? weniger Würfe gewinnt Gleichstand, dann wer zuerst dran war */
+function better(a,b){
+  if(a.r.cat!==b.r.cat) return a.r.cat>b.r.cat;
+  if(a.r.sub!==b.r.sub) return a.r.sub>b.r.sub;
+  if(a.rolls!==b.rolls) return a.rolls<b.rolls;
+  return a.pos<b.pos;
+}
+function roundActive(){ return G.players.map((p,i)=>i).filter(i=>{ const p=G.players[i]; return G.halfPlayers.includes(p.id) && (G.pool>0 || (p.deckel||0)>0); }); }
+function roundOrder(starter){ const act=roundActive(); const i0=act.includes(starter)?act.indexOf(starter):0; return [...act.slice(i0),...act.slice(0,i0)]; }
+function initHalf(ids,starterIdx){
+  const r=R(); G.pool=r.deckel; G.halfPlayers=ids; G.players.forEach(p=>p.deckel=0);
+  const st=starterIdx!=null&&ids.includes(G.players[starterIdx].id)?starterIdx:G.players.findIndex(p=>ids.includes(p.id));
+  G.round={maxRolls:null, results:{}, order:roundOrder(st)}; G.cur=G.round.order[0]; G.turn=freshTurn(r);
+}
+function halfName(){ return G.half===3?'Finale':`${G.half}. Hälfte`; }
+function roundRulesList(r){
+  return [`${r.dice} Würfel, bis zu ${r.rolls} Würfe. Würfel dürfen zwischen den Würfen liegen bleiben.`,
+    'Wer eine Runde anfängt, legt mit seiner Wurfzahl fest, wie oft die anderen höchstens würfeln dürfen.',
+    ...(r.flip?['Zwei Sechsen dürfen in eine Eins umgedreht werden: Eine Sechs wird zur Eins und bleibt liegen, die andere wird neu gewürfelt.']:[]),
+    'Rangfolge: Schock out (1-1-1) > Schock 6 bis Schock 2 (1-1-X) > General (drei Gleiche) > Straße > Rest als Zahl, z. B. 6-4-2 = 642.',
+    'Gleicher Wurf: Wer weniger Würfe gebraucht hat, liegt vorn, sonst wer zuerst dran war.',
+    'Der schlechteste Wurf kassiert Deckel: Schock out = alle, Schock X = X, General = 3, Straße = 2, sonst 1.',
+    `Zuerst kommen die Deckel vom Stapel (${r.deckel}). Ist er leer, gibt der beste Wurf seine Deckel ab. Wer keine Deckel hat, ist für diese Hälfte raus.`,
+    'Wer alle Deckel hat, verliert die Hälfte und fängt die nächste Runde an.',
+    r.halves?'Zwei Hälften. Verliert derselbe Spieler beide, hat er verloren. Sonst spielen die beiden Verlierer das Finale.':'Wer die Hälfte verliert, hat das Spiel verloren.'];
+}
+function roundDice(){ const t=T(); return G.mode==='digital'?(t.roll||[]):t.sel; }
+function roundMax(){ return G.round.maxRolls||R().rolls; }
+function endHalf(loserIdx){
+  const r=R(), L=G.players[loserIdx]; G.halfLosers=[...(G.halfLosers||[]),L.id]; PS(L.id).burned++;
+  addLog(`<b>${esc(L.name)} verliert die ${halfName()}.</b>`);
+  if(!r.halves || G.half===3 || (G.half===2 && G.halfLosers[0]===L.id)){
+    G.winner=L.id; addLog(`<b>${esc(L.name)} hat das Spiel verloren.</b>`); return;
+  }
+  if(G.half===1){ G.half=2; initHalf(G.players.map(p=>p.id), loserIdx); addLog('2. Hälfte – '+esc(L.name)+' fängt an.'); return; }
+  G.half=3; initHalf([G.halfLosers[0],G.halfLosers[1]], loserIdx); addLog('Finale: '+G.halfLosers.map(id=>esc(G.players.find(p=>p.id===id).name)).join(' gegen ')+'.');
+}
+function resolveRound(){
+  const res=G.round.order.map((i,pos)=>{ const x=G.round.results[G.players[i].id]; return {i,pos,rolls:x.rolls,r:rankThrow(x.dice)}; });
+  let best=res[0], worst=res[0];
+  res.forEach(x=>{ if(better(x,best)) best=x; if(better(worst,x)) worst=x; });
+  const B=G.players[best.i], W=G.players[worst.i], r=R();
+  PS(W.id).niete++;
+  if(best.r.deckel==='all'){
+    addLog(`<span class="steal">${esc(B.name)} wirft Schock out!</span> ${esc(W.name)} kassiert alle Deckel.`);
+    W.deckel=r.deckel; G.pool=0; G.players.forEach(p=>{ if(p!==W) p.deckel=0; });
+    endHalf(worst.i); return;
+  }
+  let n=best.r.deckel, from='vom Stapel';
+  if(G.pool>0){ n=Math.min(n,G.pool); G.pool-=n; }
+  else { n=Math.min(n,B.deckel||0); B.deckel-=n; from='von '+esc(B.name); }
+  W.deckel=(W.deckel||0)+n; PS(W.id).lost+=n;
+  addLog(`Beste: ${esc(B.name)} (${esc(best.r.label)}). ${esc(W.name)} hat den schlechtesten Wurf (${esc(worst.r.label)}) und kassiert ${n} ${n===1?'Deckel':'Deckel'} ${from}.`);
+  if(G.pool===0 && W.deckel===r.deckel){ endHalf(worst.i); return; }
+  G.round={maxRolls:null, results:{}, order:roundOrder(worst.i)}; G.cur=G.round.order[0]; G.turn=freshTurn(r);
+}
+const roundActs={
+  rroll(){ const t=T(), r=R(); if(t.rolls>=roundMax()) return;
+    const prev=t.roll||[]; const held=t.held||[];
+    const nr=Array.from({length:r.dice},(_,i)=>held[i]&&prev[i]?prev[i]:1+Math.floor(Math.random()*6));
+    const s=ST(); const fresh=nr.filter((_,i)=>!(held[i]&&prev[i])); fresh.forEach(f=>s.faces[f]++); s.dice+=fresh.length; s.rolls++;
+    t.roll=nr; t.rolls++; t.rollId=uid(); commit(); },
+  rflip(){ const t=T(), r=R(); if(!r.flip||!t.roll||t.rolls>=roundMax()||t.flipRoll===t.rolls) return;
+    const six=t.roll.map((f,i)=>f===6?i:-1).filter(i=>i>=0); if(six.length<2) return;
+    t.roll=[...t.roll]; t.held=[...(t.held||[])];
+    t.roll[six[0]]=1; t.held[six[0]]=true; t.held[six[1]]=false; t.flipRoll=t.rolls;
+    addLog(esc(G.players[G.cur].name)+' dreht zwei Sechsen in eine Eins um.'); commit(); },
+  rhold(i){ const t=T(); if(!t.roll||t.rolls>=roundMax()) return; i=+i; t.held=[...(t.held||[])]; t.held[i]=!t.held[i]; commit(); },
+  rcount(n){ T().realRolls=+n; commit(); },
+  rdone(){
+    const t=T(), r=R(), p=G.players[G.cur], d=roundDice(); if(d.length!==r.dice) return;
+    const rolls=G.mode==='digital'?t.rolls:(t.realRolls||1); if(rolls<1||rolls>roundMax()) return;
+    pushHist();
+    if(G.round.maxRolls==null) G.round.maxRolls=rolls;
+    G.round.results[p.id]={dice:[...d],rolls};
+    const rk=rankThrow(d); const ps=PS(p.id); ps.turns++; if(rk.cat>=4) ps.trip++;
+    addLog(`${esc(p.name)}: ${esc(rk.label)} in ${rolls} ${rolls===1?'Wurf':'Würfen'}.`);
+    const next=G.round.order.find(i=>!G.round.results[G.players[i].id]);
+    if(next==null) resolveRound(); else { G.cur=next; G.turn=freshTurn(r); }
+    commit();
+  }
+};
+function roundGameHTML(){
+  const r=R(), t=T(), p=G.players[G.cur], mx=roundMax();
+  const d=roundDice(); const ready=d.length===r.dice; const rk=ready?rankThrow(d):null;
+  const first=G.round.maxRolls==null;
+  let input='';
+  if(G.mode==='real'){
+    const ghosts=Math.max(0,r.dice-t.sel.length); const rc=t.realRolls||1;
+    input=`<div><div class="label" style="margin-bottom:6px">Endgültiger Wurf</div>
+      <div class="dice">${t.sel.map((f,i)=>dieHTML(f,{tag:'button',attrs:`data-act="unsel" data-v="${i}" title="Antippen zum Entfernen"`})).join('')}${'<div class="die ghost"></div>'.repeat(ghosts)}</div></div>
+      <div class="pad">${FACES.map(f=>dieHTML(f,{tag:'button',attrs:`data-act="face" data-v="${f}" ${t.sel.length>=r.dice?'disabled':''}`})).join('')}</div>
+      <div class="field"><span class="label">Gebrauchte Würfe</span><div class="seg" style="grid-template-columns:repeat(${mx},1fr)">${Array.from({length:mx},(_,k)=>`<button data-act="rcount" data-v="${k+1}" aria-pressed="${rc===k+1}">${k+1}</button>`).join('')}</div></div>`;
+  } else {
+    const left=mx-t.rolls;
+    input=`${t.roll?`<div class="dice rolled" data-roll="${t.rollId||''}">${t.roll.map((f,i)=>dieHTML(f,{tag:'button',cls:(t.held||[])[i]?'picked':'',attrs:`data-act="rhold" data-v="${i}" aria-pressed="${!!(t.held||[])[i]}" ${left<=0?'disabled':''}`})).join('')}</div>`:''}
+      ${r.flip&&t.roll&&left>0&&t.flipRoll!==t.rolls&&t.roll.filter(f=>f===6).length>=2?`<button class="btn ghost" data-act="rflip">Zwei Sechsen → eine Eins</button>`:''}
+      ${left>0?`<button class="btn ${t.roll?'':'primary'}" data-act="rroll" style="padding:14px">${t.rolls?`Nochmal würfeln (${left} übrig)`:'Würfeln'}</button>`:''}`;
+  }
+  const act=roundActive();
+  const sorted=[...G.players.keys()].filter(i=>G.halfPlayers.includes(G.players[i].id)).sort((a,b)=>(G.players[a].deckel||0)-(G.players[b].deckel||0));
+  return `
+  ${gameTop(1)}
+  <section class="card" style="padding:8px">
+    <div class="top" style="padding:4px 10px 6px"><span class="label">${halfName()}</span><span class="muted small">Stapel: <b class="num" style="font-size:18px;color:var(--ink)">${G.pool}</b> Deckel</span></div>
+    <div class="board">${sorted.map(i=>{ const pl=G.players[i]; const res=G.round.results[pl.id]; const out=!act.includes(i);
+      return `<div class="prow ${i===G.cur?'cur':''}" style="${out?'opacity:.5':''}"><span class="rank">${G.round.order.indexOf(i)>=0?G.round.order.indexOf(i)+1+'.':'–'}</span>
+        <div style="min-width:0"><div class="nm">${esc(pl.name)}${out?'<span class="tag">raus</span>':''}</div><div class="muted small">${res?`${esc(rankThrow(res.dice).label)} · ${res.rolls} ${res.rolls===1?'Wurf':'Würfe'}`:i===G.cur?'würfelt gerade':'noch nicht dran'}</div></div>
+        <span class="sc" title="Deckel">${pl.deckel||0}</span></div>`; }).join('')}</div>
+    <p class="muted small" style="margin:6px 10px 2px">Zahl rechts = Deckel. Wenige Deckel sind gut.</p>
+  </section>
+  <section class="card turn">
+    <div class="turnhead">
+      <div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2><div class="muted" style="font-size:14px">${first?`Fängt an und legt die Würfe fest (max. ${r.rolls})`:`Höchstens ${mx} ${mx===1?'Wurf':'Würfe'}`}</div></div>
+      ${G.mode==='digital'?`<div class="stat"><div class="label">Wurf</div><div class="big num">${t.rolls}<span style="font-size:24px">/${mx}</span></div></div>`:''}
+    </div>
+    <div class="seg" role="group" aria-label="Würfel">
+      <button data-act="mode" data-v="real" aria-pressed="${G.mode==='real'}">Echte Würfel</button>
+      <button data-act="mode" data-v="digital" aria-pressed="${G.mode==='digital'}">Digitale Würfel</button>
+    </div>
+    ${input}
+    <div class="tally"><span class="muted">${rk?'Wurf':'Noch kein vollständiger Wurf'}</span><span class="num">${rk?esc(rk.label):''}</span></div>
+    <button class="btn primary" data-act="rdone" ${ready?'':'disabled'} style="padding:14px">Wurf eintragen</button>
+  </section>
+  ${gameFooter()}`;
+}
+/* Editor für Runden-Spiele */
+function roundFromRules(r,id,isCustom){ return {type:'round', id, isCustom, confirmDel:false, name:r.name, rolls:r.rolls||3, deckel:String(r.deckel||13), halves:r.halves!==false, flip:r.flip!==false}; }
+function compileRound(E){
+  const errors=[]; const r={id:E.id, type:'round', name:E.name.trim()||'Eigenes Spiel', tagline:'', dice:3, rolls:E.rolls, deckel:0, halves:!!E.halves, flip:!!E.flip};
+  if(!E.name.trim()) errors.push('Gib dem Spiel einen Namen.');
+  const n=num(E.deckel); if(!n||Number.isNaN(n)||n<3||n>50) errors.push('Deckel: eine Zahl zwischen 3 und 50.'); else r.deckel=n;
+  r.tagline=`Eigenes Runden-Spiel: 3 Würfel, ${r.rolls} Würfe, ${r.deckel||'?'} Deckel${r.halves?', zwei Hälften und Finale':''}.`;
+  return {rules:r, errors};
+}
+function roundEditorHTML(){
+  const inp=(path,{ph='',mode='numeric'}={})=>`<input type="text" class="ein" id="e_${path}" data-path="${path}" value="${esc(getPath(E,path)??'')}" placeholder="${ph}" inputmode="${mode}" autocomplete="off">`;
+  return `
+  <div class="top"><button class="btn small ghost" data-act="ecancel">← Zurück</button><span class="chip">Regel-Editor</span></div>
+  <section class="card ecard">
+    <h2 style="font-size:19px">Grundlagen</h2>
+    <label class="field"><span class="label">Name des Spiels</span>${inp('name',{mode:'text',ph:'z. B. Schocken am Stammtisch'})}</label>
+    <div class="field"><span class="label">Höchstens Würfe pro Zug</span>
+      <div class="stepper"><button class="btn small" data-act="erolls" data-v="-1" ${E.rolls<=1?'disabled':''} aria-label="Ein Wurf weniger">−</button><b class="num">${E.rolls}</b><button class="btn small" data-act="erolls" data-v="1" ${E.rolls>=5?'disabled':''} aria-label="Ein Wurf mehr">+</button></div></div>
+    <label class="field"><span class="label">Deckel im Stapel</span>${inp('deckel',{ph:'13'})}</label>
+    <label class="tog"><input type="checkbox" id="e_halves" data-path="halves" ${E.halves?'checked':''}><span>Zwei Hälften und Finale</span></label>
+    <label class="tog"><input type="checkbox" id="e_flip" data-path="flip" ${E.flip?'checked':''}><span>Zwei Sechsen in eine Eins umdrehen</span></label>
+    <p class="muted small" style="margin:0">Die Rangfolge der Würfe (Schock, General, Straße) bleibt wie beim Schocken.</p>
+  </section>
+  <section class="card ecard"><h2 style="font-size:19px">So liest sich das Spiel</h2><div id="epreview">${editorPreview()}</div></section>
+  <div class="row">
+    ${E.isCustom?(E.confirmDel?`<button class="btn red" data-act="edel" data-v="1">Wirklich löschen</button><button class="btn" data-act="edel" data-v="0">Behalten</button>`:`<button class="btn ghost" data-act="edel">Spiel löschen</button>`):''}
+    <button class="btn primary" data-act="esave" style="flex:2">Speichern</button>
+  </div>`;
+}
+
+/* ---------- Leerer Baukasten ---------- */
+const BLANK={
+  push:{name:'', dice:5, singles:{}, combos:{}, specials:[], carryOver:true, entry:0, target:1000, exact:false, burn:[], zones:[], steal:null},
+  block:{type:'block', name:'', rolls:3, bonus:null, fields:[]}
+};
+Object.assign(editActs,{
+  newpick(){ setup.newPick=!setup.newPick; render(); },
+  newgame(kind){ const id='c_'+uid(); E=kind==='block'?blockFromRules(BLANK.block,id,false):fromRules(BLANK.push,id,false); E.name=''; if(kind==='block'){ E.bonusOn=false; } setup.newPick=false; view='editor'; render(); window.scrollTo(0,0); }
+});
+
+/* ==========================================================
+   BLUFF (Mäxchen-Familie)
+   type:"bluff" · lives (0 = keine Leben, nur Strafpunkte zählen)
+   maexDouble   Zweifel an Mäxchen kostet doppelt
+   equalAllowed Gleich hoch ansagen erlaubt
+   blindPass    Glauben und ohne Würfeln höher weitergeben
+   secondChance Nach dem Ansehen nochmal würfeln, dann unbesehen weitergeben
+   maexBelieve  "match": wer Mäxchen glaubt, muss selbst Mäxchen ansagen
+                "accept": wer Mäxchen glaubt, nimmt die Strafe sofort an
+   hamburger    42 ist der höchste Wurf, noch über Mäxchen
+   ========================================================== */
+TEMPLATES.maexchen={
+  id:'maexchen', type:'bluff', name:'Mäxchen', tagline:'Bluffen mit zwei Würfeln: verdeckt würfeln, ansagen, glauben oder aufdecken. Auch Mäxle oder Meiern genannt.',
+  dice:2, lives:3, maexDouble:true, equalAllowed:false, blindPass:true, secondChance:false, maexBelieve:'match', hamburger:false
+};
+const isBluff=r=>r&&r.type==='bluff';
+function bluffOrder(r){
+  const o=[31,32,41,42,43,51,52,53,54,61,62,63,64,65,11,22,33,44,55,66,21];
+  return r.hamburger?[...o.filter(v=>v!==42),42]:o;
+}
+const bVal=d=>{ const [a,b]=[...d].sort((x,y)=>y-x); return a*10+b; };
+const bRank=(r,v)=>bluffOrder(r).indexOf(v);
+function bLabel(r,v){
+  if(v===21) return 'Mäxchen';
+  if(r.hamburger&&v===42) return 'Hamburger';
+  if(v%11===0) return `${v/11}er-Pasch`;
+  return String(v);
+}
+const MAX=r=>bluffOrder(r)[bluffOrder(r).length-1];
+function canBeat(r,claim){ return bRank(r,claim)<bluffOrder(r).length-1 || r.equalAllowed || (claim===21&&r.maexBelieve==='match'); }
+function bluffRulesList(r){
+  const L=['2 Würfel unter dem Becher. Die höhere Zahl zählt als Zehner: 6 und 3 = 63.',
+    `Rangfolge: 31 < 32 < 41 … < 65 < Pasch (11 bis 66) < Mäxchen (21)${r.hamburger?' < Hamburger (42)':''}.`,
+    'Würfeln, verdeckt ansehen und einen Wert ansagen – ehrlich oder geblufft. Er muss höher sein als die letzte Ansage'+(r.equalAllowed?' oder gleich hoch.':'.'),
+    'Der Nächste glaubt (und würfelt selbst) oder deckt auf. Ist der Wurf mindestens so hoch wie angesagt, verliert der Aufdecker, sonst der Ansager.'];
+  if(r.blindPass) L.push('Wer glaubt, darf auch ohne zu würfeln einen höheren Wert ansagen und weitergeben.');
+  if(r.secondChance) L.push('Nach dem Ansehen darf man einmal nachwürfeln, muss das Ergebnis dann aber unbesehen weitergeben.');
+  L.push(r.maexBelieve==='accept'?'Wird Mäxchen angesagt, deckt der Nächste auf oder nimmt die Strafe direkt an.':'Wird Mäxchen angesagt, deckt der Nächste auf oder muss selbst wieder Mäxchen ansagen.');
+  if(r.maexDouble) L.push('Geht es um ein Mäxchen, kostet das Verlieren doppelt.');
+  L.push(r.lives?`Jeder hat ${r.lives} ${r.lives===1?'Leben':'Leben'}. Wer keins mehr hat, scheidet aus. Der Letzte gewinnt.`:'Keine Leben: Es werden nur Strafpunkte gezählt, Spielende nach Absprache.');
+  L.push('Wer eine Runde verliert, fängt die nächste an.');
+  return L;
+}
+function bluffAlive(){ return G.players.map((p,i)=>i).filter(i=>!R().lives||G.players[i].lives>0); }
+function bluffNextAlive(i){ const al=bluffAlive(); for(let k=1;k<=G.players.length;k++){ const j=(i+k)%G.players.length; if(al.includes(j)) return j; } return i; }
+function bluffPenalty(idx,amt,why){
+  const r=R(), p=G.players[idx];
+  p.pen=(p.pen||0)+amt; if(r.lives) p.lives=Math.max(0,p.lives-amt);
+  PS(p.id).niete+=amt;
+  addLog(`<span class="steal">${esc(p.name)} verliert ${amt===2?'doppelt':'ein Leben'}</span>${why?' – '+why:''}${r.lives?` (noch ${p.lives})`:''}.`);
+  if(r.lives && p.lives===0){ addLog(`${esc(p.name)} scheidet aus.`); PS(p.id).burned++; }
+  const al=bluffAlive();
+  if(r.lives && al.length<=1){ G.winner=G.players[al[0]].id; addLog(`<b>${esc(G.players[al[0]].name)} gewinnt Mäxchen!</b>`); return; }
+  G.cur = (!r.lives||p.lives>0)?idx:bluffNextAlive(idx);
+  G.bluff.last=null; G.turn=freshTurn(r);
+}
+let peek=false, peekKey='';
+function myPid(){ return G&&G.code?(prefs.me||{})[G.code]:null; }
+function canActBluff(){ const me=myPid(); return !G.code || !me || me==='*' || me===G.players[G.cur].id; }
+const bluffActs={
+  xroll(){ const t=T(); if(t.dice&&!t.again) return; const s=ST();
+    const d=[1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)]; d.forEach(f=>s.faces[f]++); s.dice+=2; s.rolls++;
+    t.dice=d; t.blind=false; t.rollId=uid(); peek=false; commit(); },
+  xagain(){ const t=T(); if(!R().secondChance||!t.dice||t.blind) return; const s=ST();
+    const d=[1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)]; d.forEach(f=>s.faces[f]++); s.dice+=2; s.rolls++;
+    t.dice=d; t.blind=true; peek=false; addLog(`${esc(G.players[G.cur].name)} würfelt nach und gibt unbesehen weiter.`); commit(); },
+  xpeek(){ if(T().blind) return; peek=!peek; render(); },
+  xbelieve(){ const r=R(), b=G.bluff; if(!b.last) return; pushHist();
+    const prev=G.players.find(p=>p.id===b.last.pid);
+    if(b.last.claim===21 && r.maexBelieve==='accept'){ addLog(`${esc(G.players[G.cur].name)} glaubt das Mäxchen.`); bluffPenalty(G.cur, r.maexDouble?2:1, 'Mäxchen geglaubt'); commit(); return; }
+    if(bRank(r,bVal(b.last.dice))<bRank(r,b.last.claim)) PS(prev.id).trip++;
+    addLog(`${esc(G.players[G.cur].name)} glaubt ${esc(prev.name)}.`);
+    T().believed=true; commit(); },
+  xblind(){ const r=R(), b=G.bluff, t=T(); if(!r.blindPass||!b.last||t.dice) return;
+    t.dice=[...b.last.dice]; t.blind=true; t.passed=true; peek=false;
+    if(bRank(r,bVal(b.last.dice))<bRank(r,b.last.claim)) PS(b.last.pid).trip++;
+    commit(); },
+  xdoubt(){ const r=R(), b=G.bluff; if(!b.last) return; pushHist();
+    const prevIdx=G.players.findIndex(p=>p.id===b.last.pid), me=G.cur;
+    const actual=bVal(b.last.dice), claim=b.last.claim;
+    const honest=bRank(r,actual)>=bRank(r,claim);
+    const amt=(claim===21||actual===21)&&r.maexDouble?2:1;
+    G.bluff.reveal={dice:b.last.dice, claim, by:G.players[me].id, of:b.last.pid, honest};
+    addLog(`${esc(G.players[me].name)} deckt auf: ${esc(bLabel(r,actual))} statt ${esc(bLabel(r,claim))} angesagt.`);
+    if(!honest) PS(G.players[me].id).stole++;
+    bluffPenalty(honest?me:prevIdx, amt, honest?'die Ansage stimmte':'beim Bluffen erwischt');
+    commit(); },
+  xclaim(v){ v=+v; const r=R(), b=G.bluff, t=T(); if(!t.dice) return;
+    const min=b.last?b.last.claim:null;
+    if(min!=null){ const ok=bRank(r,v)>bRank(r,min) || (bRank(r,v)===bRank(r,min)&&(r.equalAllowed||(min===21&&r.maexBelieve==='match'))); if(!ok) return; }
+    pushHist();
+    const p=G.players[G.cur]; PS(p.id).turns++;
+    b.last={pid:p.id, claim:v, dice:[...t.dice]}; G.bluff.reveal=null;
+    addLog(`${esc(p.name)} sagt <b>${esc(bLabel(r,v))}</b> an${t.passed?' (ohne zu würfeln)':''}.`);
+    G.cur=bluffNextAlive(G.cur); G.turn=freshTurn(r); peek=false; commit(); },
+  xlose(i){ const r=R(); pushHist(); const [idx,amt]=String(i).split(':').map(Number); bluffPenalty(idx,amt,''); commit(); },
+  xme(pid){ prefs.me={...(prefs.me||{}),[G.code]:pid}; savePrefs(); render(); }
+};
+function cupHTML(){ return `<div class="cup" aria-hidden="true"><svg viewBox="0 0 120 110"><path d="M22 10 H98 L88 100 H32 Z" fill="var(--ink)"/><rect x="16" y="4" width="88" height="12" rx="4" fill="var(--ink)"/><path d="M36 30 H84" stroke="var(--paper)" stroke-opacity=".25" stroke-width="4" stroke-linecap="round"/></svg></div>`; }
+function claimGrid(r,min){
+  const ord=bluffOrder(r); const mi=min==null?-1:bRank(r,min);
+  return `<div class="claims">${ord.map(v=>{ const k=bRank(r,v);
+    const ok=min==null||k>mi||(k===mi&&(r.equalAllowed||(min===21&&r.maexBelieve==='match')));
+    return `<button class="claim ${v===21||(r.hamburger&&v===42)?'top':v%11===0?'pasch':''}" data-act="xclaim" data-v="${v}" ${ok?'':'disabled'}>${v}</button>`; }).join('')}</div>
+    <p class="muted small" style="margin:0">Gelb = Pasch, rot = ${r.hamburger?'Mäxchen (21) und Hamburger (42)':'Mäxchen (21)'}.</p>`;
+}
+function bluffBoard(r){
+  return `<section class="card" style="padding:8px"><div class="board">${G.players.map((pl,i)=>{ const out=r.lives&&pl.lives<=0;
+    return `<div class="prow ${i===G.cur&&!G.winner?'cur':''}" style="${out?'opacity:.45':''}"><span class="rank"></span>
+      <div style="min-width:0"><div class="nm">${esc(pl.name)}${out?'<span class="tag">raus</span>':''}${myPid()===pl.id?'<span class="tag">du</span>':''}</div>
+      ${r.lives?`<div class="lives">${Array.from({length:r.lives},(_,k)=>`<i class="${k<pl.lives?'on':''}"></i>`).join('')}</div>`:`<div class="muted small">${pl.pen||0} Strafpunkte</div>`}</div>
+      <span class="sc">${r.lives?pl.lives:(pl.pen||0)}</span></div>`; }).join('')}</div></section>`;
+}
+function bluffGameHTML(){
+  const r=R(), t=T(), p=G.players[G.cur], b=G.bluff;
+  const key=G.cur+':'+(t.rollId||'')+':'+(b.last?b.last.claim:''); if(key!==peekKey){ peekKey=key; peek=false; }
+  const seg=`<div class="seg" role="group" aria-label="Würfel">
+      <button data-act="mode" data-v="real" aria-pressed="${G.mode==='real'}">Echte Würfel</button>
+      <button data-act="mode" data-v="digital" aria-pressed="${G.mode==='digital'}">Digitale Würfel</button></div>`;
+  const rev=b.reveal?`<div class="hint ${b.reveal.honest?'good':'warn'}"><div class="dice" style="min-height:0;margin-bottom:6px">${b.reveal.dice.map(f=>dieHTML(f)).join('')}</div>
+      Aufgedeckt: <b>${esc(bLabel(r,bVal(b.reveal.dice)))}</b>, angesagt war ${esc(bLabel(r,b.reveal.claim))}.</div>`:'';
+  let body='';
+  if(G.mode==='real'){
+    body=`<p class="muted small" style="margin:0">Ihr spielt mit Becher am Tisch. Tippt an, wer eine Runde verliert.</p>
+      <div class="glist">${G.players.map((pl,i)=> (r.lives&&pl.lives<=0)?'':`<div class="grow"><div class="gpick" style="cursor:default"><b>${esc(pl.name)}</b><span class="muted small">${r.lives?pl.lives+' Leben':(pl.pen||0)+' Strafpunkte'}</span></div>
+        <div class="row" style="flex-wrap:nowrap;gap:0"><button class="ginfo" data-act="xlose" data-v="${i}:1">−1</button>${r.maexDouble?`<button class="ginfo" data-act="xlose" data-v="${i}:2">−2</button>`:''}</div></div>`).join('')}</div>
+      <details><summary class="muted" style="cursor:pointer;font-size:14px">Rangfolge zum Nachschauen</summary><div class="ranks">${[...bluffOrder(r)].reverse().map(v=>`<span>${esc(bLabel(r,v))}</span>`).join('')}</div></details>`;
+  } else if(!canActBluff()){
+    body=`${cupHTML()}<p style="margin:0;text-align:center"><b>${esc(p.name)}</b> ist dran${b.last?` und muss ${esc(bLabel(r,b.last.claim))} von ${esc(G.players.find(x=>x.id===b.last.pid).name)} glauben oder aufdecken`:''}.</p>`;
+  } else if(b.last && !t.believed && !t.dice){
+    const prev=G.players.find(x=>x.id===b.last.pid);
+    const maexAccept=b.last.claim===21&&r.maexBelieve==='accept';
+    body=`${cupHTML()}<div class="claimbox"><span class="muted small">${esc(prev.name)} sagt</span><b>${esc(bLabel(r,b.last.claim))}</b></div>
+      <div class="actions">
+        <button class="btn red" data-act="xdoubt">Aufdecken<span class="btnsub">ich glaube das nicht</span></button>
+        ${maexAccept||canBeat(r,b.last.claim)?`<button class="btn primary" data-act="xbelieve">Glauben<span class="btnsub">${maexAccept?'und Strafe annehmen':'und selbst würfeln'}</span></button>`:`<p class="muted small" style="margin:0;align-self:center">Höher geht nicht – nur Aufdecken.</p>`}
+        ${r.blindPass&&!(b.last.claim===MAX(r))&&!maexAccept?`<button class="btn wide" data-act="xblind">Glauben, ohne zu würfeln weitergeben</button>`:''}
+      </div>`;
+  } else if(!t.dice){
+    body=`${cupHTML()}<button class="btn primary big" data-act="xroll">Würfeln</button>
+      <p class="muted small" style="margin:0;text-align:center">${b.last?`Du musst mehr als ${esc(bLabel(r,b.last.claim))} ansagen.`:'Du fängst die Runde an und darfst alles ansagen.'}</p>`;
+  } else {
+    const show=peek&&!t.blind;
+    body=`<div class="cupwrap">${show?`<div class="dice" style="justify-content:center">${t.dice.map(f=>dieHTML(f)).join('')}</div>`:cupHTML()}</div>
+      ${t.blind?`<p class="muted small" style="margin:0;text-align:center">${t.passed?'Du gibst den Becher ungesehen weiter.':'Nachgewürfelt – du weißt selbst nicht, was drunter liegt.'}</p>`
+        :`<div class="row"><button class="btn" data-act="xpeek">${show?'Becher zu':'Unter den Becher schauen'}</button>${r.secondChance&&!t.passed?`<button class="btn ghost" data-act="xagain">Nachwürfeln</button>`:''}</div>`}
+      <div class="label">Was sagst du an?</div>
+      ${claimGrid(r,b.last?b.last.claim:null)}`;
+  }
+  return `${gameTop(2)}
+  ${bluffBoard(r)}
+  <section class="card turn">
+    <div class="turnhead"><div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2></div></div>
+    ${seg}
+    ${rev}
+    ${body}
+  </section>
+  ${gameFooter()}`;
+}
+function whoamiHTML(){
+  return `<div class="overlay" role="dialog" aria-label="Wer bist du?"><div class="card stats">
+    <h2 style="font-size:22px">Wer bist du?</h2>
+    <p class="muted" style="margin:0">Bei Mäxchen sieht jedes Handy nur die eigenen Würfel.</p>
+    <div class="menu">${G.players.map(p=>`<button class="mitem" data-act="xme" data-v="${p.id}"><b>${esc(p.name)}</b></button>`).join('')}
+      <button class="mitem" data-act="xme" data-v="*"><b>Wir teilen uns dieses Handy</b><span class="muted small">dann zeigt es allen den Becher</span></button></div>
+  </div></div>`;
+}
+/* Editor */
+function bluffFromRules(r,id,isCustom){ return {type:'bluff', id, isCustom, confirmDel:false, name:r.name, lives:r.lives??3,
+  maexDouble:!!r.maexDouble, equalAllowed:!!r.equalAllowed, blindPass:!!r.blindPass, secondChance:!!r.secondChance, maexBelieve:r.maexBelieve==='accept'?'accept':'match', hamburger:!!r.hamburger}; }
+function compileBluff(E){
+  const errors=[]; if(!E.name.trim()) errors.push('Gib dem Spiel einen Namen.');
+  const r={id:E.id, type:'bluff', name:E.name.trim()||'Eigenes Spiel', dice:2, lives:E.lives, maexDouble:E.maexDouble, equalAllowed:E.equalAllowed, blindPass:E.blindPass, secondChance:E.secondChance, maexBelieve:E.maexBelieve, hamburger:E.hamburger};
+  r.tagline=`Eigenes Bluff-Spiel: ${r.lives?r.lives+' Leben':'Strafpunkte'}${r.maexDouble?', Mäxchen doppelt':''}.`;
+  return {rules:r, errors};
+}
+function bluffEditorHTML(){
+  const tog=(path,label,sub)=>`<label class="tog"><input type="checkbox" id="e_${path}" data-path="${path}" ${E[path]?'checked':''}><span>${label}${sub?`<small class="muted" style="display:block;font-size:13px">${sub}</small>`:''}</span></label>`;
+  return `
+  <div class="top"><button class="btn small ghost" data-act="ecancel">← Zurück</button><span class="chip">Regel-Editor</span></div>
+  <section class="card ecard">
+    <h2 style="font-size:19px">Grundlagen</h2>
+    <label class="field"><span class="label">Name des Spiels</span><input type="text" class="ein" id="e_name" data-path="name" value="${esc(E.name)}" placeholder="z. B. Mäxle bei Oma" autocomplete="off"></label>
+    <div class="field"><span class="label">Leben pro Spieler</span>
+      <div class="stepper"><button class="btn small" data-act="elives" data-v="-1" ${E.lives<=0?'disabled':''} aria-label="Ein Leben weniger">−</button><b class="num">${E.lives||'∞'}</b><button class="btn small" data-act="elives" data-v="1" ${E.lives>=10?'disabled':''} aria-label="Ein Leben mehr">+</button></div>
+      <span class="muted small">${E.lives?'Wer keine Leben mehr hat, scheidet aus.':'∞ = niemand scheidet aus, es werden nur Strafpunkte gezählt.'}</span></div>
+  </section>
+  <section class="card ecard">
+    <h2 style="font-size:19px">Varianten</h2>
+    ${tog('maexDouble','Mäxchen kostet doppelt','Geht es beim Aufdecken um ein Mäxchen, verliert man zwei Leben.')}
+    ${tog('blindPass','Ohne Würfeln weitergeben','Wer glaubt, darf gleich höher ansagen und den Becher ungewürfelt weitergeben.')}
+    ${tog('equalAllowed','Gleich hoch ansagen erlaubt','Die Ansage muss nicht höher sein, gleich reicht.')}
+    ${tog('secondChance','Nachwürfeln','Nach dem Ansehen einmal nachwürfeln, dann unbesehen weitergeben.')}
+    ${tog('hamburger','Hamburger (42) über Mäxchen','Auch Doppelmäxchen genannt: 42 wird zum höchsten Wurf.')}
+    <div class="field"><span class="label">Wenn Mäxchen angesagt wird</span>
+      <div class="seg"><button data-act="emaex" data-v="match" aria-pressed="${E.maexBelieve==='match'}">Gleichziehen</button><button data-act="emaex" data-v="accept" aria-pressed="${E.maexBelieve==='accept'}">Strafe annehmen</button></div>
+      <span class="muted small">${E.maexBelieve==='match'?'Wer glaubt, würfelt und muss selbst wieder Mäxchen ansagen.':'Wer glaubt, verliert sofort, ohne zu würfeln.'}</span></div>
+  </section>
+  <section class="card ecard"><h2 style="font-size:19px">So liest sich das Spiel</h2><div id="epreview">${editorPreview()}</div></section>
+  <div class="row">
+    ${E.isCustom?(E.confirmDel?`<button class="btn red" data-act="edel" data-v="1">Wirklich löschen</button><button class="btn" data-act="edel" data-v="0">Behalten</button>`:`<button class="btn ghost" data-act="edel">Spiel löschen</button>`):''}
+    <button class="btn primary" data-act="esave" style="flex:2">Speichern</button>
+  </div>`;
+}
+Object.assign(editActs,{
+  elives(d){ E.lives=Math.min(10,Math.max(0,E.lives+(+d))); render(); },
+  emaex(v){ E.maexBelieve=v==='accept'?'accept':'match'; render(); }
+});
+
+Object.assign(act, editActs, blockActs, shareActs, roundActs, bluffActs);
+if(!allTemplates()[prefs.tpl]) prefs.tpl='kubiki';
+
+/* ---------- Darstellung ---------- */
+const PIPS={1:[5],2:[1,9],3:[1,5,9],4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+function dieHTML(f,{tag='div',cls='',attrs=''}={}){
+  const cells=PIPS[f].map(p=>`<i style="grid-area:${Math.ceil(p/3)}/${(p-1)%3+1}"></i>`).join('');
+  const special='';
+  return `<${tag} class="die${special} ${cls}" ${attrs} aria-label="Würfel ${f}">${cells}</${tag}>`;
+}
+function trackHTML(r,s){
+  const pct=v=>Math.min(100,v/r.target*100);
+  return `<div class="track" aria-hidden="true">${(r.zones||[]).map(([a,b])=>`<span class="z" style="left:${pct(a)}%;width:${pct(b)-pct(a)}%"></span>`).join('')}
+    <span class="fill" style="width:${pct(s)}%"></span>${(r.burn||[]).map(v=>`<span class="burn" style="left:${pct(v)}%"></span>`).join('')}</div>`;
+}
+function renderTop(){
+  const el=$('#topchip'); if(!el||!G) return;
+  el.innerHTML=G.code?`<span class="dot ${synced?'on':''}"></span>Code <b>${G.code}</b>`:'';
+}
+function render(){
+  const app=$('#app');
+  if(view==='editor'&&E){ app.innerHTML=editorHTML(); $('#ov').innerHTML=''; return; }
+  if(view==='setup'||!G){ app.innerHTML=setupHTML(); $('#ov').innerHTML=share?shareHTML():''; return; }
+  app.innerHTML=gameHTML(); renderTop(); renderOverlay();
+}
+function metaOf(r){
+  if(isBlock(r)) return `${r.dice} Würfel · ${r.rolls} Würfe · ${r.fields.length} Felder`;
+  if(isRound(r)) return `${r.dice} Würfel · ${r.deckel} Deckel`;
+  if(isBluff(r)) return `2 Würfel · Bluffen · ${r.lives?r.lives+' Leben':'Strafpunkte'}`;
+  return `${r.dice} Würfel · Ziel ${r.exact?'genau ':''}${fmt(r.target)}`;
+}
+function subHead(title,back){
+  return `<div class="subhead"><button class="back" data-act="go" data-v="${back}" aria-label="Zurück">←</button><h1>${esc(title)}</h1></div>`;
+}
+function setupHTML(){
+  const st=setup.step||'home'; const canOnline=!!db; const custom=prefs.custom||{};
+  if(st==='pick'){
+    return `${subHead('Spiel wählen','home')}
+    <div class="glist">${Object.values(allTemplates()).map(t=>`
+      <div class="grow">
+        <button class="gpick" data-act="tpl" data-v="${t.id}"><b>${esc(t.name)}${custom[t.id]?'<span class="tag">eigenes</span>':''}</b><span class="muted small">${esc(metaOf(t))}</span></button>
+        <button class="ginfo" data-act="info" data-v="${t.id}" aria-label="Regeln von ${esc(t.name)}">Regeln</button>
+      </div>`).join('')}
+    </div>
+    <button class="btn ghost" data-act="newpick" aria-expanded="${!!setup.newPick}">+ Eigenes Spiel bauen</button>
+    ${setup.newPick?`<div class="choice">
+      <button class="opt" data-act="newgame" data-v="push"><span><b>Punkte sammeln</b><small>Wie Kubiki: würfeln, rauslegen, weiter oder aufhören.</small></span></button>
+      <button class="opt" data-act="newgame" data-v="block"><span><b>Spielblock</b><small>Wie Kniffel: würfeln, festhalten, ein Feld füllen.</small></span></button>
+      <p class="muted small" style="margin:0">Schocken-Varianten: bei Schocken unter „Regeln“ anpassen.</p></div>`:''}`;
+  }
+  if(st==='info'){
+    const t=tplOf(setup.infoId); const isC=!!custom[t.id];
+    return `${subHead(t.name,'pick')}
+    <section class="card">
+      <p class="muted" style="margin:0 0 12px">${esc(t.tagline||metaOf(t))}</p>
+      <ul class="rules">${rulesList(t).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
+    </section>
+    <button class="btn primary big" data-act="tpl" data-v="${t.id}">Mit ${esc(t.name)} spielen</button>
+    <div class="row">
+      <button class="btn" data-act="${isC?'edit':'copy'}" data-v="${t.id}">${isC?'Bearbeiten':'Anpassen'}</button>
+      <button class="btn" data-act="share" data-v="${t.id}">Teilen</button>
+    </div>`;
+  }
+  if(st==='players'){
+    const tr=tplOf(prefs.tpl);
+    const savedFree=prefs.saved.filter(n=>!setup.names.map(s=>s.trim()).includes(n));
+    return `${subHead('Wer spielt mit?','pick')}
+    <button class="gamechip" data-act="go" data-v="pick"><span class="muted small">Spiel</span><b>${esc(tr.name)}</b><span class="muted small">ändern</span></button>
+    <section class="card" style="display:flex;flex-direction:column;gap:10px">
+      <div class="plist">${setup.names.map((n,i)=>`
+        <div class="pline"><span class="num muted" style="font-size:18px;text-align:center">${i+1}</span>
+          <input type="text" id="pn${i}" data-i="${i}" value="${esc(n)}" placeholder="Name" autocomplete="off">
+          <button class="x" data-act="delp" data-v="${i}" aria-label="Spieler entfernen">✕</button></div>`).join('')}
+      </div>
+      <div class="row"><button class="btn ghost" data-act="addp">+ Spieler</button><button class="btn ghost" data-act="clearnames" style="flex:0 0 auto">Leeren</button></div>
+      ${savedFree.length?`<div class="saved">${savedFree.map(n=>`<span class="pchip"><button data-act="addsaved" data-v="${esc(n)}" aria-label="${esc(n)} hinzufügen">+ ${esc(n)}</button><button class="rm" data-act="rmsaved" data-v="${esc(n)}" aria-label="${esc(n)} vergessen">✕</button></span>`).join('')}</div>`:''}
+    </section>
+    <div class="seg" role="group" aria-label="Geräte">
+      <button data-act="online" data-v="0" aria-pressed="${!setup.online}">Ein Handy</button>
+      <button data-act="online" data-v="1" aria-pressed="${setup.online}" ${canOnline?'':'disabled'}>Mehrere Handys</button>
+    </div>
+    <p class="muted small" style="margin:-4px 0 0">${setup.online?'Ihr bekommt einen Code zum Koppeln. Alle sehen den Stand live.':canOnline?'Das Handy geht reihum oder liegt in der Mitte.':'Mehrere Handys koppeln kommt in einer späteren Version.'}</p>
+    ${setup.err?`<div class="err">${esc(setup.err)}</div>`:''}
+    <button class="btn primary big" data-act="start">Los geht's</button>`;
+  }
+  if(st==='join'){
+    return `${subHead('Spiel beitreten','home')}
+    <section class="card" style="display:flex;flex-direction:column;gap:10px">
+      <p class="muted" style="margin:0">Code vom Handy eingeben, auf dem das Spiel läuft.</p>
+      <input type="text" id="joincode" value="${esc(setup.joinCode)}" placeholder="KRBX" maxlength="4" class="codein" autocomplete="off">
+      ${setup.err?`<div class="err">${esc(setup.err)}</div>`:''}
+      <button class="btn primary" data-act="join">Beitreten</button>
+    </section>`;
+  }
+  if(st==='import'){
+    return `${subHead('Regeln empfangen','home')}
+    <section class="card" style="display:flex;flex-direction:column;gap:10px">
+      <p class="muted" style="margin:0">${db?'5-Buchstaben-Code oder geteilten Regel-Text':'Geteilten Regel-Text'} einfügen. Das Spiel landet in deiner Spielauswahl.</p>
+      <textarea id="importtxt" class="ein" rows="3" placeholder="${db?'z. B. QKMTR oder DECKEL-REGELN:…':'DECKEL-REGELN:…'}" autocomplete="off">${esc(setup.importTxt||'')}</textarea>
+      ${setup.importErr?`<div class="err">${esc(setup.importErr)}</div>`:''}${setup.importMsg?`<div class="hint good">${esc(setup.importMsg)}</div>`:''}
+      <button class="btn primary" data-act="importrules">Regeln übernehmen</button>
+    </section>`;
+  }
+  if(st==='history'){
+    const h=prefs.history||[]; const tab={};
+    h.forEach(e=>e.players.forEach(n=>{ const x=tab[n]||(tab[n]={n,games:0,wins:0,paid:0}); x.games++; if(e.who===n){ if(e.loserGame) x.paid++; else x.wins++; } }));
+    const rows=Object.values(tab).sort((a,b)=>b.wins-a.wins||b.games-a.games);
+    const d=t=>new Date(t).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'})+' '+new Date(t).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+    return `${subHead('Statistik','home')}
+    ${h.length?`<section class="card">
+      <div class="label" style="margin-bottom:8px">Ewige Tabelle · ${h.length} ${h.length===1?'Spiel':'Spiele'}</div>
+      <div class="tblwrap"><table class="tbl" style="min-width:0"><thead><tr><th>Spieler</th><th>Spiele</th><th>Siege</th><th>Quote</th>${rows.some(x=>x.paid)?'<th>Verloren*</th>':''}</tr></thead>
+      <tbody>${rows.map((x,i)=>`<tr><td>${esc(x.n)}</td><td>${x.games}</td><td class="${i===0&&x.wins?'hl':''}">${x.wins}</td><td>${x.games?Math.round(x.wins/x.games*100)+' %':'–'}</td>${rows.some(y=>y.paid)?`<td>${x.paid}</td>`:''}</tr>`).join('')}</tbody></table></div>
+      ${rows.some(x=>x.paid)?'<p class="muted small" style="margin:8px 0 0">* Schocken und andere Runden-Spiele: hier wird der Verlierer gezählt.</p>':''}
+    </section>
+    <section class="card">
+      <div class="label" style="margin-bottom:8px">Letzte Spiele</div>
+      <ol class="log">${h.slice(0,20).map(e=>`<li><span class="num" style="min-width:86px">${d(e.at)}</span><span><b>${esc(e.game)}</b> – ${e.loserGame?'verloren hat':'gewonnen hat'} ${esc(e.who)}<span class="muted small" style="display:block">${e.ranking.map(x=>esc(x.n)+' '+esc(x.v)).join(' · ')}</span></span></li>`).join('')}</ol>
+    </section>
+    ${setup.confirmClear?`<div class="row"><button class="btn" data-act="clearhist" data-v="0">Behalten</button><button class="btn red" data-act="clearhist" data-v="1">Wirklich alles löschen</button></div>`:`<button class="btn ghost" data-act="clearhist">Statistik löschen</button>`}`
+    :`<section class="card"><p style="margin:0">Noch keine abgeschlossenen Spiele.</p><p class="muted small" style="margin:6px 0 0">Sobald ein Spiel einen Sieger hat, erscheint es hier – mit ewiger Tabelle über alle Spieleabende.</p></section>`}`;
+  }
+  if(st==='colors'){
+    return `${subHead('Würfelfarbe','home')}
+    <section class="card">${swatchesHTML()}</section>`;
+  }
+  /* Start */
+  return `
+  <div class="hero">
+    <svg class="coaster" viewBox="0 0 140 140" role="img" aria-label="Bierdeckel mit Strichliste"><path d="M136.6,70.0 L135.8,71.2 L134.0,72.3 L132.1,73.3 L131.2,74.4 L131.9,75.5 L133.6,76.8 L135.3,78.2 L135.9,79.5 L135.0,80.5 L133.0,81.4 L131.0,82.1 L130.0,83.1 L130.5,84.3 L132.0,85.8 L133.5,87.4 L133.9,88.8 L132.8,89.7 L130.7,90.2 L128.6,90.7 L127.5,91.5 L127.8,92.8 L129.1,94.5 L130.4,96.3 L130.6,97.7 L129.4,98.4 L127.2,98.6 L125.1,98.8 L123.9,99.4 L124.0,100.8 L125.0,102.7 L126.0,104.6 L126.0,106.0 L124.7,106.6 L122.6,106.5 L120.4,106.4 L119.2,106.8 L119.1,108.1 L119.8,110.2 L120.5,112.2 L120.3,113.6 L119.0,114.0 L116.8,113.6 L114.7,113.2 L113.4,113.4 L113.2,114.7 L113.6,116.8 L114.0,119.0 L113.6,120.3 L112.2,120.5 L110.2,119.8 L108.1,119.1 L106.8,119.2 L106.4,120.4 L106.5,122.6 L106.6,124.7 L106.0,126.0 L104.6,126.0 L102.7,125.0 L100.8,124.0 L99.4,123.9 L98.8,125.1 L98.6,127.2 L98.4,129.4 L97.7,130.6 L96.3,130.4 L94.5,129.1 L92.8,127.8 L91.5,127.5 L90.7,128.6 L90.2,130.7 L89.7,132.8 L88.8,133.9 L87.4,133.5 L85.8,132.0 L84.3,130.5 L83.1,130.0 L82.1,131.0 L81.4,133.0 L80.5,135.0 L79.5,135.9 L78.2,135.3 L76.8,133.6 L75.5,131.9 L74.4,131.2 L73.3,132.1 L72.3,134.0 L71.2,135.8 L70.0,136.6 L68.8,135.8 L67.7,134.0 L66.7,132.1 L65.6,131.2 L64.5,131.9 L63.2,133.6 L61.8,135.3 L60.5,135.9 L59.5,135.0 L58.6,133.0 L57.9,131.0 L56.9,130.0 L55.7,130.5 L54.2,132.0 L52.6,133.5 L51.2,133.9 L50.3,132.8 L49.8,130.7 L49.3,128.6 L48.5,127.5 L47.2,127.8 L45.5,129.1 L43.7,130.4 L42.3,130.6 L41.6,129.4 L41.4,127.2 L41.2,125.1 L40.6,123.9 L39.2,124.0 L37.3,125.0 L35.4,126.0 L34.0,126.0 L33.4,124.7 L33.5,122.6 L33.6,120.4 L33.2,119.2 L31.9,119.1 L29.8,119.8 L27.8,120.5 L26.4,120.3 L26.0,119.0 L26.4,116.8 L26.8,114.7 L26.6,113.4 L25.3,113.2 L23.2,113.6 L21.0,114.0 L19.7,113.6 L19.5,112.2 L20.2,110.2 L20.9,108.1 L20.8,106.8 L19.6,106.4 L17.4,106.5 L15.3,106.6 L14.0,106.0 L14.0,104.6 L15.0,102.7 L16.0,100.8 L16.1,99.4 L14.9,98.8 L12.8,98.6 L10.6,98.4 L9.4,97.7 L9.6,96.3 L10.9,94.5 L12.2,92.8 L12.5,91.5 L11.4,90.7 L9.3,90.2 L7.2,89.7 L6.1,88.8 L6.5,87.4 L8.0,85.8 L9.5,84.3 L10.0,83.1 L9.0,82.1 L7.0,81.4 L5.0,80.5 L4.1,79.5 L4.7,78.2 L6.4,76.8 L8.1,75.5 L8.8,74.4 L7.9,73.3 L6.0,72.3 L4.2,71.2 L3.4,70.0 L4.2,68.8 L6.0,67.7 L7.9,66.7 L8.8,65.6 L8.1,64.5 L6.4,63.2 L4.7,61.8 L4.1,60.5 L5.0,59.5 L7.0,58.6 L9.0,57.9 L10.0,56.9 L9.5,55.7 L8.0,54.2 L6.5,52.6 L6.1,51.2 L7.2,50.3 L9.3,49.8 L11.4,49.3 L12.5,48.5 L12.2,47.2 L10.9,45.5 L9.6,43.7 L9.4,42.3 L10.6,41.6 L12.8,41.4 L14.9,41.2 L16.1,40.6 L16.0,39.2 L15.0,37.3 L14.0,35.4 L14.0,34.0 L15.3,33.4 L17.4,33.5 L19.6,33.6 L20.8,33.2 L20.9,31.9 L20.2,29.8 L19.5,27.8 L19.7,26.4 L21.0,26.0 L23.2,26.4 L25.3,26.8 L26.6,26.6 L26.8,25.3 L26.4,23.2 L26.0,21.0 L26.4,19.7 L27.8,19.5 L29.8,20.2 L31.9,20.9 L33.2,20.8 L33.6,19.6 L33.5,17.4 L33.4,15.3 L34.0,14.0 L35.4,14.0 L37.3,15.0 L39.2,16.0 L40.6,16.1 L41.2,14.9 L41.4,12.8 L41.6,10.6 L42.3,9.4 L43.7,9.6 L45.5,10.9 L47.2,12.2 L48.5,12.5 L49.3,11.4 L49.8,9.3 L50.3,7.2 L51.2,6.1 L52.6,6.5 L54.2,8.0 L55.7,9.5 L56.9,10.0 L57.9,9.0 L58.6,7.0 L59.5,5.0 L60.5,4.1 L61.8,4.7 L63.2,6.4 L64.5,8.1 L65.6,8.8 L66.7,7.9 L67.7,6.0 L68.8,4.2 L70.0,3.4 L71.2,4.2 L72.3,6.0 L73.3,7.9 L74.4,8.8 L75.5,8.1 L76.8,6.4 L78.2,4.7 L79.5,4.1 L80.5,5.0 L81.4,7.0 L82.1,9.0 L83.1,10.0 L84.3,9.5 L85.8,8.0 L87.4,6.5 L88.8,6.1 L89.7,7.2 L90.2,9.3 L90.7,11.4 L91.5,12.5 L92.8,12.2 L94.5,10.9 L96.3,9.6 L97.7,9.4 L98.4,10.6 L98.6,12.8 L98.8,14.9 L99.4,16.1 L100.8,16.0 L102.7,15.0 L104.6,14.0 L106.0,14.0 L106.6,15.3 L106.5,17.4 L106.4,19.6 L106.8,20.8 L108.1,20.9 L110.2,20.2 L112.2,19.5 L113.6,19.7 L114.0,21.0 L113.6,23.2 L113.2,25.3 L113.4,26.6 L114.7,26.8 L116.8,26.4 L119.0,26.0 L120.3,26.4 L120.5,27.8 L119.8,29.8 L119.1,31.9 L119.2,33.2 L120.4,33.6 L122.6,33.5 L124.7,33.4 L126.0,34.0 L126.0,35.4 L125.0,37.3 L124.0,39.2 L123.9,40.6 L125.1,41.2 L127.2,41.4 L129.4,41.6 L130.6,42.3 L130.4,43.7 L129.1,45.5 L127.8,47.2 L127.5,48.5 L128.6,49.3 L130.7,49.8 L132.8,50.3 L133.9,51.2 L133.5,52.6 L132.0,54.2 L130.5,55.7 L130.0,56.9 L131.0,57.9 L133.0,58.6 L135.0,59.5 L135.9,60.5 L135.3,61.8 L133.6,63.2 L131.9,64.5 L131.2,65.6 L132.1,66.7 L134.0,67.7 L135.8,68.8Z" fill="var(--coaster)" stroke="var(--coaster-edge)" stroke-width="1.5"/><circle cx="70" cy="70" r="55" fill="none" stroke="var(--coaster-ring)" stroke-width="3"/><circle cx="70" cy="70" r="50" fill="none" stroke="var(--coaster-ring)" stroke-width="1"/><g fill="none" stroke="var(--pencil)" stroke-linecap="round"><path d="M38 52 Q39.95 70.0 39.5 88" stroke-width="4.2"/><path d="M48 53 Q49.95 70.0 49.5 87" stroke-width="4.2"/><path d="M58 52 Q59.95 70.0 59.5 88" stroke-width="4.2"/><path d="M68 53 Q69.95 70.0 69.5 87" stroke-width="4.2"/><path d="M31 82 Q54.7 69.5 76 57" stroke-width="4.6"/><path d="M88 53 Q89.8 70.5 89.2 88" stroke-width="4.2"/><path d="M98 54 Q99.8 71.0 99.2 88" stroke-width="4.2"/><path d="M108 53 Q109.8 70.5 109.2 88" stroke-width="4.2"/></g></svg>
+    <h1 class="herotitle">Deckel</h1>
+    <p class="muted" style="margin:0">Punkte zählen für eure Spieleabende – mit euren Hausregeln</p>
+  </div>
+  <button class="btn primary big" data-act="go" data-v="pick">Neues Spiel</button>
+  <div class="menu">
+    ${canOnline?`<button class="mitem" data-act="go" data-v="join"><b>Spiel beitreten</b><span class="muted small">mit dem Code eines anderen Handys</span></button>`:''}
+    <button class="mitem" data-act="go" data-v="history"><b>Statistik</b><span class="muted small">${(prefs.history||[]).length?(prefs.history.length+' Spiele, ewige Tabelle'):'Siege über alle Spieleabende'}</span></button>
+    <button class="mitem" data-act="go" data-v="import"><b>Regeln empfangen</b><span class="muted small">Code oder Text von Freunden</span></button>
+    <button class="mitem" data-act="go" data-v="colors"><b>Würfelfarbe</b><span class="muted small">${esc((DICE[prefs.dice]||DICE.weiss).n)}</span></button>
+  </div>`;
+}
+function gameHTML(){
+  if(isBlock(R())) return blockGameHTML();
+  if(isRound(R())) return roundGameHTML();
+  if(isBluff(R())) return bluffGameHTML();
+  const rs=R(), t=T(), p=G.players[G.cur];
+  const order=G.players.map((pl,i)=>({...pl,i})).sort((a,b)=>b.score-a.score);
+  const rank={}; order.forEach((pl,k)=>rank[pl.i]=k+1);
+  const faces=selFaces(); const sc=faces.length?scoreFaces(rs,faces):{pts:0,ok:true};
+
+  let input='';
+  if(G.mode==='real'){
+    const ghosts=Math.max(0,t.left-t.sel.length);
+    input=`<div><div class="label" style="margin-bottom:6px">Rausgelegte Würfel dieses Wurfs</div>
+      <div class="dice">${t.sel.map((f,i)=>dieHTML(f,{tag:'button',cls:sc.ok?'':'bad',attrs:`data-act="unsel" data-v="${i}" title="Antippen zum Entfernen"`})).join('')}${'<div class="die ghost"></div>'.repeat(ghosts)}</div></div>
+      <div class="pad">${FACES.map(f=>dieHTML(f,{tag:'button',attrs:`data-act="face" data-v="${f}" ${t.sel.length>=t.left?'disabled':''}`})).join('')}</div>
+      <p class="muted" style="margin:0;font-size:13px">Am Tisch würfeln, dann die Würfel antippen, die rausgelegt werden. Antippen oben entfernt sie wieder.</p>`;
+  } else {
+    if(!t.roll){
+      input=`<button class="btn primary" data-act="roll" style="padding:18px;font-size:17px">${t.left} Würfel werfen</button>`;
+    } else {
+      const niete=!canScore(rs,t.roll);
+      input=`<div class="dice rolled" data-roll="${t.rollId||''}">${t.roll.map((f,i)=>dieHTML(f,{tag:'button',cls:(t.picked.includes(i)?'picked':'')+(t.picked.includes(i)&&!sc.ok?' bad':''),attrs:`data-act="pick" data-v="${i}" aria-pressed="${t.picked.includes(i)}"`})).join('')}</div>
+      ${niete?`<div class="hint warn"><b>Niete!</b> Kein Würfel zählt.</div>`:`<p class="muted" style="margin:0;font-size:13px">Würfel antippen, die rausgelegt werden.</p>`}`;
+    }
+  }
+  const selInvalid=faces.length&&!sc.ok;
+  const leftRaw=t.left-faces.length;
+  const canCont=faces.length>0&&sc.ok&&(leftRaw>0||rs.carryOver);
+  const canStop=sc.ok&&((t.pts+sc.pts)>0||sc.win)&&!(G.mode==='digital'&&t.roll&&!faces.length&&!canScore(rs,t.roll));
+  const leftAfter=leftRaw===0?rs.dice:leftRaw;
+
+  return `
+  ${gameTop(5)}
+
+  <section class="card" style="padding:8px">
+    <div class="board">${G.players.map((pl,i)=>{const zz=zoneOf(rs,pl.score);return `
+      <div class="prow ${i===G.cur?'cur':''}"><span class="rank">${rank[i]}.</span>
+        <div style="min-width:0"><div class="nm">${esc(pl.name)}${zz?`<span class="tag">Sperrzone</span>`:''}</div>${trackHTML(rs,pl.score)}</div>
+        <span class="sc">${fmt(pl.score)}</span></div>`}).join('')}</div>
+  </section>
+
+  <section class="card turn">
+    <div class="turnhead">
+      <div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2><div class="muted num" style="font-size:18px">Stand ${fmt(p.score)}</div></div>
+      <div class="stat"><div class="label">Zug</div><div class="big num">${fmt(t.pts+(sc.ok?sc.pts:0))}</div><div class="muted" style="font-size:13px">${t.left} Würfel im Spiel</div></div>
+    </div>
+    <div class="seg" role="group" aria-label="Würfel">
+      <button data-act="mode" data-v="real" aria-pressed="${G.mode==='real'}">Echte Würfel</button>
+      <button data-act="mode" data-v="digital" aria-pressed="${G.mode==='digital'}">Digitale Würfel</button>
+    </div>
+    ${input}
+    <div class="tally"><span class="muted">${faces.length?`Rausgelegt: ${faces.length} Würfel`:'Noch nichts rausgelegt'}</span>
+      <span>${selInvalid?'<span class="err">Nicht jeder Würfel zählt</span>':`<span class="num">+${fmt(sc.pts)}</span>`}</span></div>
+    <div class="actions">
+      <button class="btn primary" data-act="cont" ${canCont?'':'disabled'}>Weiterwürfeln<span class="btnsub">${canCont?'mit '+leftAfter+' Würfeln':'erst Würfel rauslegen'}</span></button>
+      <button class="btn" data-act="stop" ${canStop?'':'disabled'}>Aufhören<span class="btnsub">und schreiben</span></button>
+      <button class="btn red wide" data-act="niete">Niete${t.pts?` – ${fmt(t.pts)} Punkte weg`:''}</button>
+    </div>
+  </section>
+
+  ${gameFooter()}`;
+}
+function gameTop(face){
+  return `<div class="top"><div class="brand">${dieHTML(face,{attrs:'style="width:34px;height:34px;padding:4px"'})}<h1>${esc(R().name)}</h1></div>
+    <div class="topright"><span class="chip" id="topchip"></span><button class="btn small" data-act="panel" data-v="menu" aria-label="Menü öffnen">Menü</button></div></div>`;
+}
+function gameFooter(){
+  return `<section class="card">
+    <div class="top" style="margin-bottom:8px"><div class="label">Zuletzt</div><button class="btn small" data-act="undo" ${(G.hist||[]).length?'':'disabled'}>Rückgängig</button></div>
+    <ol class="log">${G.log.slice(0,3).map(l=>`<li><span class="num">${l.n}</span><span>${l.t}</span></li>`).join('')}</ol>
+  </section>`;
+}
+let panel=null;
+function panelHTML(){
+  const r=R(); const close=`<button class="btn small" data-act="panel" data-v="">Schließen</button>`;
+  const wrap=(title,body,back)=>`<div class="overlay" role="dialog" aria-label="${esc(title)}" data-act="panel" data-v="" data-self="1"><div class="card stats">
+    <div class="top">${back?`<button class="back" data-act="panel" data-v="menu" aria-label="Zurück zum Menü">←</button>`:''}<h2 style="font-size:22px;flex:1">${esc(title)}</h2>${close}</div>${body}</div></div>`;
+  if(panel==='menu') return wrap('Menü',`<div class="menu">
+      <button class="mitem" data-act="panel" data-v="stats"><b>Statistik</b><span class="muted small">Würfel und Spieler</span></button>
+      ${isBlock(r)?`<button class="mitem" data-act="panel" data-v="block"><b>Spielblock</b><span class="muted small">alle Felder aller Spieler</span></button>`:''}
+      <button class="mitem" data-act="panel" data-v="log"><b>Ganzer Verlauf</b><span class="muted small">${G.log.length} Einträge</span></button>
+      <button class="mitem" data-act="panel" data-v="rules"><b>Regeln</b><span class="muted small">${esc(r.name)}</span></button>
+      <button class="mitem" data-act="panel" data-v="colors"><b>Würfelfarbe</b><span class="muted small">${esc((DICE[prefs.dice]||DICE.weiss).n)}</span></button>
+      <button class="mitem" data-act="panel" data-v="leave"><b>Spiel verlassen</b><span class="muted small">zurück zum Start</span></button>
+    </div>`);
+  if(panel==='rules') return wrap('Regeln',`<ul class="rules">${rulesList(r).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`,1);
+  if(panel==='colors') return wrap('Würfelfarbe',swatchesHTML(),1);
+  if(panel==='log') return wrap('Verlauf',`<ol class="log">${G.log.map(l=>`<li><span class="num">${l.n}</span><span>${l.t}</span></li>`).join('')}</ol>`,1);
+  if(panel==='leave') return wrap('Spiel verlassen',`<p style="margin:0">${G.code?'Das Spiel läuft auf den anderen Handys weiter. Du kannst mit dem Code '+G.code+' wieder beitreten.':'Der Spielstand geht dabei verloren.'}</p>
+    <div class="row"><button class="btn" data-act="panel" data-v="menu">Abbrechen</button><button class="btn red" data-act="leave">Verlassen</button></div>`,1);
+  return '';
+}
+function renderOverlay(){
+  const ov=$('#ov');
+  if(G&&!G.winner&&isBluff(R())&&G.code&&!myPid()){ ov.innerHTML=whoamiHTML(); return; }
+  if(G&&panel){ ov.innerHTML=panelHTML(); return; }
+  if(G&&showBlock){ ov.innerHTML=blockSheetHTML(); return; }
+  if(G&&showStats){ ov.innerHTML=statsHTML(); return; }
+  if(!G||!G.winner){ov.innerHTML='';return;}
+  const w=G.players.find(p=>p.id===G.winner);
+  const order=isBluff(R())?[...G.players].sort((a,b)=>(R().lives?b.lives-a.lives:(a.pen||0)-(b.pen||0))):[...G.players].sort((a,b)=>b.score-a.score);
+  ov.innerHTML=`<div class="overlay" role="dialog" aria-label="Spielende"><div class="card">
+    <div class="label">${isRound(R())?'Verloren – die nächste Runde geht auf':'Gewonnen'}</div><div class="crown">${esc(w.name)}</div>
+    ${isRound(R())?`<p class="muted" style="margin:0">Hälften verloren: ${(G.halfLosers||[]).map(id=>esc((G.players.find(p=>p.id===id)||{}).name||'')).join(', ')}</p>`
+      :`<ol class="log">${order.map((p,i)=>`<li><span class="num">${i+1}.</span><span style="flex:1">${esc(p.name)}</span><b class="num" style="font-size:18px">${isBluff(R())?(R().lives?p.lives+' Leben':(p.pen||0)+' Strafp.'):fmt(p.score)}</b></li>`).join('')}</ol>`}
+    <div class="row"><button class="btn" data-act="undo">Rückgängig</button>${isBlock(R())?'<button class="btn" data-act="block">Spielblock</button>':''}<button class="btn" data-act="stats">Statistik</button></div>
+    <div class="row"><button class="btn" data-act="samenew">Anderes Spiel</button><button class="btn primary" data-act="again" style="flex:2">Nochmal ${esc(R().name)}</button></div>
+    <p class="muted small" style="margin:0">Beides mit denselben Spielern.</p>
+  </div></div>`;
+}
+function statsHTML(){
+  const s=ST(); const max=Math.max(1,...s.faces.slice(1)); const exp=s.dice/6;
+  const top=Math.max(max,exp)*1.08;
+  const pct=v=>(v/top*100).toFixed(1);
+  const dice = s.dice ? `
+    <div class="bars">${FACES.map(f=>`<div class="bar"><span class="v">${s.faces[f]}</span><div class="b" style="height:${pct(s.faces[f])}%"></div></div>`).join('')}
+      <div class="exp" style="bottom:${pct(exp)}%"><span>fair: je ${exp.toFixed(1).replace('.',',')}</span></div></div>
+    <div class="barlabels">${FACES.map(f=>dieHTML(f)).join('')}</div>
+    <div class="kpis">
+      <div class="kpi"><div class="num">${s.rolls}</div><small>digitale Würfe</small></div>
+      <div class="kpi"><div class="num">${s.rollTrip}</div><small>mit Drilling</small></div>
+      <div class="kpi"><div class="num">${s.expTrip.toFixed(1).replace('.',',')}</div><small>Drillinge erwartet</small></div>
+    </div>
+    <p class="muted" style="margin:0;font-size:13px">Bei fairen Würfeln liegen alle Säulen ungefähr auf der gestrichelten Linie. Je mehr Würfe, desto näher.</p>`
+    : `<p class="muted" style="margin:0;font-size:14px">Noch keine digitalen Würfe. Bei echten Würfeln sieht die App nur die rausgelegten Würfel, deshalb zählt die Verteilung nur digitale Würfe.</p>`;
+  const pl=G.players.map(p=>({p,...PS(p.id)}));
+  const best=k=>Math.max(...pl.map(x=>x[k]));
+  const cell=(x,k)=>`<td class="${['best','trip','stole'].includes(k)&&x[k]>0&&x[k]===best(k)&&pl.length>1?'hl':''}">${fmt(x[k])}</td>`;
+  const quote=x=>x.turns?Math.round(x.niete/x.turns*100)+' %':'–';
+  const rs=R();
+  const cols=isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
+    ...(rs.steal?[['stole','Geklaut'],['lost','Beklaut']]:[]), ...((rs.burn||[]).length?[['burned','Verbrannt']]:[])];
+  return `<div class="overlay" role="dialog" aria-label="Statistik"><div class="card stats">
+    <div class="top"><h2 style="font-size:22px">Statistik</h2><button class="btn small" data-act="closestats">Schließen</button></div>
+    <div class="label">Würfelverteilung</div>
+    ${dice}
+    <div class="label" style="margin-top:6px">Spieler</div>
+    <div class="tblwrap"><table class="tbl"><thead><tr><th>Spieler</th>${cols.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead>
+    <tbody>${pl.map(x=>`<tr><td>${esc(x.p.name)}</td>${cols.map(([k])=>k==='quote'?`<td>${quote(x)}</td>`:cell(x,k)).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="muted" style="margin:0;font-size:13px">Rot = Bestwert${isBluff(rs)?' bei Bluffs und Erwischt':isRound(rs)?' bei Schocks':isBlock(rs)?' bei bestem Feld und Kniffel':` bei bester Zug, Drillingen${rs.steal?' und Geklaut':''}`}. Die Statistik läuft über alle Runden dieses Spiels.</p>
+    <div class="row"><button class="btn ghost small" data-act="resetstats">Statistik zurücksetzen</button></div>
+  </div></div>`;
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
+  if(b.dataset.self && e.target!==b) return;
+  const a=b.dataset.act; if(act[a]) act[a](b.dataset.v);
+});
+document.addEventListener('input',e=>{
+  if(e.target.matches('.pline input')) setup.names[+e.target.dataset.i]=e.target.value;
+  if(e.target.id==='joincode') setup.joinCode=e.target.value;
+  if(e.target.id==='importtxt') setup.importTxt=e.target.value;
+  if(E && e.target.matches('[data-path]')) editorInput(e.target);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id==='joincode') act.join();
+  if(e.key==='Enter'&&e.target.matches('.pline input')) act.addp();
+});
+
+applyDice();
+/* Start: letztes Spiel auf diesem Gerät fortsetzen */
+const saved=loadLocal();
+if(saved&&saved.G&&saved.view==='game'){ G=migrate(saved.G); view='game'; }
+render();
+})();
+</script>
+
+<script>
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+</script>
+</body>
+</html>
