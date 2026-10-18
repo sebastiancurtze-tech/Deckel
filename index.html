@@ -159,6 +159,13 @@ button.die{padding:6px}
 .crown{font-family:var(--f-num);font-weight:800;font-size:40px;line-height:1}
 .err{color:var(--pip);font-size:14px}
 .small{font-size:13px}
+#throw{position:fixed;inset:0;z-index:38;pointer-events:none;opacity:0;transition:opacity .22s;perspective:900px;overflow:hidden}
+#throw.on{opacity:1;pointer-events:auto;background:radial-gradient(ellipse at 50% 46%,rgba(20,35,58,.45),rgba(20,35,58,.78));-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+.cubewrap{position:absolute;left:0;top:0;width:var(--size);height:var(--size);transform-style:preserve-3d;will-change:transform}
+.cube{position:relative;width:100%;height:100%;transform-style:preserve-3d;will-change:transform}
+.cface{position:absolute;inset:0;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:16%;background:var(--die-face,#fbfbf8);border:1.5px solid var(--die-edgec,#c9d2da);border-radius:18%;backface-visibility:hidden;box-shadow:inset 0 0 calc(var(--size)*.18) rgba(0,0,0,.14)}
+.cface i{width:68%;height:68%;border-radius:50%;background:var(--die-pip,#1d2633);place-self:center;box-shadow:inset 0 1px 2px rgba(0,0,0,.5)}
+.cubeshadow{position:absolute;height:calc(var(--size)*.22);border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.55),rgba(0,0,0,0));filter:blur(2px)}
 .brand h1.long{font-size:21px}
 .subhead h1.long{font-size:21px}
 .guide{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
@@ -198,12 +205,26 @@ canvas.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:non
 .tablemode{position:fixed;inset:0;z-index:30;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
 .tmhead{display:flex;justify-content:space-between;align-items:center;font-family:var(--f-num);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:.04em}
 .tmhead .btn{background:transparent;color:var(--paper);border-color:rgba(255,255,255,.3)}
-.tmgrid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-content:center;padding:16px 0}
+.tablemode{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tmbtns{display:flex;gap:8px}
+.tmbody{flex:1;display:flex;flex-direction:column;gap:14px;padding:14px 0 6px;min-height:0}
+.tmgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-content:start}
+.tmplay{--bg:#0f1824;--paper:#172333;--ink:#e7edf3;--muted:#93a2b3;--line:#2a3a4e;--pip-soft:#3a1f22;--zone-soft:#33301f;--ok-soft:#183427;color:var(--ink);min-width:0}
+.tmplay .card{background:var(--paper);border-color:var(--line)}
+.tmplay .turn{border-color:rgba(255,255,255,.18)}
+.tmplay .btn.primary{background:#e7edf3;color:#14233a;border-color:#e7edf3}
+.tmplay .tmwin .crown{color:#fff}
+.tmplay .die{--dface:var(--die-face,#eef2f5);--dedge:var(--die-edge,#9aa8b6)}
+@media (min-width:720px) and (orientation:landscape){
+  .tmbody{flex-direction:row;align-items:flex-start}
+  .tmgrid{flex:1 1 50%;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .tmplay{flex:1 1 50%;max-width:520px}
+}
 .tmcell{background:rgba(255,255,255,.07);border-radius:16px;padding:16px;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"r n" "s s";gap:4px 10px}
 .tmcell.cur{background:var(--pip)}
 .tmrank{grid-area:r;font-family:var(--f-num);font-size:22px;opacity:.6}
 .tmname{grid-area:n;font-weight:700;font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tmscore{grid-area:s;font-family:var(--f-num);font-weight:800;font-size:clamp(48px,11vw,96px);line-height:1;font-variant-numeric:tabular-nums}
+.tmscore{grid-area:s;font-family:var(--f-num);font-weight:800;font-size:clamp(40px,9vw,84px);line-height:1;font-variant-numeric:tabular-nums}
 .tmfoot{text-align:center;font-size:18px;opacity:.85}
 .pline.lot input{background:var(--pip-soft);border-color:var(--pip)}
 .mitem.setrow{flex-direction:row;justify-content:space-between;align-items:center;gap:12px}
@@ -337,6 +358,7 @@ select.ein{width:auto}
 <body>
 <div class="wrap" id="app"></div>
 <div id="ov"></div>
+<div id="throw" aria-hidden="true"></div>
 <div id="fx" aria-live="polite"></div>
 
 <script>
@@ -1796,7 +1818,7 @@ function onMotion(e){
   const a=e.acceleration&&e.acceleration.x!=null?e.acceleration:e.accelerationIncludingGravity; if(!a) return;
   const m=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2); const thr=e.acceleration&&e.acceleration.x!=null?16:28;
   const now=Date.now(); if(m<thr||now-lastShake<1200) return;
-  if(view!=='game'||!G||G.winner||panel||showStats||showBlock) return;
+  if(view!=='game'||!G||G.winner||(panel&&panel!=='table')||showStats||showBlock) return;
   const sel=['roll','broll','rroll','xroll','boxroll','hroll','bustroll','shiproll','pokroll','jroll'].map(a=>`[data-act=${a}]:not([disabled])`).join(',')+',[data-act=cont]:not([disabled])';
   const b=document.querySelector('#app '+sel.split(',').join(',#app ')); if(!b) return;
   lastShake=now; b.click();
@@ -1953,6 +1975,7 @@ function settingsHTML(){
   <div class="menu">
     ${sw('shake','Schütteln zum Würfeln','Handy schütteln statt auf Würfeln tippen','shake')}
     ${setup.shakeErr?`<div class="err">${esc(setup.shakeErr)}</div>`:''}
+    ${sw('anim','Würfel fallen sehen','3D-Animation bei digitalen Würfen')}
     ${sw('sound','Würfelgeräusche','Würfeln, Siege, Pech')}
     ${sw('vibrate','Vibration','bei Würfen und großen Momenten (Android)')}
     ${sw('awake','Bildschirm bleibt an','solange ein Spiel läuft')}
@@ -1990,10 +2013,23 @@ function tabHTML(){
 function tableHTML(){
   const r=R(); const lowGood=isRound(r)||isBox(r);
   const o=rankOrder(r);
+  /* Der aktuelle Zug wird aus der normalen Spielansicht übernommen – alle Knöpfe funktionieren hier genauso. */
+  let play='';
+  if(G.winner){
+    const w=G.players.find(p=>p.id===G.winner);
+    play=`<section class="card turn tmwin"><div class="label">${isRound(r)?'Verloren':'Gewonnen'}</div><div class="crown">${esc(w.name)}</div>
+      <div class="row"><button class="btn" data-act="undo">Rückgängig</button><button class="btn primary" data-act="again" style="flex:2">Nochmal ${esc(r.name)}</button></div></section>`;
+  } else {
+    const box=document.createElement('div'); box.innerHTML=gameHTML(); const turn=box.querySelector('section.turn');
+    play=turn?turn.outerHTML:'';
+  }
   return `<div class="tablemode" data-act="panel" data-v="" data-self="1" role="dialog" aria-label="Tisch-Anzeige">
-    <div class="tmhead"><span>${esc(r.name)}</span><button class="btn small" data-act="panel" data-v="">Schließen</button></div>
-    <div class="tmgrid">${o.map((p,i)=>`<div class="tmcell ${G.players[G.cur]===p&&!G.winner?'cur':''}"><div class="tmrank">${i+1}.</div><div class="tmname">${esc(p.name)}</div><div class="tmscore">${scoreBig(r,p)}</div></div>`).join('')}</div>
-    <div class="tmfoot">${G.winner?'Spiel beendet':'Am Zug: <b>'+esc(G.players[G.cur].name)+'</b>'}${lowGood?' · wenig ist gut':''}</div>
+    <div class="tmhead"><span>${esc(r.name)}</span><span class="tmbtns"><button class="btn small" data-act="undo" ${(G.hist||[]).length?'':'disabled'}>Rückgängig</button><button class="btn small" data-act="panel" data-v="">Schließen</button></span></div>
+    <div class="tmbody">
+      <div class="tmgrid">${o.map((p,i)=>`<div class="tmcell ${G.players[G.cur]===p&&!G.winner?'cur':''}"><div class="tmrank">${i+1}.</div><div class="tmname">${esc(p.name)}</div><div class="tmscore">${scoreBig(r,p)}</div></div>`).join('')}</div>
+      <div class="tmplay">${play}</div>
+    </div>
+    ${lowGood?'<div class="tmfoot">wenig ist gut</div>':''}
   </div>`;
 }
 
@@ -2564,7 +2600,7 @@ function gameHTML(){
     <div class="tally"><span class="muted">${faces.length?`Rausgelegt: ${faces.length} Würfel`:'Noch nichts rausgelegt'}</span>
       <span>${selInvalid?'<span class="err">Nicht jeder Würfel zählt</span>':`<span class="num">+${fmt(sc.pts)}</span>`}</span></div>
     <div class="actions">
-      <button class="btn primary" data-act="cont" ${canCont?'':'disabled'}>Weiterwürfeln<span class="btnsub">${canCont?'mit '+leftAfter+' Würfeln':'erst Würfel rauslegen'}</span></button>
+      <button class="btn primary" data-act="cont" ${canCont?'':'disabled'}>Weiterwürfeln<span class="btnsub">${canCont?'mit '+leftAfter+(leftAfter===1?' Würfel':' Würfeln'):'erst Würfel rauslegen'}</span></button>
       <button class="btn" data-act="stop" ${canStop?'':'disabled'}>Aufhören<span class="btnsub">und schreiben</span></button>
       <button class="btn red wide" data-act="niete">Niete${t.pts?` – ${fmt(t.pts)} Punkte weg`:''}</button>
     </div>
@@ -2656,12 +2692,91 @@ function statsHTML(){
   </div></div>`;
 }
 
+
+/* ==========================================================
+   WÜRFEL FALLEN WIE IN ECHT (3D)
+   Jeder Würfel ist ein CSS-3D-Würfel. Er fliegt vom unteren Rand auf den
+   Tisch, überschlägt sich, prallt ab und bleibt mit der gewürfelten Zahl
+   oben liegen. Mäxchen ist ausgenommen – dort sind die Würfel geheim.
+   ========================================================== */
+/* Seite mit Zahl v nach vorn drehen: Lage der Flächen auf dem Würfel */
+const FACE_POS={1:'rotateY(0deg)',6:'rotateY(180deg)',3:'rotateY(90deg)',4:'rotateY(-90deg)',2:'rotateX(90deg)',5:'rotateX(-90deg)'};
+const FACE_TO_FRONT={1:[0,0],6:[0,180],3:[0,-90],4:[0,90],2:[-90,0],5:[90,0]};
+function rolledValues(a,before){
+  const r=R(), t=G.turn||{};
+  if(isBluff(r)) return null;
+  const notHeld=(arr)=>(arr||[]).filter((_,i)=>!before.held[i]);
+  if(a==='roll'||a==='cont') return t.roll||null;
+  if(a==='broll'||a==='rroll') return notHeld(t.roll);
+  if(a==='pokroll') return notHeld(t.dice);
+  if(a==='boxroll') return t.dice||null;
+  if(a==='hroll') return t.die?[t.die]:null;
+  if(a==='bustroll') return (G.rp&&G.turn&&t.last)?[t.last]:null;
+  if(a==='shiproll') return t.last||null;
+  if(a==='jroll') return G.raceLast?[G.raceLast.die]:null;
+  return null;
+}
+function afterRoll(a,before){
+  let vals=null; try{ vals=rolledValues(a,before); }catch(e){}
+  if(a==='bustroll'&&!vals){ const L=(G.rp&&G.rp.last)||{}; }
+  if(!vals||!vals.length||prefs.anim===false||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){ if(prefs.anim!==false){ sfx('roll'); buzz(25); } return; }
+  throwDice(vals);
+}
+function cubeHTML(){
+  return `<div class="cube">${[1,2,3,4,5,6].map(v=>`<div class="cface" style="transform:${FACE_POS[v]} translateZ(var(--half))">${PIPS[v].map(p=>`<i style="grid-area:${Math.ceil(p/3)}/${(p-1)%3+1}"></i>`).join('')}</div>`).join('')}</div>`;
+}
+let throwTimer=null;
+function throwDice(vals){
+  const layer=document.getElementById('throw'); if(!layer) return;
+  clearTimeout(throwTimer); layer.innerHTML=''; layer.classList.add('on');
+  const W=innerWidth, H=innerHeight, n=vals.length;
+  const size=Math.round(Math.min(78, Math.max(46, W/(n+2.2))));
+  layer.style.setProperty('--size',size+'px'); layer.style.setProperty('--half',(size/2)+'px');
+  /* Landeplätze: locker verteilt in der Bildmitte, ohne Überlappung */
+  const spots=[]; const cx=W/2, cy=H*0.46, spreadX=Math.min(W*0.36, n*size*0.75), spreadY=Math.min(H*0.14,size*1.3);
+  for(let i=0;i<n;i++){ let x,y,k=0; do{ x=cx+(Math.random()*2-1)*spreadX; y=cy+(Math.random()*2-1)*spreadY; k++; } while(k<40&&spots.some(s=>Math.hypot(s[0]-x,s[1]-y)<size*1.25)); spots.push([x,y]); }
+  sfx('roll'); buzz(20);
+  vals.forEach((v,i)=>{
+    const wrap=document.createElement('div'); wrap.className='cubewrap'; wrap.innerHTML=cubeHTML(); layer.appendChild(wrap);
+    const cube=wrap.firstChild;
+    const [x,y]=spots[i]; const sx=W*(0.25+Math.random()*0.5), sy=H+size*1.5;
+    const z=(Math.random()*40-20);
+    /* Flugbahn: von unten hoch, Aufprall, kleiner Hüpfer, Ausrollen */
+    const midX=x+(sx-x)*0.25, delay=i*45, dur=900+Math.random()*250;
+    wrap.animate([
+      {transform:`translate(${sx-size/2}px,${sy}px) scale(1.35)`, offset:0},
+      {transform:`translate(${midX-size/2}px,${y-size*2.2-size/2}px) scale(1.15)`, offset:.38},
+      {transform:`translate(${x-size/2+(sx>x?6:-6)}px,${y-size/2}px) scale(1)`, offset:.62},
+      {transform:`translate(${x-size/2+(sx>x?3:-3)}px,${y-size*0.35-size/2}px) scale(1.04)`, offset:.76},
+      {transform:`translate(${x-size/2}px,${y-size/2}px) scale(1)`, offset:1}
+    ],{duration:dur,delay,easing:'cubic-bezier(.3,.7,.4,1)',fill:'both'});
+    const [fx,fy]=FACE_TO_FRONT[v]; const spinX=360*(2+Math.floor(Math.random()*2)), spinY=360*(1+Math.floor(Math.random()*2));
+    const rx0=Math.random()*360, ry0=Math.random()*360;
+    cube.animate([
+      {transform:`rotateZ(0deg) rotateX(${rx0}deg) rotateY(${ry0}deg)`},
+      {transform:`rotateZ(${z*0.5}deg) rotateX(${fx+spinX*0.55}deg) rotateY(${fy+spinY*0.6}deg)`, offset:.62},
+      {transform:`rotateZ(${z}deg) rotateX(${fx+8}deg) rotateY(${fy-6}deg)`, offset:.82},
+      {transform:`rotateZ(${z}deg) rotateX(${fx}deg) rotateY(${fy}deg)`}
+    ],{duration:dur,delay,easing:'cubic-bezier(.25,.6,.35,1)',fill:'both'});
+    /* Aufprall-Klacken */
+    setTimeout(()=>{ const c=audio(); if(c&&prefs.sound!==false){ noiseBurst(c,c.currentTime,0.04,900+Math.random()*500,0.6); } },delay+dur*0.62);
+    const sh=document.createElement('div'); sh.className='cubeshadow'; sh.style.left=(x-size*0.5)+'px'; sh.style.top=(y+size*0.42)+'px'; sh.style.width=size+'px'; layer.appendChild(sh);
+    sh.animate([{opacity:0,transform:'scale(.4)'},{opacity:.0,transform:'scale(.5)',offset:.4},{opacity:.45,transform:'scale(1)',offset:.62},{opacity:.35,transform:'scale(.9)',offset:.76},{opacity:.45,transform:'scale(1)'}],{duration:dur,delay,fill:'both'});
+  });
+  const total=1150+n*45+750;
+  throwTimer=setTimeout(endThrow,total);
+}
+function endThrow(){ const layer=document.getElementById('throw'); if(!layer) return; clearTimeout(throwTimer); layer.classList.remove('on'); setTimeout(()=>{ if(!layer.classList.contains('on')) layer.innerHTML=''; },250); }
+document.addEventListener('pointerdown',e=>{ if(e.target.closest&&e.target.closest('#throw.on')) endThrow(); },true);
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
   if(b.dataset.self && e.target!==b) return;
   const a=b.dataset.act; audio();
-  if(ROLL_ACTS.includes(a)||(a==='cont'&&G&&G.mode==='digital')){ sfx('roll'); buzz(25); }
+  const rolling=G&&view==='game'&&(ROLL_ACTS.includes(a)||(a==='cont'&&G.mode==='digital'));
+  const before=rolling?{held:[...((G.turn&&G.turn.held)||[])], id:G.turn&&G.turn.rollId, raceN:(G.stats||{}).rolls}:null;
+  if(rolling&&prefs.anim===false){ sfx('roll'); buzz(25); }
   if(act[a]) act[a](b.dataset.v);
+  if(rolling) afterRoll(a,before);
 });
 document.addEventListener('input',e=>{
   if(e.target.matches('.pline input')) setup.names[+e.target.dataset.i]=e.target.value;
