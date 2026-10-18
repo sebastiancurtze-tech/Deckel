@@ -52,6 +52,23 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
 .wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 .wrap.wide{max-width:1180px}
+.freebtn{display:flex;flex-direction:column;align-items:center}
+.free{min-height:calc(100vh - 40px)}
+.freestep{gap:10px}
+.freestep b{font-size:26px;color:var(--ink)}
+.freezone{flex:1;min-height:52vh;border:0;background:transparent;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;cursor:pointer;border-radius:18px}
+.freezone:active{background:var(--tvtile)}
+.freedice{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;max-width:640px}
+.fz-xl .die{width:min(34vw,150px);height:min(34vw,150px);padding:min(5vw,22px);border-radius:20%}
+.fz-xl .die i{width:min(5.5vw,24px);height:min(5.5vw,24px)}
+.fz-l .die{width:min(24vw,118px);height:min(24vw,118px);padding:min(3.6vw,17px);border-radius:20%}
+.fz-l .die i{width:min(4vw,19px);height:min(4vw,19px)}
+.fz-m .die{width:min(19vw,96px);height:min(19vw,96px);padding:min(3vw,14px)}
+.fz-m .die i{width:min(3.2vw,15px);height:min(3.2vw,15px)}
+.fz-s .die{width:min(15vw,78px);height:min(15vw,78px);padding:min(2.4vw,11px)}
+.fz-s .die i{width:min(2.6vw,12px);height:min(2.6vw,12px)}
+.freesum{font-size:20px}.freesum b{font-size:42px;margin-left:6px}
+.freehint{font-size:18px;color:var(--muted)}
 .tv{background:var(--tvbg);color:var(--ink);display:flex;flex-direction:column;gap:10px;min-height:calc(100vh - 40px)}
 .tvhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .tvhead h1{color:var(--ink)}
@@ -1870,6 +1887,7 @@ function onMotion(e){
   const a=e.acceleration&&e.acceleration.x!=null?e.acceleration:e.accelerationIncludingGravity; if(!a) return;
   const m=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2); const thr=e.acceleration&&e.acceleration.x!=null?16:28;
   const now=Date.now(); if(m<thr||now-lastShake<1200) return;
+  if(view==='free'){ const now2=Date.now(); lastShake=now2; act.freeroll(); return; }
   if(view!=='game'||!G||G.winner||(panel&&panel!=='table')||showStats||showBlock) return;
   const sel=['roll','broll','rroll','xroll','boxroll','hroll','bustroll','shiproll','pokroll','jroll'].map(a=>`[data-act=${a}]:not([disabled])`).join(',')+',[data-act=cont]:not([disabled])';
   const b=document.querySelector('#app '+sel.split(',').join(',#app ')); if(!b) return;
@@ -1879,7 +1897,7 @@ function shakeListen(){ const want=!!prefs.shake; if(want&&!shakeOn){ window.add
 /* Bildschirm an */
 let wake=null;
 async function keepAwake(){
-  const want=view==='game'&&G&&!G.winner&&prefs.awake!==false&&document.visibilityState==='visible';
+  const want=(view==='free'||(view==='game'&&G&&!G.winner))&&prefs.awake!==false&&document.visibilityState==='visible';
   try{
     if(want&&!wake&&navigator.wakeLock){ wake=await navigator.wakeLock.request('screen'); wake.addEventListener('release',()=>{wake=null;}); }
     if(!want&&wake){ await wake.release(); wake=null; }
@@ -2504,10 +2522,37 @@ function tableViewHTML(){
     </div>
   </div>`;
 }
-Object.assign(setActs,{ felt(k){ if(!FELTS[k]) return; prefs.felt=k; savePrefs(); render(); } });
+Object.assign(act,{ felt(k){ if(!FELTS[k]) return; prefs.felt=k; savePrefs(); render(); } });
+
+/* ==========================================================
+   EINFACH WÜRFELN – nur Würfel, Vollbild, kein Spiel
+   ========================================================== */
+let free={dice:[]};
+function freeN(){ return Math.min(10,Math.max(1,prefs.freeN||2)); }
+function freeHTML(){
+  const F=felt(), n=freeN(), d=free.dice.length===n?free.dice:[];
+  const size=n<=2?'xl':n<=4?'l':n<=6?'m':'s';
+  return `<div class="tv free" style="${feltVars(F)}">
+    <div class="tvhead"><button class="btn small" data-act="freeback">← Zurück</button>
+      <div class="stepper freestep"><button class="btn small" data-act="freen" data-v="-1" ${n<=1?'disabled':''} aria-label="Ein Würfel weniger">−</button><b class="num">${n}</b><span class="muted small">${n===1?'Würfel':'Würfel'}</span><button class="btn small" data-act="freen" data-v="1" ${n>=10?'disabled':''} aria-label="Ein Würfel mehr">+</button></div></div>
+    <button class="freezone fz-${size}" data-act="freeroll" aria-label="Würfeln">
+      ${d.length?`<span class="freedice" data-roll="${free.id||''}">${d.map(f=>dieHTML(f)).join('')}</span><span class="freesum"><span class="muted">Summe</span> <b class="num">${d.reduce((a,b)=>a+b,0)}</b></span>`
+        :`<span class="freehint">Tippen oder Handy schütteln zum Würfeln</span>`}
+    </button>
+    <button class="btn primary big" data-act="freeroll">${n} ${n===1?'Würfel':'Würfel'} werfen</button>
+  </div>`;
+}
+Object.assign(act,{
+  freego(){ free={dice:[]}; view='free'; render(); window.scrollTo(0,0); },
+  freeback(){ view='setup'; setup.step='home'; render(); },
+  freen(d){ prefs.freeN=Math.min(10,Math.max(1,freeN()+(+d))); savePrefs(); free.dice=[]; render(); },
+  freeroll(){ const n=freeN(); free.dice=Array.from({length:n},()=>1+Math.floor(Math.random()*6)); free.id=uid();
+    render(); if(prefs.anim!==false&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)) throwDice(free.dice); else { sfx('roll'); buzz(25); } }
+});
 function render(){
   const app=$('#app');
   if(view==='editor'&&E){ document.body.classList.remove('ingame'); document.body.style.background=''; $('.wrap').classList.remove('wide'); app.innerHTML=editorHTML(); $('#ov').innerHTML=''; return; }
+  if(view==='free'){ document.body.classList.add('ingame'); document.body.style.background=felt().bg; document.documentElement.style.background=felt().bg; $('.wrap').classList.add('wide'); app.innerHTML=freeHTML(); $('#ov').innerHTML=''; keepAwake(); return; }
   const ingame=!(view==='setup'||!G)&&!(view==='editor'&&E);
   document.body.classList.toggle('ingame',ingame); document.body.style.background=ingame?felt().bg:''; document.documentElement.style.background=ingame?felt().bg:''; $('.wrap').classList.toggle('wide',ingame);
   if(view==='setup'||!G){ app.innerHTML=setupHTML(); $('#ov').innerHTML=share?shareHTML():setup.eveningOpen?eveningHTML():''; keepAwake(); return; }
@@ -2643,6 +2688,7 @@ function setupHTML(){
     <p class="muted" style="margin:0">Punkte zählen für eure Spieleabende – mit euren Hausregeln</p>
   </div>
   <button class="btn primary big" data-act="go" data-v="pick">Neues Spiel</button>
+  <button class="btn big freebtn" data-act="freego">Einfach würfeln<span class="btnsub">nur Würfel, ohne Spiel und Namen</span></button>
   <div class="menu">
     ${canOnline?`<button class="mitem" data-act="go" data-v="join"><b>Spiel beitreten</b><span class="muted small">mit dem Code eines anderen Handys</span></button>`:''}
     <button class="mitem" data-act="go" data-v="history"><b>Statistik & Erfolge</b><span class="muted small">${(prefs.history||[]).length?(prefs.history.length+' Spiele, ewige Tabelle, Spieleabend teilen'):'Siege über alle Spieleabende'}</span></button>
