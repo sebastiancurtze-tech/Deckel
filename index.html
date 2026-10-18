@@ -159,6 +159,56 @@ button.die{padding:6px}
 .crown{font-family:var(--f-num);font-weight:800;font-size:40px;line-height:1}
 .err{color:var(--pip);font-size:14px}
 .small{font-size:13px}
+#fx{position:fixed;inset:0;display:grid;place-items:center;pointer-events:none;z-index:40;padding:24px}
+#fx .fxcard{background:var(--ink);color:var(--paper);border-radius:18px;padding:22px 26px;text-align:center;max-width:360px;transform:scale(.7) rotate(-3deg);opacity:0;transition:transform .25s cubic-bezier(.2,1.6,.4,1),opacity .2s;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+#fx.on .fxcard{transform:scale(1) rotate(-2deg);opacity:1}
+#fx .fxtitle{font-family:var(--f-num);font-weight:800;font-size:46px;line-height:1;text-transform:uppercase;letter-spacing:.02em}
+#fx .fxsub{margin-top:8px;font-size:15px;opacity:.85}
+#fx .fx-burn .fxtitle,#fx .fx-schockout .fxtitle,#fx .fx-lose .fxtitle,#fx .fx-caught .fxtitle{color:#ff7a6e}
+#fx .fx-win,#fx .fx-shut,#fx .fx-kniffel{background:var(--pip);color:#fff}
+#fx .fx-ach{background:var(--zone);color:#14233a}
+#fx .fx-ach .fxtitle{font-size:30px}
+#fx .fx-stroke{background:#f4ead2;color:#3b3f46}
+#fx .fx-stroke .fxtitle{font-size:30px}
+@media (prefers-reduced-motion:reduce){#fx .fxcard{transition:none;transform:none}}
+canvas.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:39}
+.tablemode{position:fixed;inset:0;z-index:30;background:var(--ink);color:var(--paper);display:flex;flex-direction:column;padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.tmhead{display:flex;justify-content:space-between;align-items:center;font-family:var(--f-num);font-weight:800;font-size:26px;text-transform:uppercase;letter-spacing:.04em}
+.tmhead .btn{background:transparent;color:var(--paper);border-color:rgba(255,255,255,.3)}
+.tmgrid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-content:center;padding:16px 0}
+.tmcell{background:rgba(255,255,255,.07);border-radius:16px;padding:16px;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"r n" "s s";gap:4px 10px}
+.tmcell.cur{background:var(--pip)}
+.tmrank{grid-area:r;font-family:var(--f-num);font-size:22px;opacity:.6}
+.tmname{grid-area:n;font-weight:700;font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tmscore{grid-area:s;font-family:var(--f-num);font-weight:800;font-size:clamp(48px,11vw,96px);line-height:1;font-variant-numeric:tabular-nums}
+.tmfoot{text-align:center;font-size:18px;opacity:.85}
+.pline.lot input{background:var(--pip-soft);border-color:var(--pip)}
+.mitem.setrow{flex-direction:row;justify-content:space-between;align-items:center;gap:12px}
+.setrow>span{display:flex;flex-direction:column;gap:2px}
+.sw2{width:44px;height:26px;border-radius:13px;background:var(--line);position:relative;flex:0 0 auto;transition:background .15s}
+.sw2::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--paper);transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.setrow[aria-checked="true"] .sw2{background:var(--ok)}
+.setrow[aria-checked="true"] .sw2::after{left:21px}
+.tabrow{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;flex-wrap:wrap}
+.tabname{display:flex;flex-direction:column;gap:4px;min-width:0}
+.tabname b{font-size:17px}
+.tabbtns{display:flex;gap:6px}
+.tally{max-width:100%;height:auto}
+.achrow{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
+.achrow:first-of-type{border-top:0}
+.achs{display:flex;flex-wrap:wrap;gap:6px}
+.ach{background:var(--zone-soft);border:1px solid var(--zone);border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+.tiles{display:grid;gap:6px}
+.tile{aspect-ratio:.75;border:2px solid var(--ink);background:#f4ead2;color:#3b2a12;border-radius:6px;font-family:var(--f-num);font-weight:800;font-size:22px;padding:0}
+.tile.shut{background:var(--ink);color:var(--paper);opacity:.35}
+.tile.sel{background:var(--pip);color:#fff;border-color:var(--pip);transform:translateY(-3px)}
+.tile:disabled{cursor:default}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{border:2px dashed var(--line);background:var(--bg);border-radius:12px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.slot .num{font-size:44px;font-weight:800;line-height:1}
+.slot small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.slot.set{border-style:solid;border-color:var(--ink);background:var(--paper)}
+.slot:not(:disabled):not(.set){border-color:var(--pip);background:var(--pip-soft)}
 .cup{display:grid;place-items:center;padding:6px 0}
 .cup svg{width:96px;height:88px}
 .cupwrap{min-height:100px;display:grid;place-items:center}
@@ -264,6 +314,7 @@ select.ein{width:auto}
 <body>
 <div class="wrap" id="app"></div>
 <div id="ov"></div>
+<div id="fx" aria-live="polite"></div>
 
 <script>
 (()=>{
@@ -408,6 +459,8 @@ function rulesList(r){
   if(isBlock(r)) return blockRulesList(r);
   if(isRound(r)) return roundRulesList(r);
   if(isBluff(r)) return bluffRulesList(r);
+  if(isBox(r)) return boxRulesList(r);
+  if(isHouse(r)) return houseRulesList(r);
   const L=[];
   const singles=Object.entries(r.singles).filter(([f,p])=>p).map(([f,p])=>`${f}er = ${fmt(p)}`).join(', ');
   L.push(`${r.dice} Würfel.${singles?' '+singles+'.':' Einzelne Würfel zählen nicht.'}`);
@@ -425,16 +478,16 @@ function rulesList(r){
 
 /* ---------- Zustand ---------- */
 const uid=()=>Math.random().toString(36).slice(2,9);
-function freshTurn(r){ if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
+function freshTurn(r){ if(r.type==='box') return {tiles:Array(r.tiles).fill(true),dice:null,sel:[],tsel:[],left:2,rollId:null}; if(r.type==='house') return {slots:[null,null,null],die:null,sel:[],rollId:null}; if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
 function newGame(names,tplId){
   const rules=clone(tplOf(tplId));
-  const extra=rules.type==='round'?{half:1, pool:rules.deckel, halfPlayers:[], halfLosers:[], round:{maxRolls:null,results:{},order:names.map((_,i)=>i)}}:rules.type==='bluff'?{bluff:{last:null,reveal:null}}:{};
+  const extra=rules.type==='round'?{half:1, pool:rules.deckel, halfPlayers:[], halfLosers:[], round:{maxRolls:null,results:{},order:names.map((_,i)=>i)}}:rules.type==='bluff'?{bluff:{last:null,reveal:null}}:rules.type==='box'?{box:{round:1}}:rules.type==='house'?{house:{res:{},starter:0}}:{};
   return {v:2, rev:1, code:null, mode:rules.type==='bluff'?'digital':'real', rules, ...extra,
     players:names.map(n=>({id:uid(),name:n,score:0})), cur:0,
     turn:freshTurn(rules),
     log:[{n:1,t:esc(rules.name)+' gestartet – '+esc(names[0])+' fängt an.'}], hist:[], winner:null, stats:freshStats()};
 }
-function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } return g; }
+function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } if(g.rules.type==='box') g.players.forEach(p=>{p.total=0;p.score=0;}); if(g.rules.type==='house') g.players.forEach(p=>{p.wins=0;p.score=0;}); return g; }
 function migrate(g){ if(g && !g.rules){ g.rules=clone(TEMPLATES.kubiki); } if(g && g.rules.id==='kubiki' && g.rules.forceTake===undefined) g.rules.forceTake=true; return g; }
 /* Welche Würfel eines Wurfs bringen Punkte? (für Vorauswahl bzw. Pflicht-Nehmen) */
 function scoringIdx(r,roll){
@@ -489,13 +542,15 @@ function recordEnd(){
   const r=R(), w=G.players.find(p=>p.id===G.winner); if(!w) return;
   let ranking;
   if(isRound(r)) ranking=[{n:w.name,v:'verloren'}];
-  else if(isBluff(r)) ranking=[...G.players].sort((a,b)=>r.lives?b.lives-a.lives:(a.pen||0)-(b.pen||0)).map(p=>({n:p.name,v:r.lives?p.lives+' Leben':(p.pen||0)+' Strafp.'}));
-  else ranking=[...G.players].sort((a,b)=>b.score-a.score).map(p=>({n:p.name,v:fmt(p.score)}));
+  else ranking=rankOrder(r).map(p=>({n:p.name,v:scoreLabel(r,p)}));
   prefs.history=[{at:Date.now(), game:r.name, loserGame:isRound(r), who:w.name, players:G.players.map(p=>p.name), ranking}, ...(prefs.history||[])].slice(0,200);
   savePrefs();
 }
 function commit(){
-  if(G.winner && !G.endKey){ G.endKey=uid(); recordEnd(); }
+  if(G.winner && !G.endKey){ G.endKey=uid(); recordEnd(); const w=G.players.find(p=>p.id===G.winner);
+    if(isRound(R())) celebrate('lose',w.name+' hat verloren','die nächste Runde geht auf '+w.name); else celebrate('win',w.name+' gewinnt!',R().name);
+    strokeLoser(); checkEndAch(); }
+  checkGameAch();
   G.rev=(G.rev||0)+1; saveLocal(); render();
   if(G.code && db){
     const data=JSON.parse(JSON.stringify(G));
@@ -553,7 +608,7 @@ function winText(faces){
   return f?`${(WORD[c[f]]||c[f]).toLowerCase()} ${f}er`:'den Sofortsieg';
 }
 const act={
-  mode(m){ if(G.mode===m) return; G.mode=m; if(isBlock(R())||isRound(R())||isBluff(R())) G.turn=freshTurn(R()); else { G.turn.sel=[]; G.turn.roll=null; G.turn.picked=[]; } commit(); },
+  mode(m){ if(G.mode===m) return; G.mode=m; if(isBox(R())){ const t=G.turn; t.dice=null; t.sel=[]; t.tsel=[]; } else if(isHouse(R())){ G.turn.die=null; } else if(isBlock(R())||isRound(R())||isBluff(R())) G.turn=freshTurn(R()); else { G.turn.sel=[]; G.turn.roll=null; G.turn.picked=[]; } commit(); },
   face(f){ const t=T(); if(t.sel.length>=t.left) return; t.sel=[...t.sel,+f].sort(); commit(); },
   unsel(i){ const t=T(); t.sel=t.sel.filter((_,k)=>k!==+i); commit(); },
   roll(){ const t=T(); t.roll=Array.from({length:t.left},()=>1+Math.floor(Math.random()*6)); t.picked=scoringIdx(R(),t.roll); t.rollId=uid();
@@ -591,12 +646,12 @@ const act={
     } else {
       p.score=b.nw; p.in=true;
       let t=esc(p.name)+' schreibt '+fmt(b.total)+' → <b>'+fmt(b.nw)+'</b>.';
-      if(b.burned) t=esc(p.name)+' landet auf '+fmt(b.old+b.total)+' und <span class="steal">verbrennt auf 0</span>.';
+      if(b.burned){ t=esc(p.name)+' landet auf '+fmt(b.old+b.total)+' und <span class="steal">verbrennt auf 0</span>.'; celebrate('burn','Verbrannt!',p.name+' landet auf '+fmt(b.old+b.total)+' und fällt auf 0'); }
       addLog(t);
       b.steals.forEach(i=>{
         const o=G.players[i]; const amt=rs.steal.amount; let s=Math.max(0,o.score-amt); let extra='';
         if((rs.burn||[]).includes(s)){s=0; extra=' und verbrennt auf 0'; PS(o.id).burned++;}
-        { const k=Math.min(amt,o.score); ps.stole+=k; PS(o.id).lost+=k; }
+        { const k=Math.min(amt,o.score); ps.stole+=k; ps.steals=(ps.steals||0)+1; PS(o.id).lost+=k; celebrate('steal','Geklaut!',p.name+' überholt '+o.name+' und nimmt '+k); }
         o.score=s; addLog('<span class="steal">'+esc(p.name)+' überholt '+esc(o.name)+' und klaut '+fmt(amt)+'</span> ('+esc(o.name)+': '+fmt(s)+extra+').');
       });
       if(b.win){ G.winner=p.id; addLog('<b>'+esc(p.name)+' gewinnt mit '+fmt(b.nw)+' Punkten!</b>'); }
@@ -608,6 +663,9 @@ const act={
   undo(){ const h=G.hist||[]; if(!h.length) return; const prev=h[h.length-1]; const rest=h.slice(0,-1); const rev=G.rev; if(G.endKey&&!prev.winner&&(prefs.history||[]).length){ prefs.history=prefs.history.slice(1); savePrefs(); } G={...prev,hist:rest,rev}; commit(); },
   again(){
     G.endKey=null;
+    if(isBox(R())||isHouse(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[];
+      G.players.forEach(p=>{p.total=0;p.wins=0;p.score=0;}); if(isBox(R())) G.box={round:1}; else G.house={res:{},starter:(wi+1)%G.players.length};
+      G.cur=(wi+1)%G.players.length; G.turn=freshTurn(R()); addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' fängt an.'); commit(); return; }
     if(isBluff(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[]; G.players.forEach(p=>{p.lives=R().lives; p.pen=0;});
       G.bluff={last:null,reveal:null}; G.cur=(wi+1)%G.players.length; G.turn=freshTurn(R()); addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' fängt an.'); commit(); return; }
     if(isRound(R())){ const li=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[]; G.half=1; G.halfLosers=[];
@@ -713,6 +771,8 @@ function editorHTML(){
   if(E.type==='block') return blockEditorHTML();
   if(E.type==='round') return roundEditorHTML();
   if(E.type==='bluff') return bluffEditorHTML();
+  if(E.type==='box') return boxEditorHTML();
+  if(E.type==='house') return houseEditorHTML();
   const inp=(path,{ph='',w='',mode='numeric',cls=''}={})=>`<input type="text" class="ein ${cls}" id="e_${path.replace(/\./g,'_')}" data-path="${path}" value="${esc(getPath(E,path)??'')}" placeholder="${ph}" inputmode="${mode}" autocomplete="off" ${w?`style="width:${w}"`:''}>`;
   const tog=(path,label)=>`<label class="tog"><input type="checkbox" id="e_${path.replace(/\./g,'_')}" data-path="${path}" ${getPath(E,path)?'checked':''}><span>${label}</span></label>`;
   const rows=[]; for(let k=3;k<=E.dice;k++) rows.push(k);
@@ -774,7 +834,7 @@ function editorHTML(){
 }
 function editStart(id, asNew){
   const src=tplOf(id); const custom=!!(prefs.custom||{})[id];
-  const fr=isBlock(src)?blockFromRules:isRound(src)?roundFromRules:isBluff(src)?bluffFromRules:fromRules;
+  const fr=isBlock(src)?blockFromRules:isRound(src)?roundFromRules:isBluff(src)?bluffFromRules:isBox(src)?boxFromRules:isHouse(src)?houseFromRules:fromRules;
   if(custom && !asNew){ E=fr(src,id,true); }
   else { E=fr(src,'c_'+uid(),false); E.name=src.name+' (eigene Regeln)'; }
   view='editor'; render(); window.scrollTo(0,0);
@@ -837,6 +897,7 @@ function fieldScore(fd,dice){
     case 'fullhouse': { const v=c.filter(n=>n>0).sort(); return v.length===2&&v[0]===2&&v[1]===3?fd.pts:0; }
     case 'straight': { let run=0,best=0; for(const f of FACES){ run=c[f]?run+1:0; best=Math.max(best,run); } return best>=fd.len?fd.pts:0; }
     case 'chance': return sum(dice);
+    case 'sum': return sum(dice)===fd.n?fd.n:0;
   }
   return 0;
 }
@@ -855,12 +916,13 @@ function fieldDesc(f){
     case 'fullhouse': return `Drei Gleiche und zwei Gleiche: ${fmt(f.pts)} Punkte`;
     case 'straight': return `${f.len} aufeinanderfolgende Zahlen: ${fmt(f.pts)} Punkte`;
     case 'chance': return 'Summe aller Würfel';
+    case 'sum': return `Augensumme genau ${f.n}: ${f.n} Punkte`;
   }
   return '';
 }
 function blockRulesList(r){
   const L=[`${r.dice} Würfel, bis zu ${r.rolls} ${r.rolls===1?'Wurf':'Würfe'} pro Zug. Zwischen den Würfen beliebige Würfel festhalten.`,
-    'Nach dem Zug genau ein Feld eintragen. Passt nichts, wird ein Feld mit 0 gestrichen.'];
+    r.ordered?'Die Felder werden der Reihe nach gespielt: In Runde 2 zählt nur eine 2, in Runde 3 nur eine 3 usw.':'Nach dem Zug genau ein Feld eintragen. Passt nichts, wird ein Feld mit 0 gestrichen.'];
   const up=r.fields.filter(f=>f.sec==='upper'), low=r.fields.filter(f=>f.sec==='lower');
   if(up.length) L.push(`Oben: ${up.map(f=>f.name).join(', ')} – jeweils die Summe dieser Zahl.${r.bonus&&r.bonus.pts?` Bonus +${fmt(r.bonus.pts)} ab ${fmt(r.bonus.threshold)} Punkten oben.`:''}`);
   low.forEach(f=>L.push(`${f.name}: ${fieldDesc(f)}.`));
@@ -878,12 +940,13 @@ const blockActs={
   bpick(id){
     const r=R(), p=G.players[G.cur], d=blockDice(); if(d.length!==r.dice) return;
     p.sheet=p.sheet||{}; if(p.sheet[id]!=null) return;
+    if(r.ordered){ const nx=r.fields.find(f=>p.sheet[f.id]==null); if(!nx||nx.id!==id) return; }
     const fd=r.fields.find(f=>f.id===id); if(!fd) return;
     pushHist();
     const v=fieldScore(fd,d); const before=sheetTotals(r,p.sheet);
     p.sheet[id]=v; const after=sheetTotals(r,p.sheet); p.score=after.total;
     const ps=PS(p.id); ps.turns++; if(v===0) ps.niete++; ps.best=Math.max(ps.best,v);
-    if(fd.kind==='kind'&&fd.n===r.dice&&v>0) ps.trip++;
+    if(fd.kind==='kind'&&fd.n===r.dice&&v>0){ ps.trip++; celebrate('kniffel','Kniffel!',p.name); }
     addLog(v?`${esc(p.name)} trägt <b>${fmt(v)}</b> bei ${esc(fd.name)} ein.`:`${esc(p.name)} streicht ${esc(fd.name)}.`);
     if(!before.bonus&&after.bonus) addLog(`<b>${esc(p.name)} holt den Bonus (+${fmt(after.bonus)}).</b>`);
     if(G.players.every(pl=>filled(r,pl)===r.fields.length)){
@@ -917,8 +980,9 @@ function blockGameHTML(){
       ${left>0?`<button class="btn primary" data-act="broll" style="padding:16px;font-size:17px">${t.rolls?`Weiterwürfeln (${left} übrig)`:`${r.dice} Würfel werfen`}</button>`:''}`;
   }
   const tot=sheetTotals(r,p.sheet);
-  const frow=f=>{ const v=p.sheet[f.id]; const pot=ready&&v==null?fieldScore(f,d):null;
-    return `<button class="frow ${v!=null?'done':''} ${pot===0?'zero':''}" data-act="bpick" data-v="${f.id}" ${v!=null||!ready?'disabled':''}>
+  const nextId=r.ordered?(r.fields.find(f=>p.sheet[f.id]==null)||{}).id:null;
+  const frow=f=>{ const v=p.sheet[f.id]; const lockd=r.ordered&&v==null&&f.id!==nextId; const pot=ready&&v==null&&!lockd?fieldScore(f,d):null;
+    return `<button class="frow ${v!=null?'done':''} ${pot===0?'zero':''}" data-act="bpick" data-v="${f.id}" ${v!=null||!ready||lockd?'disabled':''}>
       <span>${esc(f.name)}</span><span class="num">${v!=null?fmt(v):pot!=null?(pot?'+'+fmt(pot):'streichen'):'–'}</span></button>`; };
   const up=r.fields.filter(f=>f.sec==='upper'), low=r.fields.filter(f=>f.sec==='lower');
   return `
@@ -941,7 +1005,7 @@ function blockGameHTML(){
     ${input}
     <div class="sheet">
       ${up.length?`<div class="label">Oben <span class="muted" style="text-transform:none;letter-spacing:0">· ${fmt(tot.up)}${r.bonus&&r.bonus.pts?` von ${fmt(r.bonus.threshold)} für den Bonus${tot.bonus?' ✓':''}`:''}</span></div>${up.map(frow).join('')}`:''}
-      ${low.length?`<div class="label" style="margin-top:8px">Unten</div>${low.map(frow).join('')}`:''}
+      ${low.length?`<div class="label" style="margin-top:8px">${up.length?'Unten':'Felder'}</div>${low.map(frow).join('')}`:''}
     </div>
   </section>
   ${gameFooter()}`;
@@ -1018,7 +1082,8 @@ function decodeRules(txt){ const s=txt.trim(); const m=s.match(/(DECKEL|KUBIKI)-
 function normalizeRules(raw){
   if(!raw||typeof raw!=='object') throw 0;
   const id='c_'+uid();
-  const e=isBlock(raw)?blockFromRules(raw,id,false):isRound(raw)?roundFromRules(raw,id,false):isBluff(raw)?bluffFromRules(raw,id,false):fromRules(raw,id,false);
+  const e=isBlock(raw)?blockFromRules(raw,id,false):isRound(raw)?roundFromRules(raw,id,false):isBluff(raw)?bluffFromRules(raw,id,false):isBox(raw)?boxFromRules(raw,id,false):isHouse(raw)?houseFromRules(raw,id,false):isBlock(raw)&&raw.ordered?null:fromRules(raw,id,false);
+  if(!e) throw 0;
   e.name=String(raw.name||'Geteiltes Spiel').slice(0,40);
   const {rules,errors}=compileAny(e); if(errors.length) throw 0; return rules;
 }
@@ -1073,7 +1138,7 @@ const shareActs={
     }catch(e){ setup.importErr='Die Regeln konnten nicht gelesen werden. Bitte den Text vollständig einfügen.'; render(); }
   }
 };
-function compileAny(E){ return E.type==='block'?compileBlock(E):E.type==='round'?compileRound(E):E.type==='bluff'?compileBluff(E):compile(E); }
+function compileAny(E){ return E.type==='block'?compileBlock(E):E.type==='round'?compileRound(E):E.type==='bluff'?compileBluff(E):E.type==='box'?compileBox(E):E.type==='house'?compileHouse(E):compile(E); }
 
 /* ==========================================================
    RUNDEN-VERLIERER (Schocken-Familie)
@@ -1138,7 +1203,7 @@ function resolveRound(){
   const B=G.players[best.i], W=G.players[worst.i], r=R();
   PS(W.id).niete++;
   if(best.r.deckel==='all'){
-    addLog(`<span class="steal">${esc(B.name)} wirft Schock out!</span> ${esc(W.name)} kassiert alle Deckel.`);
+    addLog(`<span class="steal">${esc(B.name)} wirft Schock out!</span> ${esc(W.name)} kassiert alle Deckel.`); celebrate('schockout','Schock out!',B.name+' – '+W.name+' kassiert alle Deckel');
     W.deckel=r.deckel; G.pool=0; G.players.forEach(p=>{ if(p!==W) p.deckel=0; });
     endHalf(worst.i); return;
   }
@@ -1169,7 +1234,7 @@ const roundActs={
     pushHist();
     if(G.round.maxRolls==null) G.round.maxRolls=rolls;
     G.round.results[p.id]={dice:[...d],rolls};
-    const rk=rankThrow(d); const ps=PS(p.id); ps.turns++; if(rk.cat>=4) ps.trip++;
+    const rk=rankThrow(d); const ps=PS(p.id); ps.turns++; if(rk.cat>=4) ps.trip++; if(rk.cat===5) ps.so=(ps.so||0)+1;
     addLog(`${esc(p.name)}: ${esc(rk.label)} in ${rolls} ${rolls===1?'Wurf':'Würfen'}.`);
     const next=G.round.order.find(i=>!G.round.results[G.players[i].id]);
     if(next==null) resolveRound(); else { G.cur=next; G.turn=freshTurn(r); }
@@ -1344,7 +1409,7 @@ const bluffActs={
     const amt=(claim===21||actual===21)&&r.maexDouble?2:1;
     G.bluff.reveal={dice:b.last.dice, claim, by:G.players[me].id, of:b.last.pid, honest};
     addLog(`${esc(G.players[me].name)} deckt auf: ${esc(bLabel(r,actual))} statt ${esc(bLabel(r,claim))} angesagt.`);
-    if(!honest) PS(G.players[me].id).stole++;
+    if(!honest){ PS(G.players[me].id).stole++; celebrate('caught','Erwischt!',G.players[prevIdx].name+' hat geblufft'); }
     bluffPenalty(honest?me:prevIdx, amt, honest?'die Ansage stimmte':'beim Bluffen erwischt');
     commit(); },
   xclaim(v){ v=+v; const r=R(), b=G.bluff, t=T(); if(!t.dice) return;
@@ -1469,7 +1534,507 @@ Object.assign(editActs,{
   emaex(v){ E.maexBelieve=v==='accept'?'accept':'match'; render(); }
 });
 
-Object.assign(act, editActs, blockActs, shareActs, roundActs, bluffActs);
+/* ==========================================================
+   NEUE SPIELE
+   ========================================================== */
+/* Chicago: Block-Spiel mit Pflichtreihenfolge (Felder werden der Reihe nach gefüllt) */
+TEMPLATES.chicago={
+  id:'chicago', type:'block', name:'Chicago', noEdit:true, ordered:true,
+  tagline:'11 Runden mit 2 Würfeln: In Runde 2 bis 12 zählt nur, wer genau die Rundenzahl würfelt.',
+  dice:2, rolls:1, bonus:null,
+  fields:[2,3,4,5,6,7,8,9,10,11,12].map(n=>({id:'s'+n,name:'Runde '+n,sec:'lower',kind:'sum',n}))
+};
+/* Shut the Box */
+TEMPLATES.shutbox={
+  id:'shutbox', type:'box', name:'Shut the Box', tiles:9, rounds:3, oneDie:true, shutWins:true,
+  tagline:'Klappen 1 bis 9 zuklappen: Würfeln, passende Klappen schließen. Wenig Rest gewinnt.'
+};
+/* Hausnummer */
+TEMPLATES.hausnummer={
+  id:'hausnummer', type:'house', name:'Hausnummer', low:false, target:5,
+  tagline:'Drei Würfe, drei Stellen: Jede Zahl sofort auf Hunderter, Zehner oder Einer legen. Die höchste Nummer gewinnt die Runde.'
+};
+const isBox=r=>r&&r.type==='box', isHouse=r=>r&&r.type==='house';
+
+/* ---------- Shut the Box ---------- */
+function boxNeedOne(r,t){ return r.oneDie && t.tiles.slice(6).every(x=>!x); }
+function boxDice(){ const t=T(), r=R(); const n=boxNeedOne(r,t)?1:2; return G.mode==='digital'?(t.dice||null):(t.sel.length===n?t.sel:null); }
+function canClose(open,target,start=0){ if(target===0) return true; for(let i=start;i<open.length;i++){ if(open[i]<=target && canClose(open,target-open[i],i+1)) return true; } return false; }
+function boxRulesList(r){
+  return [`Klappen 1 bis ${r.tiles} sind offen. Würfeln und offene Klappen schließen, deren Summe genau der Augensumme entspricht.`,
+    r.oneDie?'Sind 7, 8 und 9 zu, darf man mit nur einem Würfel weiterwürfeln.':'Es wird immer mit zwei Würfeln gewürfelt.',
+    'Geht nichts mehr, ist der Zug vorbei. Die Summe der offenen Klappen sind deine Punkte.',
+    r.shutWins?'Wer alle Klappen schließt („Shut the Box“), gewinnt sofort.':'Wer alle Klappen schließt, bekommt 0 Punkte.',
+    `Nach ${r.rounds} ${r.rounds===1?'Runde':'Runden'} gewinnt, wer insgesamt die wenigsten Punkte hat.`];
+}
+function boxEndTurn(score){
+  const r=R(), p=G.players[G.cur]; p.total=(p.total||0)+score; p.score=p.total;
+  const ps=PS(p.id); ps.turns++; if(score===0) ps.trip++; ps.best=Math.max(ps.best,score);
+  if(G.cur===G.players.length-1){
+    if(G.box.round>=r.rounds){ const w=[...G.players].sort((a,b)=>a.total-b.total)[0]; G.winner=w.id; addLog(`<b>${esc(w.name)} gewinnt mit ${w.total} Punkten Rest!</b>`); return; }
+    G.box.round++; addLog(`Runde ${G.box.round} beginnt.`);
+  }
+  G.cur=(G.cur+1)%G.players.length; G.turn=freshTurn(r);
+}
+const boxActs={
+  boxroll(){ const t=T(), r=R(); if(t.dice) return; const n=boxNeedOne(r,t)?1:2;
+    t.dice=Array.from({length:n},()=>1+Math.floor(Math.random()*6)); t.rollId=uid(); t.tsel=[];
+    const s=ST(); t.dice.forEach(f=>s.faces[f]++); s.dice+=n; s.rolls++; commit(); },
+  boxtile(n){ n=+n; const t=T(); if(!t.tiles[n-1]) return; t.tsel=t.tsel.includes(n)?t.tsel.filter(x=>x!==n):[...t.tsel,n]; commit(); },
+  boxshut(){ const t=T(), r=R(), d=boxDice(); if(!d) return; const s=sum(d);
+    if(sum(t.tsel)!==s) return; pushHist();
+    t.tsel.forEach(n=>t.tiles[n-1]=false); t.tsel=[]; t.dice=null; t.sel=[]; t.left=boxNeedOne(r,t)?1:2;
+    if(t.tiles.every(x=>!x)){ const p=G.players[G.cur]; addLog(`<b>${esc(p.name)} schließt die Box!</b>`); celebrate('shut','Shut the Box!',p.name);
+      if(r.shutWins){ p.total=(p.total||0); p.score=p.total; PS(p.id).turns++; PS(p.id).trip++; G.winner=p.id; addLog(`<b>${esc(p.name)} gewinnt sofort!</b>`); commit(); return; }
+      boxEndTurn(0); commit(); return; }
+    commit(); },
+  boxend(){ const t=T(); pushHist(); const rest=t.tiles.reduce((a,o,i)=>a+(o?i+1:0),0);
+    addLog(`${esc(G.players[G.cur].name)} kommt nicht weiter: ${rest} Punkte Rest.`); boxEndTurn(rest); commit(); }
+};
+function boxGameHTML(){
+  const r=R(), t=T(), p=G.players[G.cur]; const n=boxNeedOne(r,t)?1:2; t.left=n;
+  const d=boxDice(); const open=t.tiles.map((o,i)=>o?i+1:0).filter(Boolean);
+  const target=d?sum(d):0; const possible=d?canClose(open.slice().sort((a,b)=>b-a),target):true;
+  const selSum=sum(t.tsel||[]);
+  const board=`<section class="card" style="padding:8px"><div class="top" style="padding:4px 10px 6px"><span class="label">Runde ${G.box.round} von ${r.rounds}</span><span class="muted small">wenig ist gut</span></div>
+    <div class="board">${G.players.map((pl,i)=>`<div class="prow ${i===G.cur&&!G.winner?'cur':''}"><span class="rank"></span><div style="min-width:0"><div class="nm">${esc(pl.name)}</div></div><span class="sc">${pl.total||0}</span></div>`).join('')}</div></section>`;
+  const tiles=`<div class="tiles" style="grid-template-columns:repeat(${r.tiles>9?6:9},1fr)">${t.tiles.map((o,i)=>`<button class="tile ${o?'':'shut'} ${(t.tsel||[]).includes(i+1)?'sel':''}" data-act="boxtile" data-v="${i+1}" ${o&&d&&possible?'':'disabled'}>${i+1}</button>`).join('')}</div>`;
+  let input='';
+  if(G.mode==='real'){
+    const ghosts=Math.max(0,n-t.sel.length);
+    input=`<div class="dice">${t.sel.map((f,i)=>dieHTML(f,{tag:'button',attrs:`data-act="unsel" data-v="${i}"`})).join('')}${'<div class="die ghost"></div>'.repeat(ghosts)}</div>
+      ${d?'':`<div class="pad">${FACES.map(f=>dieHTML(f,{tag:'button',attrs:`data-act="face" data-v="${f}"`})).join('')}</div><p class="muted small" style="margin:0">Am Tisch mit ${n} ${n===1?'Würfel':'Würfeln'} würfeln und eintippen.</p>`}`;
+  } else {
+    input=d?`<div class="dice rolled" data-roll="${t.rollId||''}">${d.map(f=>dieHTML(f)).join('')}</div>`:`<button class="btn primary big" data-act="boxroll">${n} ${n===1?'Würfel':'Würfel'} werfen</button>`;
+  }
+  return `${gameTop(6)}${board}
+  <section class="card turn">
+    <div class="turnhead"><div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2></div>${d?`<div class="stat"><div class="label">Augen</div><div class="big num">${target}</div></div>`:''}</div>
+    <div class="seg" role="group" aria-label="Würfel"><button data-act="mode" data-v="real" aria-pressed="${G.mode==='real'}">Echte Würfel</button><button data-act="mode" data-v="digital" aria-pressed="${G.mode==='digital'}">Digitale Würfel</button></div>
+    ${tiles}
+    ${input}
+    ${d&&!possible?`<div class="hint warn"><b>Kein Zug möglich.</b> ${open.reduce((a,b)=>a+b,0)} Punkte Rest.</div><button class="btn red big" data-act="boxend">Zug beenden</button>`
+      :d?`<div class="tally"><span class="muted">Klappen gewählt</span><span class="num">${selSum} / ${target}</span></div><button class="btn primary big" data-act="boxshut" ${selSum===target?'':'disabled'}>Klappen schließen</button>`:''}
+  </section>${gameFooter()}`;
+}
+function boxFromRules(r,id,isCustom){ return {type:'box', id, isCustom, confirmDel:false, name:r.name, tiles:r.tiles||9, rounds:r.rounds||3, oneDie:r.oneDie!==false, shutWins:r.shutWins!==false}; }
+function compileBox(E){ const errors=[]; if(!E.name.trim()) errors.push('Gib dem Spiel einen Namen.');
+  const r={id:E.id, type:'box', name:E.name.trim()||'Eigenes Spiel', tiles:+E.tiles, rounds:E.rounds, oneDie:!!E.oneDie, shutWins:!!E.shutWins};
+  r.tagline=`Eigenes Shut the Box: ${r.tiles} Klappen, ${r.rounds} Runden.`; return {rules:r, errors}; }
+function boxEditorHTML(){
+  return `${editorTop()}
+  <section class="card ecard"><h2 style="font-size:19px">Grundlagen</h2>
+    ${eName('z. B. Shut the Box kurz')}
+    <div class="field"><span class="label">Klappen</span><div class="seg" style="grid-template-columns:repeat(3,1fr)">${[9,10,12].map(n=>`<button data-act="eset" data-v="tiles:${n}" aria-pressed="${+E.tiles===n}">1–${n}</button>`).join('')}</div></div>
+    ${eStepper('Runden','rounds',1,10)}
+    ${eTog('oneDie','Mit einem Würfel weiter, wenn 7, 8 und 9 zu sind')}
+    ${eTog('shutWins','Wer alle Klappen schließt, gewinnt sofort')}
+  </section>${editorBottom()}`;
+}
+
+/* ---------- Hausnummer ---------- */
+function houseRulesList(r){
+  return ['Jeder würfelt dreimal mit einem Würfel und legt jede Zahl sofort auf eine freie Stelle: Hunderter, Zehner oder Einer.',
+    r.low?'Die kleinste Hausnummer gewinnt die Runde.':'Die höchste Hausnummer gewinnt die Runde.',
+    'Bei Gleichstand bekommen alle Besten den Rundensieg.',
+    `Wer zuerst ${r.target} ${r.target===1?'Runde':'Runden'} gewinnt, gewinnt das Spiel.`];
+}
+const SLOTN=['Hunderter','Zehner','Einer'];
+const houseActs={
+  hroll(){ const t=T(); if(t.die||t.slots.every(x=>x!=null)) return; t.die=1+Math.floor(Math.random()*6); t.rollId=uid(); const s=ST(); s.faces[t.die]++; s.dice++; s.rolls++; commit(); },
+  hface(f){ const t=T(); if(t.die) return; t.die=+f; commit(); },
+  hplace(i){ const t=T(), r=R(); i=+i; if(!t.die||t.slots[i]!=null) return; pushHist(); t.slots[i]=t.die; t.die=null;
+    if(t.slots.every(x=>x!=null)){
+      const p=G.players[G.cur], v=+t.slots.join(''); G.house.res[p.id]=v; PS(p.id).turns++; PS(p.id).best=Math.max(PS(p.id).best,v);
+      addLog(`${esc(p.name)}: Hausnummer <b>${v}</b>.`);
+      const done=G.players.every(pl=>G.house.res[pl.id]!=null);
+      if(done){
+        const vals=G.players.map(pl=>G.house.res[pl.id]); const best=r.low?Math.min(...vals):Math.max(...vals);
+        const ws=G.players.filter(pl=>G.house.res[pl.id]===best); ws.forEach(pl=>{ pl.wins=(pl.wins||0)+1; pl.score=pl.wins; PS(pl.id).trip++; });
+        addLog(`Runde an ${ws.map(pl=>esc(pl.name)).join(' und ')} mit ${best}.`);
+        G.house.last=G.house.res; G.house.res={};
+        const top=G.players.filter(pl=>(pl.wins||0)>=r.target).sort((a,b)=>b.wins-a.wins);
+        if(top.length===1||(top.length>1&&top[0].wins>top[1].wins)){ G.winner=top[0].id; addLog(`<b>${esc(top[0].name)} gewinnt Hausnummer!</b>`); commit(); return; }
+        G.house.starter=((G.house.starter||0)+1)%G.players.length; G.cur=G.house.starter;
+      } else G.cur=(G.cur+1)%G.players.length;
+      G.turn=freshTurn(r);
+    }
+    commit(); }
+};
+function houseGameHTML(){
+  const r=R(), t=T(), p=G.players[G.cur];
+  const board=`<section class="card" style="padding:8px"><div class="top" style="padding:4px 10px 6px"><span class="label">Rundensiege · Ziel ${r.target}</span><span class="muted small">${r.low?'kleinste':'höchste'} Nummer gewinnt</span></div>
+    <div class="board">${G.players.map((pl,i)=>{ const cur=G.house.res[pl.id], last=(G.house.last||{})[pl.id];
+      return `<div class="prow ${i===G.cur&&!G.winner?'cur':''}"><span class="rank"></span><div style="min-width:0"><div class="nm">${esc(pl.name)}</div><div class="muted small">${cur!=null?'diese Runde: '+cur:last!=null?'letzte Runde: '+last:'noch nicht dran'}</div></div><span class="sc">${pl.wins||0}</span></div>`; }).join('')}</div></section>`;
+  const slots=`<div class="slots">${t.slots.map((v,i)=>`<button class="slot ${v!=null?'set':''}" data-act="hplace" data-v="${i}" ${t.die&&v==null?'':'disabled'}><span class="num">${v!=null?v:'?'}</span><small>${SLOTN[i]}</small></button>`).join('')}</div>`;
+  let input='';
+  if(t.die){ input=`<div class="dice rolled" data-roll="${t.rollId||''}" style="justify-content:center">${dieHTML(t.die)}</div><p class="muted small" style="margin:0;text-align:center">Wohin mit der ${t.die}? Tippe eine freie Stelle an.</p>`; }
+  else if(G.mode==='real'){ input=`<div class="pad">${FACES.map(f=>dieHTML(f,{tag:'button',attrs:`data-act="hface" data-v="${f}"`})).join('')}</div><p class="muted small" style="margin:0">Am Tisch würfeln und die Zahl antippen.</p>`; }
+  else input=`<button class="btn primary big" data-act="hroll">Würfeln (${t.slots.filter(x=>x==null).length} übrig)</button>`;
+  return `${gameTop(3)}${board}
+  <section class="card turn">
+    <div class="turnhead"><div><div class="label">Am Zug</div><h2>${esc(p.name)}</h2></div></div>
+    <div class="seg" role="group" aria-label="Würfel"><button data-act="mode" data-v="real" aria-pressed="${G.mode==='real'}">Echte Würfel</button><button data-act="mode" data-v="digital" aria-pressed="${G.mode==='digital'}">Digitale Würfel</button></div>
+    ${slots}${input}
+  </section>${gameFooter()}`;
+}
+function houseFromRules(r,id,isCustom){ return {type:'house', id, isCustom, confirmDel:false, name:r.name, low:!!r.low, target:r.target||5}; }
+function compileHouse(E){ const errors=[]; if(!E.name.trim()) errors.push('Gib dem Spiel einen Namen.');
+  const r={id:E.id, type:'house', name:E.name.trim()||'Eigenes Spiel', low:!!E.low, target:E.target};
+  r.tagline=`Eigene Hausnummer: ${r.low?'kleinste':'höchste'} Zahl gewinnt, ${r.target} Rundensiege.`; return {rules:r, errors}; }
+function houseEditorHTML(){
+  return `${editorTop()}<section class="card ecard"><h2 style="font-size:19px">Grundlagen</h2>
+    ${eName('z. B. Hausnummer rückwärts')}
+    ${eStepper('Rundensiege zum Gewinnen','target',1,10)}
+    ${eTog('low','Kleinste Hausnummer gewinnt (statt höchste)')}
+  </section>${editorBottom()}`;
+}
+/* kleine Editor-Bausteine */
+function editorTop(){ return `<div class="top"><button class="btn small ghost" data-act="ecancel">← Zurück</button><span class="chip">Regel-Editor</span></div>`; }
+function editorBottom(){ return `<section class="card ecard"><h2 style="font-size:19px">So liest sich das Spiel</h2><div id="epreview">${editorPreview()}</div></section>
+  <div class="row">${E.isCustom?(E.confirmDel?`<button class="btn red" data-act="edel" data-v="1">Wirklich löschen</button><button class="btn" data-act="edel" data-v="0">Behalten</button>`:`<button class="btn ghost" data-act="edel">Spiel löschen</button>`):''}
+    <button class="btn primary" data-act="esave" style="flex:2">Speichern</button></div>`; }
+function eName(ph){ return `<label class="field"><span class="label">Name des Spiels</span><input type="text" class="ein" id="e_name" data-path="name" value="${esc(E.name)}" placeholder="${ph}" autocomplete="off"></label>`; }
+function eTog(path,label){ return `<label class="tog"><input type="checkbox" id="e_${path}" data-path="${path}" ${E[path]?'checked':''}><span>${label}</span></label>`; }
+function eStepper(label,path,min,max){ return `<div class="field"><span class="label">${label}</span><div class="stepper"><button class="btn small" data-act="estep" data-v="${path}:-1" ${E[path]<=min?'disabled':''} aria-label="weniger">−</button><b class="num">${E[path]}</b><button class="btn small" data-act="estep" data-v="${path}:1" ${E[path]>=max?'disabled':''} aria-label="mehr">+</button></div></div>`; }
+const STEP_LIM={rounds:[1,10],target:[1,10]};
+Object.assign(editActs,{
+  estep(v){ const [k,d]=v.split(':'); const [lo,hi]=STEP_LIM[k]||[1,10]; E[k]=Math.min(hi,Math.max(lo,E[k]+(+d))); render(); },
+  eset(v){ const [k,val]=v.split(':'); E[k]=val; render(); }
+});
+
+/* ---------- gemeinsame Helfer für alle Spieltypen ---------- */
+function rankOrder(r){
+  const P=[...G.players];
+  if(isBluff(r)) return P.sort((a,b)=>r.lives?b.lives-a.lives:(a.pen||0)-(b.pen||0));
+  if(isRound(r)) return P.sort((a,b)=>(a.deckel||0)-(b.deckel||0));
+  if(isBox(r)) return P.sort((a,b)=>(a.total||0)-(b.total||0));
+  if(isHouse(r)) return P.sort((a,b)=>(b.wins||0)-(a.wins||0));
+  return P.sort((a,b)=>b.score-a.score);
+}
+function scoreLabel(r,p){
+  if(isBluff(r)) return r.lives?p.lives+' Leben':(p.pen||0)+' Strafp.';
+  if(isRound(r)) return (p.deckel||0)+' Deckel';
+  if(isBox(r)) return (p.total||0)+' Rest';
+  if(isHouse(r)) return (p.wins||0)+' Siege';
+  return fmt(p.score);
+}
+function scoreBig(r,p){
+  if(isBluff(r)) return r.lives?p.lives:(p.pen||0);
+  if(isRound(r)) return p.deckel||0;
+  if(isBox(r)) return p.total||0;
+  if(isHouse(r)) return p.wins||0;
+  return fmt(p.score);
+}
+
+/* ==========================================================
+   TON, VIBRATION, SCHÜTTELN, BILDSCHIRM AN
+   ========================================================== */
+let actx=null;
+function audio(){ try{ if(!actx){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; actx=new C(); } if(actx.state==='suspended') actx.resume(); return actx; }catch(e){ return null; } }
+function noiseBurst(c,t0,dur,freq,gain){
+  const len=Math.floor(c.sampleRate*dur), buf=c.createBuffer(1,len,c.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+  const src=c.createBufferSource(); src.buffer=buf;
+  const f=c.createBiquadFilter(); f.type='bandpass'; f.frequency.value=freq; f.Q.value=3;
+  const g=c.createGain(); g.gain.value=gain; src.connect(f); f.connect(g); g.connect(c.destination); src.start(t0);
+}
+function tone(c,t0,freq,dur,gain,type='triangle'){
+  const o=c.createOscillator(), g=c.createGain(); o.type=type; o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(gain,t0+.01); g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+dur+.02);
+}
+function sfx(kind){
+  if(prefs.sound===false) return; const c=audio(); if(!c) return; const t=c.currentTime;
+  if(kind==='roll'){ for(let i=0;i<7;i++) noiseBurst(c,t+i*0.045+Math.random()*0.02,0.05,1800+Math.random()*2200,0.5); }
+  else if(kind==='win'){ [523,659,784,1047].forEach((f,i)=>tone(c,t+i*0.11,f,0.35,0.18)); }
+  else if(kind==='bad'){ [330,262,196].forEach((f,i)=>tone(c,t+i*0.12,f,0.3,0.16,'sawtooth')); }
+  else if(kind==='good'){ [660,880].forEach((f,i)=>tone(c,t+i*0.09,f,0.25,0.16)); }
+  else if(kind==='tick'){ tone(c,t,1200,0.05,0.08,'square'); }
+}
+function buzz(p){ if(prefs.vibrate===false) return; try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+const ROLL_ACTS=['roll','broll','rroll','xroll','xagain','boxroll','hroll'];
+/* Schütteln */
+let lastShake=0, shakeOn=false;
+function onMotion(e){
+  const a=e.acceleration&&e.acceleration.x!=null?e.acceleration:e.accelerationIncludingGravity; if(!a) return;
+  const m=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2); const thr=e.acceleration&&e.acceleration.x!=null?16:28;
+  const now=Date.now(); if(m<thr||now-lastShake<1200) return;
+  if(view!=='game'||!G||G.winner||panel||showStats||showBlock) return;
+  const sel=['roll','broll','rroll','xroll','boxroll','hroll'].map(a=>`[data-act=${a}]:not([disabled])`).join(',')+',[data-act=cont]:not([disabled])';
+  const b=document.querySelector('#app '+sel.split(',').join(',#app ')); if(!b) return;
+  lastShake=now; b.click();
+}
+function shakeListen(){ const want=!!prefs.shake; if(want&&!shakeOn){ window.addEventListener('devicemotion',onMotion); shakeOn=true; } if(!want&&shakeOn){ window.removeEventListener('devicemotion',onMotion); shakeOn=false; } }
+/* Bildschirm an */
+let wake=null;
+async function keepAwake(){
+  const want=view==='game'&&G&&!G.winner&&prefs.awake!==false&&document.visibilityState==='visible';
+  try{
+    if(want&&!wake&&navigator.wakeLock){ wake=await navigator.wakeLock.request('screen'); wake.addEventListener('release',()=>{wake=null;}); }
+    if(!want&&wake){ await wake.release(); wake=null; }
+  }catch(e){ wake=null; }
+}
+document.addEventListener('visibilitychange',keepAwake);
+
+/* ==========================================================
+   GROSSE MOMENTE
+   ========================================================== */
+const FXQ=[]; let fxBusy=false;
+const FXKIND={burn:['bad',[80,60,200]], steal:['good',[40,40,40]], win:['win',[60,40,60,40,160]], shut:['win',[60,40,160]], schockout:['bad',[200,80,200]], kniffel:['win',[60,40,160]], caught:['bad',[120]], ach:['good',[30,30,30]], stroke:['tick',[40]], lose:['bad',[200,80,200]], good:['good',[30]]};
+function celebrate(kind,title,sub){ FXQ.push({kind,title,sub}); if(!fxBusy) setTimeout(nextFx,60); }
+function nextFx(){
+  const f=FXQ.shift(); const el=document.getElementById('fx'); if(!f||!el){ fxBusy=false; return; }
+  fxBusy=true; const [snd,vib]=FXKIND[f.kind]||['good',[30]]; sfx(snd); buzz(vib);
+  el.innerHTML=`<div class="fxcard fx-${f.kind}"><div class="fxtitle">${esc(f.title)}</div>${f.sub?`<div class="fxsub">${esc(f.sub)}</div>`:''}</div>`;
+  if(f.kind==='win'||f.kind==='shut'||f.kind==='kniffel') confetti();
+  el.classList.add('on');
+  setTimeout(()=>{ el.classList.remove('on'); setTimeout(()=>{ el.innerHTML=''; nextFx(); },260); }, f.kind==='ach'?1900:1600);
+}
+function confetti(){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c=document.createElement('canvas'); c.className='confetti'; document.body.appendChild(c);
+  const W=c.width=innerWidth*devicePixelRatio, H=c.height=innerHeight*devicePixelRatio, x=c.getContext('2d');
+  const cols=['#c8322b','#e4c66a','#2f7d4f','#2459a8','#f4ead2']; const P=Array.from({length:110},()=>({x:W/2,y:H*0.35,vx:(Math.random()-.5)*W*0.025,vy:-Math.random()*H*0.025-H*0.005,r:Math.random()*6+4,c:cols[Math.floor(Math.random()*5)],a:Math.random()*6}));
+  let fr=0; (function step(){ x.clearRect(0,0,W,H); P.forEach(p=>{ p.vy+=H*0.0009; p.x+=p.vx; p.y+=p.vy; p.a+=.2; x.save(); x.translate(p.x,p.y); x.rotate(p.a); x.fillStyle=p.c; x.fillRect(-p.r*devicePixelRatio/2,-p.r*devicePixelRatio/4,p.r*devicePixelRatio,p.r*devicePixelRatio/2); x.restore(); });
+    if(++fr<110) requestAnimationFrame(step); else c.remove(); })();
+}
+
+/* ==========================================================
+   ERFOLGE
+   ========================================================== */
+const ACH=[
+  {id:'firstwin', name:'Erster Sieg', desc:'Das erste Spiel gewonnen'},
+  {id:'wins10', name:'Seriensieger', desc:'10 Spiele gewonnen'},
+  {id:'hattrick', name:'Hattrick', desc:'3 Spiele hintereinander gewonnen'},
+  {id:'games25', name:'Stammgast', desc:'25 Spiele mitgespielt'},
+  {id:'night', name:'Nachteule', desc:'Ein Spiel nach Mitternacht beendet'},
+  {id:'burn3', name:'Brandstifter', desc:'3× verbrannt in einem Spiel'},
+  {id:'thief3', name:'Langfinger', desc:'3× geklaut in einem Spiel'},
+  {id:'bigturn', name:'Großer Wurf', desc:'Ein Zug mit mindestens 30 % der Zielpunkte'},
+  {id:'kniffel', name:'Kniffel!', desc:'Einen Kniffel geworfen'},
+  {id:'kniffel2', name:'Doppel-Kniffel', desc:'2 Kniffel in einem Spiel'},
+  {id:'bonus', name:'Bonusjäger', desc:'Den Bonus im Spielblock geholt'},
+  {id:'schockout', name:'Schock out', desc:'Drei Einsen beim Schocken'},
+  {id:'bluff5', name:'Pokerface', desc:'5 Bluffs in einem Spiel durchgebracht'},
+  {id:'catch3', name:'Lügendetektor', desc:'3 Bluffer in einem Spiel erwischt'},
+  {id:'shut', name:'Kiste zu', desc:'Alle Klappen bei Shut the Box geschlossen'},
+  {id:'house666', name:'Teufelsnummer', desc:'Hausnummer 666 gewürfelt'},
+  {id:'deckel10', name:'Großzügig', desc:'10 Runden auf dem Deckel'}
+];
+function unlock(name,id){
+  prefs.ach=prefs.ach||{}; const a=prefs.ach[name]||(prefs.ach[name]={}); if(a[id]) return false;
+  a[id]=Date.now(); savePrefs(); const d=ACH.find(x=>x.id===id); if(d) celebrate('ach','Erfolg: '+d.name,name+' – '+d.desc); return true;
+}
+function checkGameAch(){
+  if(!G) return; const r=R();
+  G.players.forEach(p=>{ const s=(G.stats&&G.stats.pl&&G.stats.pl[p.id])||null; if(!s) return;
+    if(!r.type&&(s.burned||0)>=3) unlock(p.name,'burn3');
+    if(!r.type&&(s.steals||0)>=3) unlock(p.name,'thief3');
+    if(!r.type&&r.target&&s.best>=r.target*0.3) unlock(p.name,'bigturn');
+    if(isBlock(r)&&!r.ordered&&s.trip>=1) unlock(p.name,'kniffel');
+    if(isBlock(r)&&!r.ordered&&s.trip>=2) unlock(p.name,'kniffel2');
+    if(isBlock(r)&&r.bonus&&p.sheet&&sheetTotals(r,p.sheet).bonus) unlock(p.name,'bonus');
+    if(isRound(r)&&(s.so||0)>=1) unlock(p.name,'schockout');
+    if(isBluff(r)&&s.trip>=5) unlock(p.name,'bluff5');
+    if(isBluff(r)&&s.stole>=3) unlock(p.name,'catch3');
+    if(isBox(r)&&s.trip>=1) unlock(p.name,'shut');
+    if(isHouse(r)&&s.best===666) unlock(p.name,'house666');
+  });
+}
+function checkEndAch(){
+  const h=prefs.history||[]; if(!h.length) return; const e=h[0];
+  if(!e.loserGame){ const wins=h.filter(x=>!x.loserGame&&x.who===e.who).length; if(wins>=1) unlock(e.who,'firstwin'); if(wins>=10) unlock(e.who,'wins10');
+    const lastThree=h.filter(x=>!x.loserGame&&x.players.includes(e.who)).slice(0,3); if(lastThree.length===3&&lastThree.every(x=>x.who===e.who)) unlock(e.who,'hattrick'); }
+  e.players.forEach(n=>{ if(h.filter(x=>x.players.includes(n)).length>=25) unlock(n,'games25'); });
+  const hr=new Date(e.at).getHours(); if(hr<5) e.players.forEach(n=>unlock(n,'night'));
+}
+
+/* ==========================================================
+   WER SCHMEISST DIE RUNDE?
+   ========================================================== */
+function loserOf(){ const r=R(); if(isRound(r)) return G.players.find(p=>p.id===G.winner); const o=rankOrder(r); return o.length>1?o[o.length-1]:null; }
+function strokeLoser(){
+  if(prefs.stroke===false) return; const L=loserOf(); if(!L) return;
+  prefs.tab=prefs.tab||{}; prefs.tab[L.name]=(prefs.tab[L.name]||0)+1; savePrefs();
+  celebrate('stroke','Strich auf den Deckel',L.name+' schmeißt die nächste Runde');
+  if(prefs.tab[L.name]>=10) unlock(L.name,'deckel10');
+}
+function tallySVG(n){
+  const groups=Math.floor(n/5), rest=n%5; let x=6, out='';
+  for(let g=0;g<groups;g++){ for(let i=0;i<4;i++) out+=`<line x1="${x+i*7}" y1="6" x2="${x+i*7+1}" y2="30"/>`; out+=`<line x1="${x-3}" y1="26" x2="${x+25}" y2="10"/>`; x+=38; }
+  for(let i=0;i<rest;i++) out+=`<line x1="${x+i*7}" y1="6" x2="${x+i*7+1}" y2="30"/>`;
+  const w=Math.max(40,x+rest*7+6);
+  return `<svg class="tally" viewBox="0 0 ${w} 36" width="${w}" height="36" aria-label="${n} Striche"><g stroke="var(--pencil)" stroke-width="3" stroke-linecap="round">${out}</g></svg>`;
+}
+const tabActs={
+  tabadd(n){ prefs.tab=prefs.tab||{}; prefs.tab[n]=(prefs.tab[n]||0)+1; savePrefs(); sfx('tick'); render(); },
+  tabpay(n){ prefs.tab=prefs.tab||{}; if(prefs.tab[n]>0) prefs.tab[n]--; if(!prefs.tab[n]) delete prefs.tab[n]; savePrefs(); sfx('good'); render(); },
+  tabnew(){ const n=(setup.tabName||'').trim(); if(!n) return; prefs.tab=prefs.tab||{}; prefs.tab[n]=(prefs.tab[n]||0); savePrefs(); setup.tabName=''; render(); }
+};
+
+/* ==========================================================
+   EINSTELLUNGEN, SICHERUNG
+   ========================================================== */
+const setActs={
+  setopt(v){ const [k]=v.split(':'); prefs[k]=prefs[k]===false?true:false; savePrefs();
+    if(k==='shake'&&prefs.shake!==true){ prefs.shake=false; }
+    render(); },
+  shake(){ const turnOn=!prefs.shake;
+    if(turnOn&&window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==='function'){
+      DeviceMotionEvent.requestPermission().then(s=>{ prefs.shake=s==='granted'; setup.shakeErr=s==='granted'?'':'Bewegungssensor wurde nicht erlaubt.'; savePrefs(); shakeListen(); render(); }).catch(()=>{ setup.shakeErr='Bewegungssensor ist hier nicht verfügbar.'; render(); });
+      return; }
+    if(turnOn&&!('DeviceMotionEvent' in window)){ setup.shakeErr='Dieses Gerät meldet keinen Bewegungssensor.'; render(); return; }
+    prefs.shake=turnOn; setup.shakeErr=''; savePrefs(); shakeListen(); render(); },
+  testsound(){ sfx('roll'); buzz([40,40,40]); },
+  backup(){
+    const data={app:'deckel',v:1,at:Date.now(),prefs:{saved:prefs.saved,custom:prefs.custom,history:prefs.history,tab:prefs.tab,ach:prefs.ach,dice:prefs.dice}};
+    const txt=JSON.stringify(data); const name=`deckel-sicherung-${new Date().toISOString().slice(0,10)}.json`;
+    setup.backupTxt=txt;
+    try{ const file=new File([txt],name,{type:'application/json'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){ navigator.share({files:[file],title:'Deckel-Sicherung'}).catch(()=>{}); render(); return; } }catch(e){}
+    try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); }catch(e){}
+    render(); },
+  restorefile(){ const i=document.getElementById('restorefile'); if(i) i.click(); },
+  restoretxt(){ restoreFrom(setup.restoreTxt||''); }
+};
+function restoreFrom(txt){
+  try{ const d=JSON.parse(txt.trim()); if(!d||d.app!=='deckel'||!d.prefs) throw 0; const p=d.prefs;
+    const hist=[...(prefs.history||[]),...(p.history||[])]; const seen=new Set(); prefs.history=hist.filter(e=>{ const k=e.at+'|'+e.game; if(seen.has(k)) return false; seen.add(k); return true; }).sort((a,b)=>b.at-a.at).slice(0,200);
+    prefs.custom={...(p.custom||{}),...(prefs.custom||{})};
+    prefs.saved=[...new Set([...(prefs.saved||[]),...(p.saved||[])])].slice(0,40);
+    const tab={...(p.tab||{})}; Object.entries(prefs.tab||{}).forEach(([k,v])=>tab[k]=Math.max(v,tab[k]||0)); prefs.tab=tab;
+    const ach={...(p.ach||{})}; Object.entries(prefs.ach||{}).forEach(([n,a])=>ach[n]={...(ach[n]||{}),...a}); prefs.ach=ach;
+    savePrefs(); setup.restoreMsg=`Wiederhergestellt: ${prefs.history.length} Spiele, ${Object.keys(prefs.custom||{}).length} eigene Spiele.`; setup.restoreErr=''; setup.restoreTxt='';
+  }catch(e){ setup.restoreErr='Das ist keine gültige Deckel-Sicherung.'; setup.restoreMsg=''; }
+  render();
+}
+document.addEventListener('change',e=>{ if(e.target.id==='restorefile'&&e.target.files[0]){ const f=new FileReader(); f.onload=()=>restoreFrom(String(f.result)); f.readAsText(e.target.files[0]); } });
+function settingsHTML(){
+  const sw=(k,label,sub,act)=>`<button class="mitem setrow" data-act="${act||'setopt'}" data-v="${k}" role="switch" aria-checked="${k==='shake'?!!prefs.shake:prefs[k]!==false}"><span><b>${label}</b><span class="muted small">${sub}</span></span><i class="sw2"></i></button>`;
+  return `${subHead('Einstellungen','home')}
+  <div class="label">Am Tisch</div>
+  <div class="menu">
+    ${sw('shake','Schütteln zum Würfeln','Handy schütteln statt auf Würfeln tippen','shake')}
+    ${setup.shakeErr?`<div class="err">${esc(setup.shakeErr)}</div>`:''}
+    ${sw('sound','Würfelgeräusche','Würfeln, Siege, Pech')}
+    ${sw('vibrate','Vibration','bei Würfen und großen Momenten (Android)')}
+    ${sw('awake','Bildschirm bleibt an','solange ein Spiel läuft')}
+    ${sw('stroke','Verlierer bekommt einen Strich','auf „Wer schmeißt die Runde?“')}
+    <button class="btn ghost small" data-act="testsound" style="align-self:flex-start">Ton testen</button>
+  </div>
+  <div class="label">Würfelfarbe</div>
+  <section class="card">${swatchesHTML()}</section>
+  <div class="label">Sicherung</div>
+  <section class="card" style="display:flex;flex-direction:column;gap:10px">
+    <p class="muted small" style="margin:0">Statistik, Erfolge, Striche und eigene Spiele liegen nur auf diesem Handy. Sichere sie als Datei, z. B. vor einem Handywechsel.</p>
+    <button class="btn" data-act="backup">Sicherung erstellen</button>
+    ${setup.backupTxt?`<p class="muted small" style="margin:0">Falls kein Speichern-Dialog kam: Text kopieren und z. B. an dich selbst schicken.</p><textarea class="ein" rows="3" readonly style="font-size:11px">${esc(setup.backupTxt)}</textarea>`:''}
+    <input type="file" id="restorefile" accept=".json,application/json,text/plain" hidden>
+    <div class="row"><button class="btn" data-act="restorefile">Sicherung laden (Datei)</button></div>
+    <textarea id="restoretxt" class="ein" rows="2" placeholder="… oder Sicherungstext hier einfügen" autocomplete="off">${esc(setup.restoreTxt||'')}</textarea>
+    <button class="btn ghost" data-act="restoretxt">Text übernehmen</button>
+    ${setup.restoreErr?`<div class="err">${esc(setup.restoreErr)}</div>`:''}${setup.restoreMsg?`<div class="hint good">${esc(setup.restoreMsg)}</div>`:''}
+    <p class="muted small" style="margin:0">Beim Laden wird zusammengeführt, nichts wird überschrieben.</p>
+  </section>`;
+}
+function tabHTML(){
+  const t=prefs.tab||{}; const names=[...new Set([...Object.keys(t),...(prefs.saved||[]).slice(0,0)])].sort((a,b)=>(t[b]||0)-(t[a]||0));
+  return `${subHead('Wer schmeißt?','home')}
+  <p class="muted" style="margin:0">Wer ein Spiel verliert, bekommt einen Strich auf den Deckel – einen pro geschuldeter Runde.</p>
+  ${names.length?`<div class="glist">${names.map(n=>`<div class="tabrow"><div class="tabname"><b>${esc(n)}</b><span class="muted small">${t[n]||0} ${t[n]===1?'Runde':'Runden'} offen</span>${t[n]?tallySVG(t[n]):''}</div>
+      <div class="tabbtns"><button class="btn small" data-act="tabpay" data-v="${esc(n)}" ${t[n]?'':'disabled'}>Bezahlt −1</button><button class="btn small ghost" data-act="tabadd" data-v="${esc(n)}">+1</button></div></div>`).join('')}</div>`
+    :`<section class="card"><p style="margin:0">Noch keine Striche. Nach dem nächsten Spiel bekommt der Verlierer automatisch einen.</p></section>`}
+  <div class="row"><input type="text" id="tabname" class="ein" placeholder="Name hinzufügen" value="${esc(setup.tabName||'')}" style="flex:2" autocomplete="off"><button class="btn" data-act="tabnew" style="flex:1">Hinzufügen</button></div>`;
+}
+
+/* ==========================================================
+   TISCH-ANZEIGE
+   ========================================================== */
+function tableHTML(){
+  const r=R(); const lowGood=isRound(r)||isBox(r);
+  const o=rankOrder(r);
+  return `<div class="tablemode" data-act="panel" data-v="" data-self="1" role="dialog" aria-label="Tisch-Anzeige">
+    <div class="tmhead"><span>${esc(r.name)}</span><button class="btn small" data-act="panel" data-v="">Schließen</button></div>
+    <div class="tmgrid">${o.map((p,i)=>`<div class="tmcell ${G.players[G.cur]===p&&!G.winner?'cur':''}"><div class="tmrank">${i+1}.</div><div class="tmname">${esc(p.name)}</div><div class="tmscore">${scoreBig(r,p)}</div></div>`).join('')}</div>
+    <div class="tmfoot">${G.winner?'Spiel beendet':'Am Zug: <b>'+esc(G.players[G.cur].name)+'</b>'}${lowGood?' · wenig ist gut':''}</div>
+  </div>`;
+}
+
+/* ==========================================================
+   STARTSPIELER AUSLOSEN
+   ========================================================== */
+let drawing=false;
+function drawStarter(){
+  const names=setup.names.map(s=>s.trim()).filter(Boolean); if(names.length<2||drawing) return; drawing=true;
+  setup.names=names; render(); const pick=Math.floor(Math.random()*names.length); const steps=names.length*3+pick; let k=0;
+  (function tick(){ const rows=document.querySelectorAll('.pline'); rows.forEach((r,i)=>r.classList.toggle('lot',i===k%names.length)); sfx('tick');
+    if(k<steps){ k++; setTimeout(tick,60+Math.pow(k/steps,3)*260); return; }
+    setTimeout(()=>{ setup.names=[...names.slice(pick),...names.slice(0,pick)]; drawing=false; render(); celebrate('good',names[pick]+' fängt an!',''); },500); })();
+}
+Object.assign(tabActs,{ draw(){ drawStarter(); } });
+
+/* ==========================================================
+   SPIELABEND ALS BILD
+   ========================================================== */
+function eveningEntries(){
+  const h=prefs.history||[]; if(!h.length) return [];
+  const out=[h[0]]; for(let i=1;i<h.length;i++){ if(out[out.length-1].at-h[i].at>4*3600e3) break; out.push(h[i]); } return out;
+}
+function drawEvening(){
+  const ev=eveningEntries(); if(!ev.length) return null;
+  const W=1080,H=1350, c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d');
+  const ink='#14233a', paper='#f8fafb', bg='#e9eef0', red='#c8322b', muted='#5d6b7c';
+  x.fillStyle=bg; x.fillRect(0,0,W,H);
+  /* Deckel */
+  x.save(); x.translate(930,175); x.rotate(-0.16); x.scale(0.82,0.82); x.fillStyle='#f4ead2'; x.strokeStyle='#d9c79c'; x.lineWidth=3;
+  x.beginPath(); for(let i=0;i<=352;i++){ const t=i/352*Math.PI*2, rr=120+5*Math.cos(44*t); x.lineTo(rr*Math.cos(t),rr*Math.sin(t)); } x.closePath(); x.fill(); x.stroke();
+  x.strokeStyle=red; x.lineWidth=6; x.beginPath(); x.arc(0,0,103,0,Math.PI*2); x.stroke(); x.lineWidth=2; x.beginPath(); x.arc(0,0,93,0,Math.PI*2); x.stroke();
+  x.strokeStyle='#3b3f46'; x.lineCap='round'; x.lineWidth=9; [-50,-30,-10,10].forEach(dx=>{ x.beginPath(); x.moveTo(dx,-35); x.lineTo(dx+2,35); x.stroke(); }); x.beginPath(); x.moveTo(-62,25); x.lineTo(24,-22); x.stroke();
+  [40,58].forEach(dx=>{ x.beginPath(); x.moveTo(dx,-35); x.lineTo(dx+2,35); x.stroke(); }); x.restore();
+  const fN="'Barlow Condensed','Arial Narrow',sans-serif", fB="'Figtree',system-ui,sans-serif";
+  x.fillStyle=ink; x.font=`800 104px ${fN}`; x.fillText('SPIELEABEND',70,190);
+  const d=new Date(ev[ev.length-1].at); x.font=`500 40px ${fB}`; x.fillStyle=muted;
+  x.fillText(d.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'})+` · ${ev.length} ${ev.length===1?'Spiel':'Spiele'}`,74,250);
+  /* Siege zählen */
+  const wins={}, played={}; ev.forEach(e=>{ e.players.forEach(n=>played[n]=1); if(!e.loserGame) wins[e.who]=(wins[e.who]||0)+1; });
+  const rows=Object.keys(played).map(n=>[n,wins[n]||0]).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const mx=Math.max(1,...rows.map(r=>r[1]));
+  x.fillStyle=paper; roundRect(x,60,300,W-120,90+rows.length*78,28); x.fill();
+  x.fillStyle=muted; x.font=`700 30px ${fB}`; x.fillText('SIEGE DES ABENDS',100,360);
+  rows.forEach(([n,w],i)=>{ const y=420+i*78; x.fillStyle=ink; x.font=`700 40px ${fB}`; x.fillText(n.slice(0,14),100,y+14);
+    const bw=w?Math.max(24,(W-560)*w/mx):0; if(bw){ x.fillStyle=i===0?red:ink; roundRect(x,420,y-18,bw,40,10); x.fill(); }
+    x.fillStyle=ink; x.font=`800 52px ${fN}`; x.fillText(String(w),430+bw+14,y+18); });
+  /* Spiele */
+  let y=300+90+rows.length*78+70; x.fillStyle=muted; x.font=`700 30px ${fB}`; x.fillText('DIE SPIELE',70,y); y+=50;
+  ev.slice().reverse().slice(0,8).forEach(e=>{ const t=new Date(e.at).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+    x.fillStyle=muted; x.font=`500 32px ${fB}`; x.fillText(t,70,y); x.fillStyle=ink; x.font=`700 36px ${fB}`; x.fillText(e.game,190,y);
+    const tw=x.measureText(e.game).width; x.font=`500 34px ${fB}`; x.fillStyle=e.loserGame?red:ink; x.fillText((e.loserGame?' – verloren: ':' – Sieg: ')+e.who,190+tw,y); y+=56; });
+  /* offene Runden */
+  const tab=Object.entries(prefs.tab||{}).filter(([n,v])=>v>0&&played[n]).sort((a,b)=>b[1]-a[1]);
+  if(tab.length&&y<H-160){ y+=20; x.fillStyle=muted; x.font=`700 30px ${fB}`; x.fillText('OFFENE RUNDEN',70,y); y+=50; x.fillStyle=ink; x.font=`600 36px ${fB}`;
+    x.fillText(tab.slice(0,4).map(([n,v])=>`${n} ${v}`).join('   ·   '),70,y); }
+  x.fillStyle=muted; x.font=`600 30px ${fB}`; x.fillText('Gezählt mit Deckel',70,H-60);
+  return c;
+}
+function roundRect(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
+let eveningImg=null;
+Object.assign(setActs,{
+  async evening(){ try{ await document.fonts.ready; }catch(e){} const c=drawEvening(); if(!c) return; eveningImg=c.toDataURL('image/png'); setup.eveningOpen=true; render(); },
+  closeevening(){ setup.eveningOpen=false; render(); },
+  shareevening(){ if(!eveningImg) return; fetch(eveningImg).then(r=>r.blob()).then(b=>{ const f=new File([b],'spieleabend.png',{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[f]})) navigator.share({files:[f],title:'Spieleabend'}).catch(()=>{});
+    else { const a=document.createElement('a'); a.href=eveningImg; a.download='spieleabend.png'; document.body.appendChild(a); a.click(); a.remove(); } }); }
+});
+function eveningHTML(){
+  return `<div class="overlay" role="dialog" aria-label="Spieleabend"><div class="card stats">
+    <div class="top"><h2 style="font-size:22px">Spieleabend</h2><button class="btn small" data-act="closeevening">Schließen</button></div>
+    <img src="${eveningImg}" alt="Zusammenfassung des Spieleabends" style="width:100%;border-radius:10px;border:1px solid var(--line)">
+    <button class="btn primary" data-act="shareevening">Teilen</button>
+    <p class="muted small" style="margin:0">Klappt das Teilen nicht: Bild lange gedrückt halten und speichern.</p>
+  </div></div>`;
+}
+Object.assign(act, editActs, blockActs, shareActs, roundActs, bluffActs, boxActs, houseActs, tabActs, setActs);
 if(!allTemplates()[prefs.tpl]) prefs.tpl='kubiki';
 
 /* ---------- Darstellung ---------- */
@@ -1491,14 +2056,24 @@ function renderTop(){
 function render(){
   const app=$('#app');
   if(view==='editor'&&E){ app.innerHTML=editorHTML(); $('#ov').innerHTML=''; return; }
-  if(view==='setup'||!G){ app.innerHTML=setupHTML(); $('#ov').innerHTML=share?shareHTML():''; return; }
-  app.innerHTML=gameHTML(); renderTop(); renderOverlay();
+  if(view==='setup'||!G){ app.innerHTML=setupHTML(); $('#ov').innerHTML=share?shareHTML():setup.eveningOpen?eveningHTML():''; keepAwake(); return; }
+  app.innerHTML=gameHTML(); renderTop(); renderOverlay(); keepAwake();
 }
 function metaOf(r){
   if(isBlock(r)) return `${r.dice} Würfel · ${r.rolls} Würfe · ${r.fields.length} Felder`;
   if(isRound(r)) return `${r.dice} Würfel · ${r.deckel} Deckel`;
   if(isBluff(r)) return `2 Würfel · Bluffen · ${r.lives?r.lives+' Leben':'Strafpunkte'}`;
+  if(isBox(r)) return `${r.tiles} Klappen · ${r.rounds} Runden · wenig gewinnt`;
+  if(isHouse(r)) return `1 Würfel · 3 Stellen · ${r.target} Rundensiege`;
   return `${r.dice} Würfel · Ziel ${r.exact?'genau ':''}${fmt(r.target)}`;
+}
+function achHTML(){
+  const a=prefs.ach||{}; const names=Object.keys(a).filter(n=>Object.keys(a[n]).length);
+  return `<section class="card"><div class="label" style="margin-bottom:8px">Erfolge</div>
+    ${names.length?names.map(n=>`<div class="achrow"><b>${esc(n)}</b><div class="achs">${ACH.filter(x=>a[n][x.id]).map(x=>`<span class="ach" title="${esc(x.desc)}">${esc(x.name)}</span>`).join('')}</div></div>`).join('')
+      :'<p class="muted small" style="margin:0">Noch keine Erfolge freigespielt.</p>'}
+    <details style="margin-top:10px"><summary class="muted small" style="cursor:pointer">Alle ${ACH.length} Erfolge ansehen</summary><ul class="rules" style="margin-top:8px">${ACH.map(x=>`<li><b>${esc(x.name)}</b> – ${esc(x.desc)}</li>`).join('')}</ul></details>
+  </section>`;
 }
 function subHead(title,back){
   return `<div class="subhead"><button class="back" data-act="go" data-v="${back}" aria-label="Zurück">←</button><h1>${esc(title)}</h1></div>`;
@@ -1528,7 +2103,7 @@ function setupHTML(){
     </section>
     <button class="btn primary big" data-act="tpl" data-v="${t.id}">Mit ${esc(t.name)} spielen</button>
     <div class="row">
-      <button class="btn" data-act="${isC?'edit':'copy'}" data-v="${t.id}">${isC?'Bearbeiten':'Anpassen'}</button>
+      ${t.noEdit?'':`<button class="btn" data-act="${isC?'edit':'copy'}" data-v="${t.id}">${isC?'Bearbeiten':'Anpassen'}</button>`}
       <button class="btn" data-act="share" data-v="${t.id}">Teilen</button>
     </div>`;
   }
@@ -1552,6 +2127,7 @@ function setupHTML(){
     </div>
     <p class="muted small" style="margin:-4px 0 0">${setup.online?'Ihr bekommt einen Code zum Koppeln. Alle sehen den Stand live.':canOnline?'Das Handy geht reihum oder liegt in der Mitte.':'Mehrere Handys koppeln kommt in einer späteren Version.'}</p>
     ${setup.err?`<div class="err">${esc(setup.err)}</div>`:''}
+    <button class="btn ghost" data-act="draw">Wer fängt an? Auslosen</button>
     <button class="btn primary big" data-act="start">Los geht's</button>`;
   }
   if(st==='join'){
@@ -1588,9 +2164,13 @@ function setupHTML(){
       <div class="label" style="margin-bottom:8px">Letzte Spiele</div>
       <ol class="log">${h.slice(0,20).map(e=>`<li><span class="num" style="min-width:86px">${d(e.at)}</span><span><b>${esc(e.game)}</b> – ${e.loserGame?'verloren hat':'gewonnen hat'} ${esc(e.who)}<span class="muted small" style="display:block">${e.ranking.map(x=>esc(x.n)+' '+esc(x.v)).join(' · ')}</span></span></li>`).join('')}</ol>
     </section>
+    <button class="btn primary" data-act="evening">Spieleabend als Bild teilen</button>
+    ${achHTML()}
     ${setup.confirmClear?`<div class="row"><button class="btn" data-act="clearhist" data-v="0">Behalten</button><button class="btn red" data-act="clearhist" data-v="1">Wirklich alles löschen</button></div>`:`<button class="btn ghost" data-act="clearhist">Statistik löschen</button>`}`
     :`<section class="card"><p style="margin:0">Noch keine abgeschlossenen Spiele.</p><p class="muted small" style="margin:6px 0 0">Sobald ein Spiel einen Sieger hat, erscheint es hier – mit ewiger Tabelle über alle Spieleabende.</p></section>`}`;
   }
+  if(st==='settings') return settingsHTML();
+  if(st==='tab') return tabHTML();
   if(st==='colors'){
     return `${subHead('Würfelfarbe','home')}
     <section class="card">${swatchesHTML()}</section>`;
@@ -1605,15 +2185,18 @@ function setupHTML(){
   <button class="btn primary big" data-act="go" data-v="pick">Neues Spiel</button>
   <div class="menu">
     ${canOnline?`<button class="mitem" data-act="go" data-v="join"><b>Spiel beitreten</b><span class="muted small">mit dem Code eines anderen Handys</span></button>`:''}
-    <button class="mitem" data-act="go" data-v="history"><b>Statistik</b><span class="muted small">${(prefs.history||[]).length?(prefs.history.length+' Spiele, ewige Tabelle'):'Siege über alle Spieleabende'}</span></button>
+    <button class="mitem" data-act="go" data-v="history"><b>Statistik & Erfolge</b><span class="muted small">${(prefs.history||[]).length?(prefs.history.length+' Spiele, ewige Tabelle, Spieleabend teilen'):'Siege über alle Spieleabende'}</span></button>
+    <button class="mitem" data-act="go" data-v="tab"><b>Wer schmeißt die Runde?</b><span class="muted small">${(()=>{const n=Object.values(prefs.tab||{}).reduce((a,b)=>a+b,0);return n?n+' '+(n===1?'Runde':'Runden')+' offen':'Striche auf dem Deckel';})()}</span></button>
     <button class="mitem" data-act="go" data-v="import"><b>Regeln empfangen</b><span class="muted small">Code oder Text von Freunden</span></button>
-    <button class="mitem" data-act="go" data-v="colors"><b>Würfelfarbe</b><span class="muted small">${esc((DICE[prefs.dice]||DICE.weiss).n)}</span></button>
+    <button class="mitem" data-act="go" data-v="settings"><b>Einstellungen</b><span class="muted small">Schütteln, Ton, Würfelfarbe, Sicherung</span></button>
   </div>`;
 }
 function gameHTML(){
   if(isBlock(R())) return blockGameHTML();
   if(isRound(R())) return roundGameHTML();
   if(isBluff(R())) return bluffGameHTML();
+  if(isBox(R())) return boxGameHTML();
+  if(isHouse(R())) return houseGameHTML();
   const rs=R(), t=T(), p=G.players[G.cur];
   const order=G.players.map((pl,i)=>({...pl,i})).sort((a,b)=>b.score-a.score);
   const rank={}; order.forEach((pl,k)=>rank[pl.i]=k+1);
@@ -1688,6 +2271,7 @@ function panelHTML(){
   const wrap=(title,body,back)=>`<div class="overlay" role="dialog" aria-label="${esc(title)}" data-act="panel" data-v="" data-self="1"><div class="card stats">
     <div class="top">${back?`<button class="back" data-act="panel" data-v="menu" aria-label="Zurück zum Menü">←</button>`:''}<h2 style="font-size:22px;flex:1">${esc(title)}</h2>${close}</div>${body}</div></div>`;
   if(panel==='menu') return wrap('Menü',`<div class="menu">
+      <button class="mitem" data-act="panel" data-v="table"><b>Tisch-Anzeige</b><span class="muted small">großer Punktestand für alle am Tisch</span></button>
       <button class="mitem" data-act="panel" data-v="stats"><b>Statistik</b><span class="muted small">Würfel und Spieler</span></button>
       ${isBlock(r)?`<button class="mitem" data-act="panel" data-v="block"><b>Spielblock</b><span class="muted small">alle Felder aller Spieler</span></button>`:''}
       <button class="mitem" data-act="panel" data-v="log"><b>Ganzer Verlauf</b><span class="muted small">${G.log.length} Einträge</span></button>
@@ -1705,16 +2289,17 @@ function panelHTML(){
 function renderOverlay(){
   const ov=$('#ov');
   if(G&&!G.winner&&isBluff(R())&&G.code&&!myPid()){ ov.innerHTML=whoamiHTML(); return; }
+  if(G&&panel==='table'){ ov.innerHTML=tableHTML(); return; }
   if(G&&panel){ ov.innerHTML=panelHTML(); return; }
   if(G&&showBlock){ ov.innerHTML=blockSheetHTML(); return; }
   if(G&&showStats){ ov.innerHTML=statsHTML(); return; }
   if(!G||!G.winner){ov.innerHTML='';return;}
   const w=G.players.find(p=>p.id===G.winner);
-  const order=isBluff(R())?[...G.players].sort((a,b)=>(R().lives?b.lives-a.lives:(a.pen||0)-(b.pen||0))):[...G.players].sort((a,b)=>b.score-a.score);
+  const order=rankOrder(R());
   ov.innerHTML=`<div class="overlay" role="dialog" aria-label="Spielende"><div class="card">
     <div class="label">${isRound(R())?'Verloren – die nächste Runde geht auf':'Gewonnen'}</div><div class="crown">${esc(w.name)}</div>
     ${isRound(R())?`<p class="muted" style="margin:0">Hälften verloren: ${(G.halfLosers||[]).map(id=>esc((G.players.find(p=>p.id===id)||{}).name||'')).join(', ')}</p>`
-      :`<ol class="log">${order.map((p,i)=>`<li><span class="num">${i+1}.</span><span style="flex:1">${esc(p.name)}</span><b class="num" style="font-size:18px">${isBluff(R())?(R().lives?p.lives+' Leben':(p.pen||0)+' Strafp.'):fmt(p.score)}</b></li>`).join('')}</ol>`}
+      :`<ol class="log">${order.map((p,i)=>`<li><span class="num">${i+1}.</span><span style="flex:1">${esc(p.name)}</span><b class="num" style="font-size:18px">${scoreLabel(R(),p)}</b></li>`).join('')}</ol>`}
     <div class="row"><button class="btn" data-act="undo">Rückgängig</button>${isBlock(R())?'<button class="btn" data-act="block">Spielblock</button>':''}<button class="btn" data-act="stats">Statistik</button></div>
     <div class="row"><button class="btn" data-act="samenew">Anderes Spiel</button><button class="btn primary" data-act="again" style="flex:2">Nochmal ${esc(R().name)}</button></div>
     <p class="muted small" style="margin:0">Beides mit denselben Spielern.</p>
@@ -1740,7 +2325,7 @@ function statsHTML(){
   const cell=(x,k)=>`<td class="${['best','trip','stole'].includes(k)&&x[k]>0&&x[k]===best(k)&&pl.length>1?'hl':''}">${fmt(x[k])}</td>`;
   const quote=x=>x.turns?Math.round(x.niete/x.turns*100)+' %':'–';
   const rs=R();
-  const cols=isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
+  const cols=isBox(rs)?[['turns','Züge'],['trip','Box zu'],['best','Höchster Rest']]:isHouse(rs)?[['turns','Runden'],['trip','Rundensiege'],['best','Beste Nummer']]:isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
     ...(rs.steal?[['stole','Geklaut'],['lost','Beklaut']]:[]), ...((rs.burn||[]).length?[['burned','Verbrannt']]:[])];
   return `<div class="overlay" role="dialog" aria-label="Statistik"><div class="card stats">
     <div class="top"><h2 style="font-size:22px">Statistik</h2><button class="btn small" data-act="closestats">Schließen</button></div>
@@ -1757,12 +2342,16 @@ function statsHTML(){
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]'); if(!b||b.disabled) return;
   if(b.dataset.self && e.target!==b) return;
-  const a=b.dataset.act; if(act[a]) act[a](b.dataset.v);
+  const a=b.dataset.act; audio();
+  if(ROLL_ACTS.includes(a)||(a==='cont'&&G&&G.mode==='digital')){ sfx('roll'); buzz(25); }
+  if(act[a]) act[a](b.dataset.v);
 });
 document.addEventListener('input',e=>{
   if(e.target.matches('.pline input')) setup.names[+e.target.dataset.i]=e.target.value;
   if(e.target.id==='joincode') setup.joinCode=e.target.value;
   if(e.target.id==='importtxt') setup.importTxt=e.target.value;
+  if(e.target.id==='tabname') setup.tabName=e.target.value;
+  if(e.target.id==='restoretxt') setup.restoreTxt=e.target.value;
   if(E && e.target.matches('[data-path]')) editorInput(e.target);
 });
 document.addEventListener('keydown',e=>{
@@ -1770,7 +2359,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target.matches('.pline input')) act.addp();
 });
 
-applyDice();
+applyDice(); shakeListen();
 /* Start: letztes Spiel auf diesem Gerät fortsetzen */
 const saved=loadLocal();
 if(saved&&saved.G&&saved.view==='game'){ G=migrate(saved.G); view='game'; }
