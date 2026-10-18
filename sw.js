@@ -1,5 +1,5 @@
 /* Deckel – offline-fähig: alle Dateien beim Installieren zwischenspeichern */
-const CACHE='deckel-v1';
+const CACHE='deckel-v2';
 const FILES=['./','index.html','manifest.webmanifest',
  'icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png',
  'fonts/barlow-condensed-latin-500-normal.woff2','fonts/barlow-condensed-latin-600-normal.woff2','fonts/barlow-condensed-latin-700-normal.woff2','fonts/barlow-condensed-latin-800-normal.woff2',

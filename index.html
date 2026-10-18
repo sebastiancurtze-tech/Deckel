@@ -302,7 +302,7 @@ const TEMPLATES={
       5:tbl(f=>f===1?'win':f*100)
     },
     specials:[],
-    carryOver:true, entry:50, target:1000, exact:true,
+    carryOver:true, forceTake:true, entry:50, target:1000, exact:true,
     burn:[555], zones:[[400,500],[600,700]],
     steal:{amount:50, protectZones:true}
   },
@@ -414,6 +414,7 @@ function rulesList(r){
   const cl=comboKeys(r).map(k=>describeCount(r,k)).filter(Boolean); if(cl.length) L.push(cl.join('. ')+'.');
   (r.specials||[]).forEach(sp=>L.push(sp.type==='straight'?`Straße ${sp.faces[0]}–${sp.faces[sp.faces.length-1]} = ${fmt(sp.pts)}.`:`Drei Paare = ${fmt(sp.pts)}.`));
   L.push(`Weiterwürfeln oder aufhören. Niete = Punkte des Zugs weg.${r.carryOver?` Alle ${r.dice} gepunktet = mit ${r.dice} weiter.`:''}`);
+  if(r.forceTake) L.push('Punktewürfel müssen genommen werden, wie sie fallen. Man darf keine Punkte liegen lassen.');
   if(r.entry) L.push(`Einstieg: Im ersten Zug mindestens ${fmt(r.entry)} Punkte, sonst Niete.`);
   if((r.burn||[]).length) L.push(`Genau ${r.burn.map(fmt).join(' oder ')} verbrennt auf 0.`);
   if((r.zones||[]).length) L.push(`Sperrzonen ${r.zones.map(([a,b])=>fmt(a)+'–'+fmt(b-1)).join(' und ')}: nur mit einem Zug auf ${r.zones.map(z=>fmt(z[1])).join(' bzw. ')} raus, sonst stehen bleiben.`);
@@ -434,7 +435,16 @@ function newGame(names,tplId){
     log:[{n:1,t:esc(rules.name)+' gestartet – '+esc(names[0])+' fängt an.'}], hist:[], winner:null, stats:freshStats()};
 }
 function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } return g; }
-function migrate(g){ if(g && !g.rules){ g.rules=clone(TEMPLATES.kubiki); } return g; }
+function migrate(g){ if(g && !g.rules){ g.rules=clone(TEMPLATES.kubiki); } if(g && g.rules.id==='kubiki' && g.rules.forceTake===undefined) g.rules.forceTake=true; return g; }
+/* Welche Würfel eines Wurfs bringen Punkte? (für Vorauswahl bzw. Pflicht-Nehmen) */
+function scoringIdx(r,roll){
+  if(special(r,roll)) return roll.map((_,i)=>i);
+  const c=counts(roll), take={};
+  for(const f of FACES){ let n=c[f], used=0;
+    for(let k=bestCombo(r,f,n); k; k=bestCombo(r,f,n)){ used+=k; n-=k; }
+    if(r.singles[f]) used+=n; take[f]=used; }
+  const out=[]; roll.forEach((f,i)=>{ if(take[f]>0){ out.push(i); take[f]--; } }); return out;
+}
 function freshStats(){return {faces:[0,0,0,0,0,0,0], dice:0, rolls:0, rollTrip:0, expTrip:0, pl:{}};}
 /* Wahrscheinlichkeit für mindestens drei Gleiche bei n Würfeln (exakt durchgezählt) */
 const P_TRIP=[0,1,2,3,4,5,6].map(n=>{ if(n<3) return 0; let hit=0,tot=6**n; for(let i=0;i<tot;i++){ const c=[0,0,0,0,0,0]; let x=i; for(let d=0;d<n;d++){c[x%6]++; x=Math.floor(x/6);} if(c.some(v=>v>=3)) hit++; } return hit/tot; });
@@ -546,10 +556,10 @@ const act={
   mode(m){ if(G.mode===m) return; G.mode=m; if(isBlock(R())||isRound(R())||isBluff(R())) G.turn=freshTurn(R()); else { G.turn.sel=[]; G.turn.roll=null; G.turn.picked=[]; } commit(); },
   face(f){ const t=T(); if(t.sel.length>=t.left) return; t.sel=[...t.sel,+f].sort(); commit(); },
   unsel(i){ const t=T(); t.sel=t.sel.filter((_,k)=>k!==+i); commit(); },
-  roll(){ const t=T(); t.roll=Array.from({length:t.left},()=>1+Math.floor(Math.random()*6)); t.picked=[]; t.rollId=uid();
+  roll(){ const t=T(); t.roll=Array.from({length:t.left},()=>1+Math.floor(Math.random()*6)); t.picked=scoringIdx(R(),t.roll); t.rollId=uid();
     const s=ST(); t.roll.forEach(f=>s.faces[f]++); s.dice+=t.roll.length; s.rolls++; s.expTrip+=P_TRIP[t.roll.length]||0; if(countTrips(t.roll)) s.rollTrip++;
     commit(); },
-  pick(i){ const t=T(); i=+i; t.picked=t.picked.includes(i)?t.picked.filter(x=>x!==i):[...t.picked,i]; commit(); },
+  pick(i){ if(R().forceTake) return; const t=T(); i=+i; t.picked=t.picked.includes(i)?t.picked.filter(x=>x!==i):[...t.picked,i]; commit(); },
   cont(){
     const r=scoreFaces(R(),selFaces()); if(!r.ok) return;
     if(r.win) return act.stop();
@@ -559,7 +569,8 @@ const act={
     recordPick(G.players[G.cur].id, selFaces());
     t.pts+=r.pts; t.left-=used;
     if(t.left===0){t.left=R().dice; addLog(esc(G.players[G.cur].name)+' hat alle Würfel gepunktet – Anschluss mit '+R().dice+' Würfeln.');}
-    t.sel=[]; t.roll=null; t.picked=[]; commit();
+    t.sel=[]; t.roll=null; t.picked=[];
+    if(G.mode==='digital') act.roll(); else commit();
   },
   stop(){
     const rs=R();
@@ -646,7 +657,7 @@ function fromRules(r,id,isCustom){
     combos,
     straight:{on:!!st, range:st?(Object.keys(STRAIGHTS).find(k=>STRAIGHTS[k].join()===st.faces.join())||'1-6'):(r.dice>=6?'1-6':'1-5'), pts:st?String(st.pts):''},
     pairs:{on:!!pr, pts:pr?String(pr.pts):''},
-    carryOver:!!r.carryOver, entry:r.entry?String(r.entry):'', target:String(r.target), exact:!!r.exact,
+    carryOver:!!r.carryOver, forceTake:!!r.forceTake, entry:r.entry?String(r.entry):'', target:String(r.target), exact:!!r.exact,
     burn:(r.burn||[]).join(', '),
     zones:(r.zones||[]).map(([a,b])=>[String(a),String(b-1)]),
     steal:{on:!!r.steal, amount:r.steal?String(r.steal.amount):'50', protect:r.steal?!!r.steal.protectZones:true}
@@ -656,7 +667,7 @@ const num=v=>{ const t=String(v??'').replace(/\./g,'').trim(); if(t==='') return
 function compile(E){
   const errors=[];
   const r={id:E.id, name:E.name.trim()||'Eigenes Spiel', tagline:'', dice:E.dice, singles:{}, combos:{}, specials:[],
-    carryOver:E.carryOver, entry:0, target:0, exact:E.exact, burn:[], zones:[], steal:null};
+    carryOver:E.carryOver, forceTake:!!E.forceTake, entry:0, target:0, exact:E.exact, burn:[], zones:[], steal:null};
   if(!E.name.trim()) errors.push('Gib dem Spiel einen Namen.');
   FACES.forEach(f=>{ const n=num(E.singles[f]); if(Number.isNaN(n)) errors.push(`Einzelwert für die ${f} ist keine Zahl.`); else if(n) r.singles[f]=n; });
   for(let k=3;k<=E.dice;k++){
@@ -718,6 +729,7 @@ function editorHTML(){
     </div>
     ${tog('exact','Ziel muss genau getroffen werden, drüber = stehen bleiben')}
     ${tog('carryOver',`Alle Würfel gepunktet = mit allen ${E.dice} weiter`)}
+    ${tog('forceTake','Punktewürfel müssen genommen werden, wie sie fallen')}
   </section>
 
   <section class="card ecard">
@@ -1619,8 +1631,8 @@ function gameHTML(){
       input=`<button class="btn primary" data-act="roll" style="padding:18px;font-size:17px">${t.left} Würfel werfen</button>`;
     } else {
       const niete=!canScore(rs,t.roll);
-      input=`<div class="dice rolled" data-roll="${t.rollId||''}">${t.roll.map((f,i)=>dieHTML(f,{tag:'button',cls:(t.picked.includes(i)?'picked':'')+(t.picked.includes(i)&&!sc.ok?' bad':''),attrs:`data-act="pick" data-v="${i}" aria-pressed="${t.picked.includes(i)}"`})).join('')}</div>
-      ${niete?`<div class="hint warn"><b>Niete!</b> Kein Würfel zählt.</div>`:`<p class="muted" style="margin:0;font-size:13px">Würfel antippen, die rausgelegt werden.</p>`}`;
+      input=`<div class="dice rolled" data-roll="${t.rollId||''}">${t.roll.map((f,i)=>dieHTML(f,{tag:'button',cls:(t.picked.includes(i)?'picked':'')+(t.picked.includes(i)&&!sc.ok?' bad':''),attrs:rs.forceTake?'tabindex="-1" style="cursor:default"':`data-act="pick" data-v="${i}" aria-pressed="${t.picked.includes(i)}"`})).join('')}</div>
+      ${niete?`<div class="hint warn"><b>Niete!</b> Kein Würfel zählt.</div>`:`<p class="muted" style="margin:0;font-size:13px">${rs.forceTake?'Alle Punktewürfel werden genommen, wie sie fallen.':'Alle Punktewürfel sind vorausgewählt. Antippen zum Abwählen.'}</p>`}`;
     }
   }
   const selInvalid=faces.length&&!sc.ok;
