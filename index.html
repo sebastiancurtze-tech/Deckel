@@ -2956,7 +2956,16 @@ render();
 </script>
 
 <script>
-if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+if('serviceWorker' in navigator){
+  /* Updates: beim Start und bei jeder Rückkehr in die App nach neuer Version schauen; neue Version sofort laden */
+  let reloading=false, hadCtrl=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(!hadCtrl){ hadCtrl=true; return; } if(reloading) return; reloading=true; location.reload(); });
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{
+    const chk=()=>reg.update().catch(()=>{});
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') chk(); });
+    setInterval(chk,30*60*1000);
+  }).catch(()=>{}));
+}
 </script>
 </body>
 </html>

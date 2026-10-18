@@ -1,5 +1,5 @@
 /* Deckel – offline-fähig: alle Dateien beim Installieren zwischenspeichern */
-const CACHE='deckel-v7';
+const CACHE='deckel-v8';
 const FILES=['./','index.html','manifest.webmanifest',
  'icons/icon-192.png','icons/icon-512.png','icons/icon-maskable-512.png','icons/apple-touch-icon.png',
  'fonts/barlow-condensed-latin-500-normal.woff2','fonts/barlow-condensed-latin-600-normal.woff2','fonts/barlow-condensed-latin-700-normal.woff2','fonts/barlow-condensed-latin-800-normal.woff2',
@@ -9,6 +9,6 @@ self.addEventListener('activate',e=>{ e.waitUntil(caches.keys().then(ks=>Promise
 /* Seite: erst Netz (für Updates), sonst Zwischenspeicher. Rest: erst Zwischenspeicher. */
 self.addEventListener('fetch',e=>{
   const r=e.request; if(r.method!=='GET') return;
-  if(r.mode==='navigate'){ e.respondWith(fetch(r).then(res=>{ const c=res.clone(); caches.open(CACHE).then(x=>x.put('index.html',c)); return res; }).catch(()=>caches.match('index.html'))); return; }
+  if(r.mode==='navigate'){ e.respondWith(fetch(r,{cache:'no-store'}).then(res=>{ const c=res.clone(); caches.open(CACHE).then(x=>x.put('index.html',c)); return res; }).catch(()=>caches.match('index.html'))); return; }
   e.respondWith(caches.match(r).then(m=>m||fetch(r)));
 });
