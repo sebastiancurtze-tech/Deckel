@@ -78,6 +78,49 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .cc.dead{opacity:.4}
 .dseq{display:flex;flex-wrap:wrap;gap:4px}
 .dseq .sq{min-width:26px}
+/* Digitale Karten */
+.pc{position:relative;display:inline-flex;flex-direction:column;justify-content:space-between;width:54px;height:78px;border-radius:7px;background:#fff;color:#1d2330;border:1px solid #c9ccd3;box-shadow:0 2px 5px rgba(0,0,0,.25);padding:3px 5px;font-family:var(--f-num);font-weight:800;flex:0 0 auto;transition:transform .15s;box-sizing:border-box}
+button.pc{cursor:pointer}
+.pc.red{color:#c8322b}
+.pcr{font-size:18px;line-height:1;display:flex;flex-direction:column;align-items:center;width:max-content;letter-spacing:-.04em}
+.pcr small{font-size:14px;line-height:1.1}
+.pcs{font-size:26px;line-height:1;align-self:center;margin-bottom:6px}
+.pc.back{background:repeating-linear-gradient(45deg,#7d1f2b 0 6px,#9c2b39 6px 12px);border:4px solid #fff}
+.pc.sel{transform:translateY(-14px);box-shadow:0 0 0 3px #f5c518,0 6px 12px rgba(0,0,0,.3)}
+.pc.dim{filter:brightness(.55) saturate(.6)}
+.hand{display:grid;margin:16px auto 4px;padding-right:46px;width:100%;box-sizing:border-box}
+.hand.empty{display:block;text-align:center;padding:10px}
+.pinfo{font-size:15px;line-height:1.45}
+.ctrump{display:inline-block;margin-right:6px;padding:2px 8px;border-radius:999px;background:var(--bg)}
+.red{color:#c8322b}
+.tv .ctrump .red,.tv .pinfo .red{color:#ff6b5e}
+.dtable{display:flex;gap:14px;align-items:center;background:rgba(0,0,0,.18);border-radius:14px;padding:12px;min-height:118px}
+.dstack{position:relative;width:86px;height:96px;flex:0 0 auto}
+.dstack .dtrump .pc{position:absolute;left:20px;top:10px;transform:rotate(90deg)}
+.dstack .dback{position:absolute;left:0;top:8px}
+.dcount{position:absolute;left:2px;bottom:-8px;font-weight:700}
+.dpairs{display:flex;flex-wrap:wrap;gap:8px 18px;flex:1;align-items:flex-start}
+.dpair{position:relative;width:64px;height:100px;border-radius:9px}
+.dpair .pc{position:absolute;left:0;top:0}
+.dpair .ddef{left:10px;top:20px;transform:rotate(8deg)}
+.dpair.tgt{box-shadow:0 0 0 3px #f5c518;cursor:pointer}
+.mpile{position:relative;flex:1;height:96px;display:flex;align-items:center;justify-content:center}
+.mpile .pc{position:absolute}
+.mpile .mp2{transform:rotate(-14deg) translateX(-14px)}.mpile .mp1{transform:rotate(7deg) translateX(8px)}.mpile .mp0{transform:rotate(-2deg)}
+.mwish{position:absolute;right:6px;top:0;font-size:30px;background:#fff;color:#1d2330;border-radius:50%;width:48px;height:48px;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.mwish.red{color:#c8322b}
+.wishes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn.wish{font-size:18px}
+.btn.wish.red{color:#c8322b}
+.trick{display:flex;gap:12px;justify-content:center;flex:1;flex-wrap:wrap}
+.tcard{display:flex;flex-direction:column;align-items:center;gap:4px}
+.tcard small{font-size:12px;color:var(--muted)}
+.skatbox{display:flex;gap:8px;align-items:center;justify-content:center;flex:1}
+.cover{display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 12px;border:2px dashed var(--line);border-radius:16px;background:transparent;color:var(--ink);width:100%;cursor:pointer}
+.cover b{font-family:var(--f-num);font-size:34px;text-transform:uppercase}
+.tag.dig{background:#c8322b;color:#fff}
+.sublabel{margin-top:4px;opacity:.85}
+
 /* Kartenspiele */
 .cform{display:flex;flex-direction:column;gap:10px}
 .cchips{display:flex;flex-wrap:wrap;gap:6px}
@@ -676,6 +719,7 @@ function rulesList(r){
   if(isRace(r)) return raceRulesList(r);
   if(isDarts(r)) return dartsRulesList(r);
   if(isCards(r)) return cardsRulesList(r);
+  if(isPlay(r)) return playRulesList(r);
   const L=[];
   const singles=Object.entries(r.singles).filter(([f,p])=>p).map(([f,p])=>`${f}er = ${fmt(p)}`).join(', ');
   L.push(`${r.dice} Würfel.${singles?' '+singles+'.':' Einzelne Würfel zählen nicht.'}`);
@@ -693,7 +737,7 @@ function rulesList(r){
 
 /* ---------- Zustand ---------- */
 const uid=()=>Math.random().toString(36).slice(2,9);
-function freshTurn(r){ if(r.type==='bust') return {total:0,rolls:0,last:null,sel:[],rollId:null}; if(r.type==='ship') return {set:[],cargo:null,last:null,rolls:0,sel:[],left:5,rollId:null}; if(r.type==='poker') return {dice:null,held:[],rolls:0,sel:[],left:5,rollId:null}; if(r.type==='race') return {sel:[]}; if(r.type==='darts') return {darts:[]}; if(r.type==='cards') return {}; if(r.type==='box') return {tiles:Array(r.tiles).fill(true),dice:null,sel:[],tsel:[],left:2,rollId:null}; if(r.type==='house') return {slots:[null,null,null],die:null,sel:[],rollId:null}; if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
+function freshTurn(r){ if(r.type==='bust') return {total:0,rolls:0,last:null,sel:[],rollId:null}; if(r.type==='ship') return {set:[],cargo:null,last:null,rolls:0,sel:[],left:5,rollId:null}; if(r.type==='poker') return {dice:null,held:[],rolls:0,sel:[],left:5,rollId:null}; if(r.type==='race') return {sel:[]}; if(r.type==='darts') return {darts:[]}; if(r.type==='cards'||r.type==='cardplay') return {}; if(r.type==='box') return {tiles:Array(r.tiles).fill(true),dice:null,sel:[],tsel:[],left:2,rollId:null}; if(r.type==='house') return {slots:[null,null,null],die:null,sel:[],rollId:null}; if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
 function newGame(names,tplId){
   const rules=clone(tplOf(tplId));
   const extra=rules.type==='round'?{half:1, pool:rules.deckel, halfPlayers:[], halfLosers:[], round:{maxRolls:null,results:{},order:names.map((_,i)=>i)}}:rules.type==='bluff'?{bluff:{last:null,reveal:null}}:rules.type==='box'?{box:{round:1}}:rules.type==='house'?{house:{res:{},starter:0}}:['bust','ship','poker'].includes(rules.type)?{rp:{res:{},starter:0}}:rules.type==='race'?{raceLast:null}:rules.type==='darts'?{dartsLast:null}:{};
@@ -703,7 +747,7 @@ function newGame(names,tplId){
     turn:freshTurn(rules),
     log:[{n:1,t:esc(rules.name)+' gestartet – '+esc(names[0])+' fängt an.'}], hist:[], winner:null, stats:freshStats()};
 }
-function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } if(g.rules.type==='box') g.players.forEach(p=>{p.total=0;p.score=0;}); if(g.rules.type==='house'||['bust','ship','poker'].includes(g.rules.type)) g.players.forEach(p=>{p.wins=0;p.score=0;}); if(g.rules.type==='race') g.players.forEach(p=>{p.pos=0;p.score=0;}); if(g.rules.type==='darts') dartsInit(g); if(g.rules.type==='cards') cardsInit(g); return g; }
+function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } if(g.rules.type==='box') g.players.forEach(p=>{p.total=0;p.score=0;}); if(g.rules.type==='house'||['bust','ship','poker'].includes(g.rules.type)) g.players.forEach(p=>{p.wins=0;p.score=0;}); if(g.rules.type==='race') g.players.forEach(p=>{p.pos=0;p.score=0;}); if(g.rules.type==='darts') dartsInit(g); if(g.rules.type==='cards') cardsInit(g); if(g.rules.type==='cardplay') cpInit(g); return g; }
 function migrate(g){ if(g && !g.rules){ g.rules=clone(TEMPLATES.kubiki); } if(g && g.rules.id==='kubiki' && g.rules.forceTake===undefined) g.rules.forceTake=true; return g; }
 /* Welche Würfel eines Wurfs bringen Punkte? (für Vorauswahl bzw. Pflicht-Nehmen) */
 function scoringIdx(r,roll){
@@ -880,6 +924,7 @@ const act={
   undo(){ const h=G.hist||[]; if(!h.length) return; const prev=h[h.length-1]; const rest=h.slice(0,-1); const rev=G.rev; if(G.endKey&&!prev.winner&&(prefs.history||[]).length){ prefs.history=prefs.history.slice(1); savePrefs(); } G={...prev,hist:rest,rev}; commit(); },
   again(){
     G.endKey=null;
+    if(isPlay(R())){ G.winner=null; G.hist=[]; if(R().kind==='skat'&&G.cp.phase!=='bid'){ G.players.forEach(p=>{p.score=0;p.wins=0;}); G.skatN=0; } G.cp.draw=false; cpDeal(G); commit(); return; }
     if(isCards(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[]; cardsInit(G); cdraft=null;
       G.cur=(wi+1)%G.players.length; G.turn={}; addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' gibt.'); commit(); return; }
     if(isDarts(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[]; dartsInit(G);
@@ -1714,9 +1759,9 @@ function bluffGameHTML(){
 function whoamiHTML(){
   return `<div class="overlay" role="dialog" aria-label="Wer bist du?"><div class="card stats">
     <h2 style="font-size:22px">Wer bist du?</h2>
-    <p class="muted" style="margin:0">Bei Mäxchen sieht jedes Handy nur die eigenen Würfel.</p>
+    <p class="muted" style="margin:0">${isPlay(R())?'Jedes Handy zeigt nur die eigenen Karten.':'Bei Mäxchen sieht jedes Handy nur die eigenen Würfel.'}</p>
     <div class="menu">${G.players.map(p=>`<button class="mitem" data-act="xme" data-v="${p.id}"><b>${esc(p.name)}</b></button>`).join('')}
-      <button class="mitem" data-act="xme" data-v="*"><b>Wir teilen uns dieses Handy</b><span class="muted small">dann zeigt es allen den Becher</span></button></div>
+      <button class="mitem" data-act="xme" data-v="*"><b>Wir teilen uns dieses Handy</b><span class="muted small">${isPlay(R())?'dann wird vor jedem Zug weitergegeben':'dann zeigt es allen den Becher'}</span></button></div>
   </div></div>`;
 }
 /* Editor */
@@ -1939,6 +1984,7 @@ function rankOrder(r){
   if(isHouse(r)||isRP(r)) return P.sort((a,b)=>(b.wins||0)-(a.wins||0));
   if(isRace(r)) return P.sort((a,b)=>(b.pos||0)-(a.pos||0));
   if(isCards(r)) return cardsRank(r);
+  if(isPlay(r)) return playRank(r);
   if(isDarts(r)) return r.game==='x01'?P.sort((a,b)=>a.score-b.score):r.game==='cricket'?P.sort((a,b)=>b.score-a.score||cClosed(b)-cClosed(a)):P.sort((a,b)=>(b.pos||0)-(a.pos||0));
   return P.sort((a,b)=>b.score-a.score);
 }
@@ -1949,6 +1995,7 @@ function scoreLabel(r,p){
   if(isHouse(r)||isRP(r)) return (p.wins||0)+' Siege';
   if(isRace(r)) return (p.pos||0)+' von '+raceSeq(r).length;
   if(isCards(r)) return cardsLabel(r,p);
+  if(isPlay(r)) return playLabel(r,p);
   if(isDarts(r)) return r.game==='x01'?p.score+' Rest':r.game==='cricket'?p.score+' Pkt.':(p.pos||0)+' von 21';
   return fmt(p.score);
 }
@@ -1959,6 +2006,7 @@ function scoreBig(r,p){
   if(isHouse(r)||isRP(r)) return p.wins||0;
   if(isRace(r)) return (p.pos||0)+'/'+raceSeq(r).length;
   if(isCards(r)) return cardsBig(r,p);
+  if(isPlay(r)) return playBig(r,p);
   if(isDarts(r)) return r.game==='atc'?numName(ATC_SEQ[Math.min(20,p.pos||0)]):p.score;
   return fmt(p.score);
 }
@@ -2889,7 +2937,7 @@ Object.assign(GUIDE,{
     tip:'Mit dem ±-Knopf trägst du Minuspunkte ein.'}
 });
 const isCards=r=>r&&r.type==='cards';
-const isLoserGame=r=>isRound(r)||(isCards(r)&&!!r.loser);
+const isLoserGame=r=>isRound(r)||((isCards(r)||(r&&r.type==='cardplay'))&&!!r.loser);
 const eur=c=>(c/100).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
 const sgn=n=>n>0?'+'+fmt(n):fmt(n);
 const pnum=s=>{ const t=String(s??'').replace(/[^\d-]/g,''); if(!t||t==='-') return null; const v=parseInt(t,10); return isNaN(v)?null:v; };
@@ -3135,13 +3183,322 @@ function cardsPageHTML(){
   const all=Object.values(allTemplates()).filter(isCards);
   const grp=[['Ohne 2 bis 5 – Skatblatt & Co.',['32','36','48']],['Mit 2 bis 5 – volles Blatt',['52','110']],['Eigene Karten',['own']],['Für jedes Spiel',['any']]];
   return `${subHead('Kartenspiele','cat')}
-  <p class="muted small" style="margin:-4px 0 0">Gespielt wird mit echten Karten – Deckel rechnet und schreibt mit.</p>
-  ${grp.map(([label,ds])=>{ const list=all.filter(t=>ds.includes(t.deck)); if(!list.length) return ''; return `<div class="label" style="margin-top:4px">${label}</div><div class="glist">${list.map(t=>`
+  <p class="muted small" style="margin:-4px 0 0">Digital direkt am Handy spielen – oder mit echten Karten, und Deckel rechnet mit.</p>
+  <div class="label" style="margin-top:4px">Am Handy spielen – digitale Karten</div><div class="glist">${Object.values(allTemplates()).filter(t=>t.type==='cardplay').map(t=>`
+    <div class="grow">
+      <button class="gpick" data-act="tpl" data-v="${t.id}"><b>${esc(t.name)} <span class="tag dig">digital</span></b><span class="muted small">${esc(cardsMeta(t))}</span></button>
+      <button class="ginfo" data-act="info" data-v="${t.id}" aria-label="Anleitung zu ${esc(t.name)}">Anleitung</button>
+    </div>`).join('')}</div>
+  <div class="label" style="margin-top:10px">Mit echten Karten – Deckel zählt mit</div>
+  ${grp.map(([label,ds])=>{ const list=all.filter(t=>ds.includes(t.deck)); if(!list.length) return ''; return `<div class="label sublabel">${label}</div><div class="glist">${list.map(t=>`
     <div class="grow">
       <button class="gpick" data-act="tpl" data-v="${t.id}"><b>${esc(t.name)}</b><span class="muted small">${esc(cardsMeta(t))}</span></button>
       <button class="ginfo" data-act="info" data-v="${t.id}" aria-label="Anleitung zu ${esc(t.name)}">Anleitung</button>
     </div>`).join('')}</div>`; }).join('')}`;
 }
+
+/* ==========================================================
+   DIGITALE KARTENSPIELE – komplett am Handy spielbar
+   Ein Handy: vor jedem Zug Sichtschutz, Handy weitergeben.
+   Mehrere Handys: jedes zeigt nur die eigenen Karten.
+   Karten sind Texte: Farbe + Wert, z. B. "h10" = Herz Zehn.
+   c = Kreuz, s = Pik, h = Herz, d = Karo · B = Bube, D = Dame, K = König, A = Ass
+   ========================================================== */
+const PT=(id,o)=>{ TEMPLATES[id]={id, type:'cardplay', cat:'Karten', noEdit:true, digital:true, ...o}; };
+PT('pdurak',{kind:'durak', name:'Durak', deck:'36', minP:2, maxP:6, loser:true, tagline:'Mit digitalen Karten: angreifen, schlagen, aufnehmen – wer zuletzt Karten hat, ist der Durak.'});
+PT('pmaumau',{kind:'maumau', name:'Mau-Mau', deck:'32', minP:2, maxP:6, tagline:'Mit digitalen Karten: Farbe auf Farbe, Wert auf Wert. 7 zieht zwei, 8 setzt aus, Bube wünscht.'});
+PT('pskat',{kind:'skat', name:'Skat', deck:'32', minP:3, maxP:3, tagline:'Mit digitalen Karten: reizen, Skat aufnehmen, drücken, Stiche spielen – Deckel rechnet ab.'});
+const HOWTO=['Am Handy: Wer dran ist, bekommt das Handy und tippt auf „Karten zeigen“. Die anderen schauen weg.','Karte antippen hebt sie an, nochmal antippen spielt sie. Erlaubte Karten sind hell, die anderen abgedunkelt.','Mit „Mehrere Handys“ (in der Claude-App) hat jeder seine Karten auf dem eigenen Handy.'];
+Object.assign(GUIDE,{
+  pdurak:{...GUIDE.durak, steps:[...GUIDE.durak.steps.slice(0,4),'Wer zuletzt noch Karten hat, ist der Durak.',...HOWTO,'Angreifen: eine oder mehrere Karten gleichen Werts antippen und „Legen“. Verteidigen: Karte antippen, die schlägt – sonst „Aufnehmen“.'],
+    tip:'Nach dem Aufnehmen dürfen die Angreifer noch passende Karten nachschieben.'},
+  pmaumau:{goal:'Als Erste:r alle Karten loswerden.', players:'2–6', time:'5–10 Min.',
+    steps:['Jeder bekommt 5 Karten. Gelegt wird gleiche Farbe oder gleicher Wert.','7: Der Nächste zieht 2 – oder legt selbst eine 7, dann zieht der Übernächste 4.','8: Der Nächste setzt aus.','Bube: passt auf alles außer einen Buben. Du wünschst dir eine Farbe.','Kannst oder willst du nicht legen, ziehst du eine Karte. Passt sie, darfst du sie gleich legen.',...HOWTO],
+    tip:'Deckel ruft „Mau“ und „Mau-Mau“ für dich.'},
+  pskat:{...GUIDE.skat, players:'3', steps:['Jeder bekommt 10 Karten, 2 liegen im Skat.','Reizen: Mittelhand sagt Werte (18, 20, 22 …), Vorhand hält mit „Ja“ oder passt. Dann reizt Hinterhand gegen den Gewinner.','Der Alleinspieler nimmt den Skat auf und drückt 2 Karten – oder spielt Hand. Dann sagt er das Spiel an.','Farbe muss bedient werden, Buben sind Trumpf (außer bei Null). Der höchste Trumpf oder die höchste Karte der ausgespielten Farbe gewinnt den Stich.','Der Alleinspieler braucht 61 Augen. Deckel zählt, rechnet den Spielwert aus und führt die Liste.',...HOWTO],
+    tip:'Überreizt? Dann ist das Spiel verloren – Deckel prüft das automatisch.'}
+});
+const isPlay=r=>r&&r.type==='cardplay';
+const SSYM={c:'♣',s:'♠',h:'♥',d:'♦'}, SNAME={c:'Kreuz',s:'Pik',h:'Herz',d:'Karo'}, RNAME={B:'Bube',D:'Dame',K:'König',A:'Ass'};
+const cs=c=>c[0], cr=c=>c.slice(1);
+const cName=c=>SNAME[cs(c)]+' '+(RNAME[cr(c)]||cr(c));
+function shuf(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const mkCards=ranks=>shuf(['c','s','h','d'].flatMap(s=>ranks.map(r=>s+r)));
+function pcHTML(c,o={}){ const red=cs(c)==='h'||cs(c)==='d'; const tag=o.act?'button':'span';
+  return `<${tag} class="pc ${red?'red':''} ${o.sel?'sel':''} ${o.dim?'dim':''} ${o.cls||''}" ${o.act?`data-act="${o.act}" data-v="${o.v??c}"`:''} aria-label="${cName(c)}"><span class="pcr">${cr(c)}<small>${SSYM[cs(c)]}</small></span><span class="pcs">${SSYM[cs(c)]}</span></${tag}>`; }
+const pcBack=(cls='')=>`<span class="pc back ${cls}" aria-hidden="true"></span>`;
+const pName=id=>esc((G.players.find(p=>p.id===id)||{}).name||'');
+let cpReveal=null, cpSel=[], cpOpt={}, cpTarget=null;
+function cpViewer(){ const cp=G.cp; const me=myPid(); if(G.code&&me&&me!=='*') return me; return cp.actor&&cpReveal===cp.actor?cp.actor:null; }
+const cpCan=()=>!G.winner&&G.cp.actor&&cpViewer()===G.cp.actor;
+function cpSetActor(pid){ G.cp.actor=pid; const i=G.players.findIndex(p=>p.id===pid); if(i>=0) G.cur=i; cpSel=[]; cpTarget=null; cpOpt={}; }
+function nextIdx(i,ok){ const n=G.players.length; for(let k=1;k<=n;k++){ const j=(i+k)%n; if(ok(G.players[j])) return j; } return -1; }
+const idxOf=id=>G.players.findIndex(p=>p.id===id);
+function handHTML(cards,o={}){ const n=cards.length; if(!n) return `<div class="hand empty muted small">Keine Karten mehr</div>`;
+  return `<div class="hand" style="grid-template-columns:repeat(${n},minmax(0,1fr));max-width:${n*60}px">${cards.map(c=>pcHTML(c,{act:o.act,sel:(o.sel||[]).includes(c),dim:o.ok&&!o.ok(c)})).join('')}</div>`; }
+function cpDeal(g){ const k=g.rules.kind; if(k==='durak') durakDeal(g); if(k==='maumau') maumauDeal(g); if(k==='skat') skatDeal(g); cpReveal=null; cpSel=[]; cpOpt={}; }
+function cpInit(g){ g.players.forEach(p=>{ p.score=0; p.wins=0; }); g.skatDealer=0; cpDeal(g); }
+function cpHand(pid){ return (G.cp.hands||{})[pid]||[]; }
+
+/* ---------------- DURAK ---------------- */
+const DR=['6','7','8','9','10','B','D','K','A'], drv=c=>DR.indexOf(cr(c));
+function durakDeal(g){
+  const deck=mkCards(DR), hands={}; g.players.forEach(p=>hands[p.id]=deck.splice(0,6));
+  const lastP=g.players[g.players.length-1];
+  const trumpCard=deck.length?deck[deck.length-1]:hands[lastP.id][5]; const trump=cs(trumpCard);
+  let start=0, low=99; g.players.forEach((p,i)=>hands[p.id].forEach(c=>{ if(cs(c)===trump&&drv(c)<low){ low=drv(c); start=i; } }));
+  const def=g.players[(start+1)%g.players.length].id;
+  g.cp={kind:'durak', deck, trump, trumpCard, hands, table:[], att:g.players[start].id, def, passed:[], took:false, out:[], actor:g.players[start].id};
+  g.cur=start; g.log=[{n:(g.log[0]?.n||0)+1,t:`Neue Runde Durak – Trumpf ist ${SNAME[trump]}. ${esc(g.players[start].name)} greift an.`},...g.log].slice(0,40);
+}
+const dBeats=(a,d)=>(cs(d)===cs(a)&&drv(d)>drv(a))||(cs(d)===G.cp.trump&&cs(a)!==G.cp.trump);
+function dSort(cards){ const t=G.cp.trump; return [...cards].sort((a,b)=>((cs(a)===t)-(cs(b)===t))||('cshd'.indexOf(cs(a))-'cshd'.indexOf(cs(b)))||drv(a)-drv(b)); }
+function dAttackers(withEmpty){ const cp=G.cp, n=G.players.length, ai=idxOf(cp.att), o=[];
+  for(let k=0;k<n;k++){ const p=G.players[(ai+k)%n]; if(p.id!==cp.def&&!cp.out.includes(p.id)&&(withEmpty||cp.hands[p.id].length)) o.push(p.id); } return o; }
+const dOpen=()=>G.cp.table.filter(x=>!x.d).length;
+const dRanks=()=>new Set(G.cp.table.flatMap(x=>[x.a,x.d].filter(Boolean)).map(cr));
+function dRoom(){ const cp=G.cp; return Math.max(0,Math.min(6-cp.table.length, cp.hands[cp.def].length-dOpen())); }
+function dCanAttackWith(sel){ const cp=G.cp; if(!sel.length||sel.length>dRoom()) return false;
+  const ranks=cp.table.length?dRanks():new Set([cr(sel[0])]); return sel.every(c=>ranks.has(cr(c))); }
+function dNextAttacker(){ const cp=G.cp; const o=dAttackers(); return o.find(id=>!cp.passed.includes(id)); }
+function dEndRound(bito){
+  const cp=G.cp; const cards=cp.table.flatMap(x=>[x.a,x.d].filter(Boolean));
+  if(!bito) cp.hands[cp.def].push(...cards);
+  addLog(bito?`${pName(cp.def)} hat alles geschlagen – weg damit.`:`${pName(cp.def)} nimmt ${cards.length} ${cards.length===1?'Karte':'Karten'} auf.`);
+  cp.table=[]; cp.took=false; cp.passed=[];
+  [...dAttackers(true),cp.def].forEach(id=>{ while(cp.hands[id].length<6&&cp.deck.length) cp.hands[id].push(cp.deck.shift()); });
+  G.players.forEach(p=>{ if(!cp.hands[p.id].length&&!cp.deck.length&&!cp.out.includes(p.id)){ cp.out.push(p.id); addLog(`${esc(p.name)} hat keine Karten mehr und ist raus.`); } });
+  const inG=p=>!cp.out.includes(p.id), left=G.players.filter(inG);
+  if(left.length<=1){
+    if(left.length===1){ const L=left[0]; L.score=(L.score||0)+1; G.winner=L.id; addLog(`<b>${esc(L.name)} ist der Durak!</b>`); }
+    else { cp.draw=true; cp.actor=null; addLog('<b>Unentschieden – keiner ist der Durak.</b>'); }
+    return; }
+  const di=idxOf(cp.def); const ai=bito&&inG(G.players[di])?di:nextIdx(di,inG); const nd=nextIdx(ai,inG);
+  cp.att=G.players[ai].id; cp.def=G.players[nd].id; cpSetActor(cp.att);
+}
+function dAfterAttack(){ const cp=G.cp;
+  if(cp.took){ const nx=dNextAttacker(); if(!nx||!dRoom()) dEndRound(false); else cpSetActor(nx); }
+  else cpSetActor(cp.def); }
+Object.assign(act,{
+  dsel(c){ if(!cpCan()) return; const cp=G.cp; if(!cp.hands[cp.actor].includes(c)) return;
+    if(cp.actor===cp.def&&!cp.took){ // verteidigen
+      const t=cpTarget!=null&&cp.table[cpTarget]&&!cp.table[cpTarget].d?cpTarget:cp.table.findIndex(x=>!x.d); if(t<0) return;
+      if(!dBeats(cp.table[t].a,c)){ const alt=cp.table.findIndex(x=>!x.d&&dBeats(x.a,c)); if(alt<0){ cpSel=[c]; cp.msg='Diese Karte schlägt keine offene Karte.'; render(); return; } cpTarget=alt; return act.dsel(c); }
+      if(!cpSel.includes(c)){ cpSel=[c]; cpTarget=t; cp.msg=''; render(); return; }
+      cp.table[t].d=c; cp.hands[cp.def]=cp.hands[cp.def].filter(x=>x!==c); cp.msg=''; PS(cp.def).turns++; sfx('tick'); buzz(12);
+      if(!dOpen()){ cp.passed=[]; const nx=dNextAttacker(); if(nx&&dRoom()) cpSetActor(nx); else dEndRound(true); } else { cpSel=[]; cpTarget=null; }
+      commit(); return; }
+    cpSel=cpSel.includes(c)?cpSel.filter(x=>x!==c):[...cpSel,c]; cp.msg=''; render(); },
+  dtarget(i){ if(!cpCan()) return; cpTarget=+i; cpSel=[]; render(); },
+  dlay(){ if(!cpCan()) return; const cp=G.cp; if(cp.actor===cp.def&&!cp.took) return;
+    if(!dCanAttackWith(cpSel)){ cp.msg=cp.table.length?'Nur Karten mit einem Wert, der schon auf dem Tisch liegt – und nicht mehr, als der Verteidiger schlagen kann.':'Mehrere Karten nur mit gleichem Wert.'; render(); return; }
+    cpSel.forEach(c=>{ cp.table.push({a:c,d:null}); cp.hands[cp.actor]=cp.hands[cp.actor].filter(x=>x!==c); });
+    addLog(`${pName(cp.actor)} legt ${cpSel.map(cName).join(', ')}${cp.took?' nach':''}.`); PS(cp.actor).turns++; cp.passed=[]; cp.msg=''; sfx('tick'); buzz(12);
+    dAfterAttack(); commit(); },
+  dpass(){ if(!cpCan()) return; const cp=G.cp; if(!cp.table.length||(dOpen()&&!cp.took)) return;
+    cp.passed.push(cp.actor); const nx=dNextAttacker(); if(nx&&dRoom()) cpSetActor(nx); else dEndRound(!cp.took); commit(); },
+  dtake(){ if(!cpCan()) return; const cp=G.cp; if(cp.actor!==cp.def||!cp.table.length) return;
+    cp.took=true; cp.passed=[]; addLog(`${pName(cp.def)} nimmt auf.`); const nx=dNextAttacker(); if(nx&&dRoom()) cpSetActor(nx); else dEndRound(false); commit(); }
+});
+function durakTable(){ const cp=G.cp; const me=cpViewer(); const isDef=cpCan()&&cp.actor===cp.def&&!cp.took;
+  return `<div class="dtable">
+    <div class="dstack">${cp.deck.length?`<span class="dtrump">${pcHTML(cp.trumpCard)}</span>${cp.deck.length>1?pcBack('dback'):''}<span class="muted small dcount">${cp.deck.length}</span>`:`<span class="muted small">Stapel leer<br>Trumpf ${SSYM[cp.trump]}</span>`}</div>
+    <div class="dpairs">${cp.table.length?cp.table.map((x,i)=>`<span class="dpair ${isDef&&!x.d&&(cpTarget??cp.table.findIndex(y=>!y.d))===i?'tgt':''}" ${isDef&&!x.d?`data-act="dtarget" data-v="${i}" role="button"`:''}>${pcHTML(x.a)}${x.d?pcHTML(x.d,{cls:'ddef'}):''}</span>`).join(''):'<span class="muted small">Noch keine Karten auf dem Tisch</span>'}</div>
+  </div>`; }
+function durakPlay(){ const cp=G.cp, v=cpViewer();
+  let info, btns='';
+  if(cp.draw) info='Unentschieden – keiner ist der Durak.';
+  else if(cp.actor===cp.def&&!cp.took) info=`${pName(cp.def)} verteidigt gegen ${pName(cp.att)}.`;
+  else info=cp.took?`${pName(cp.def)} nimmt auf – ${pName(cp.actor)} darf noch nachschieben.`:cp.table.length?`${pName(cp.actor)} darf noch Karten legen.`:`${pName(cp.actor)} greift ${pName(cp.def)} an.`;
+  if(cpCan()){ const isDef=cp.actor===cp.def&&!cp.took;
+    btns=isDef?`<p class="muted small" style="margin:0">Tippe eine Karte an, die schlägt – nochmal tippen legt sie. Offene Karte wählen: auf dem Tisch antippen.</p><button class="btn red" data-act="dtake">Aufnehmen</button>`
+      :`<div class="row"><button class="btn primary" data-act="dlay" ${dCanAttackWith(cpSel)?'':'disabled'}>${cpSel.length>1?cpSel.length+' Karten legen':'Legen'}</button>${cp.table.length&&(!dOpen()||cp.took)?`<button class="btn" data-act="dpass">${cp.took?'Fertig':'Fertig – Bito'}</button>`:''}</div>`; }
+  const ok=cpCan()?(cp.actor===cp.def&&!cp.took?c=>cp.table.some(x=>!x.d&&dBeats(x.a,c)):c=>!cp.table.length||dRanks().has(cr(c))):null;
+  return {info:`<span class="ctrump">Trumpf <b class="${'hd'.includes(cp.trump)?'red':''}">${SSYM[cp.trump]} ${SNAME[cp.trump]}</b></span> ${info}`, table:durakTable(), hand:v?handHTML(dSort(cp.hands[v]),{act:cpCan()?'dsel':null,sel:cpSel,ok}):'', btns, msg:cp.msg};
+}
+
+/* ---------------- MAU-MAU ---------------- */
+const MR=['7','8','9','10','B','D','K','A'], mrv=c=>MR.indexOf(cr(c));
+const MAUPTS={A:11,'10':10,K:4,D:3,B:2,'9':9,'8':8,'7':7};
+function maumauDeal(g){ const deck=mkCards(MR), hands={}; g.players.forEach(p=>hands[p.id]=deck.splice(0,5));
+  const start=g.cp&&g.cp.kind==='maumau'?(g.players.findIndex(p=>p.id===g.cp.startId)+1)%g.players.length:0;
+  g.cp={kind:'maumau', deck, pile:[deck.shift()], hands, wish:null, draw7:0, drew:null, pickWish:false, actor:g.players[start].id, startId:g.players[start].id};
+  g.cur=start; g.log=[{n:(g.log[0]?.n||0)+1,t:`Neue Runde Mau-Mau – ${esc(g.players[start].name)} fängt an.`},...g.log].slice(0,40); }
+const mTop=()=>G.cp.pile[G.cp.pile.length-1];
+function mValid(c){ const cp=G.cp, top=mTop(); if(cp.draw7>0) return cr(c)==='7';
+  if(cr(c)==='B') return cr(top)!=='B'; const suit=cp.wish||cs(top); return cs(c)===suit||(!cp.wish&&cr(c)===cr(top)); }
+function mSort(cards){ return [...cards].sort((a,b)=>('cshd'.indexOf(cs(a))-'cshd'.indexOf(cs(b)))||mrv(a)-mrv(b)); }
+function mNext(skip){ const cp=G.cp; let i=idxOf(cp.actor); i=(i+1+(skip?1:0))%G.players.length; cp.drew=null; cpSetActor(G.players[i].id); }
+function mDrawOne(){ const cp=G.cp; if(!cp.deck.length){ const top=cp.pile.pop(); cp.deck=shuf(cp.pile); cp.pile=[top]; if(cp.deck.length) addLog('Der Ablagestapel wird neu gemischt.'); } return cp.deck.shift(); }
+Object.assign(act,{
+  msel(c){ if(!cpCan()) return; const cp=G.cp; if(cp.pickWish||!cp.hands[cp.actor].includes(c)) return;
+    if(cp.drew&&c!==cp.drew){ cpSel=[c]; cp.msg='Nach dem Ziehen darfst du nur die gezogene Karte legen.'; render(); return; }
+    if(!mValid(c)){ cpSel=[c]; cp.msg=cp.draw7?'Du musst eine 7 legen oder ziehen.':cp.wish?`Gewünscht ist ${SNAME[cp.wish]} – oder ein Bube.`:'Passt nicht: gleiche Farbe oder gleicher Wert.'; render(); return; }
+    if(!cpSel.includes(c)){ cpSel=[c]; cp.msg=''; render(); return; }
+    const p=cp.actor; cp.hands[p]=cp.hands[p].filter(x=>x!==c); cp.pile.push(c); cp.wish=null; cp.msg=''; PS(p).turns++; sfx('tick'); buzz(12);
+    const left=cp.hands[p].length;
+    if(!left){ const P=G.players.find(x=>x.id===p); P.wins=(P.wins||0)+1; let pts=0; G.players.forEach(o=>{ if(o.id!==p){ const s=cp.hands[o.id].reduce((a,x)=>a+MAUPTS[cr(x)],0); o.score=(o.score||0)+s; } });
+      G.winner=p; addLog(`<b>${pName(p)} legt ${cName(c)} – Mau-Mau!</b>`); commit(); return; }
+    addLog(`${pName(p)} legt ${cName(c)}${left===1?' – Mau!':''}`);
+    if(cr(c)==='B'){ cp.pickWish=true; cpSel=[]; commit(); return; }
+    if(cr(c)==='7') cp.draw7+=2;
+    mNext(cr(c)==='8'&&G.players.length>1); if(cr(c)==='8') addLog(`${esc(G.players[(G.cur-1+G.players.length)%G.players.length].name)} setzt aus.`);
+    commit(); },
+  mwish(s){ if(!cpCan()) return; const cp=G.cp; if(!cp.pickWish) return; cp.wish=s; cp.pickWish=false; addLog(`${pName(cp.actor)} wünscht sich ${SNAME[s]}.`); mNext(false); commit(); },
+  mdraw(){ if(!cpCan()) return; const cp=G.cp; if(cp.pickWish||cp.drew) return; const p=cp.actor;
+    if(cp.draw7){ const n=cp.draw7; for(let k=0;k<n;k++){ const c=mDrawOne(); if(c) cp.hands[p].push(c); } cp.draw7=0; addLog(`${pName(p)} zieht ${n} Karten.`); mNext(false); commit(); return; }
+    const c=mDrawOne(); if(!c){ addLog(`Keine Karten mehr zum Ziehen – ${pName(p)} setzt aus.`); mNext(false); commit(); return; }
+    cp.hands[p].push(c); cp.drew=c; addLog(`${pName(p)} zieht eine Karte.`); cpSel=mValid(c)?[c]:[]; commit(); },
+  mpass(){ if(!cpCan()) return; const cp=G.cp; if(!cp.drew) return; mNext(false); commit(); }
+});
+function maumauPlay(){ const cp=G.cp, v=cpViewer(), top=mTop();
+  const info=cp.pickWish?`${pName(cp.actor)} wünscht sich eine Farbe.`:cp.draw7?`${pName(cp.actor)} muss ${cp.draw7} Karten ziehen – oder eine 7 legen.`:`${pName(cp.actor)} ist dran.`+(cp.wish?` Gewünscht: <b class="${'hd'.includes(cp.wish)?'red':''}">${SSYM[cp.wish]} ${SNAME[cp.wish]}</b>`:'');
+  const table=`<div class="dtable"><div class="dstack">${cp.deck.length?pcBack('dback'):''}<span class="muted small dcount">${cp.deck.length}</span></div><div class="mpile">${cp.pile.slice(-3).map((c,i,a)=>pcHTML(c,{cls:'mp'+(a.length-1-i)})).join('')}${cp.wish?`<span class="mwish ${'hd'.includes(cp.wish)?'red':''}">${SSYM[cp.wish]}</span>`:''}</div></div>`;
+  let btns='';
+  if(cpCan()){ if(cp.pickWish) btns=`<div class="label">Welche Farbe wünschst du dir?</div><div class="wishes">${['c','s','h','d'].map(s=>`<button class="btn wish ${'hd'.includes(s)?'red':''}" data-act="mwish" data-v="${s}">${SSYM[s]} ${SNAME[s]}</button>`).join('')}</div>`;
+    else btns=`<div class="row">${cp.drew?`<button class="btn" data-act="mpass">Weiter</button>`:`<button class="btn" data-act="mdraw">${cp.draw7?cp.draw7+' Karten ziehen':'Karte ziehen'}</button>`}</div>`; }
+  return {info, table, hand:v?handHTML(mSort(cp.hands[v]),{act:cpCan()&&!cp.pickWish?'msel':null,sel:cpSel,ok:cpCan()?(c=>mValid(c)&&(!cp.drew||c===cp.drew)):null}):'', btns, msg:cp.msg};
+}
+
+/* ---------------- SKAT ---------------- */
+const SKR=['7','8','9','10','B','D','K','A'];
+const BIDS=[18,20,22,23,24,27,30,33,35,36,40,44,45,46,48,50,54,55,59,60,63,66,70,72,77,80,81,84,88,90,96,99,100,108,110,117,120,121,126,130,132,135,140,143,144,150,153,154,156,160,162,165,168,170,176,180,187,192,198,204,216,240,264];
+const AUG={A:11,'10':10,K:4,D:3,B:2,'9':0,'8':0,'7':0};
+const SKBASE={c:12,s:11,h:10,d:9,g:24};
+const SKGNAME={c:'Kreuz',s:'Pik',h:'Herz',d:'Karo',g:'Grand',n:'Null'};
+function skatDeal(g){ const P=g.players, d=g.skatDealer%3, V=P[(d+1)%3].id, M=P[(d+2)%3].id, H=P[d].id;
+  const deck=mkCards(SKR), hands={[V]:deck.splice(0,10),[M]:deck.splice(0,10),[H]:deck.splice(0,10)};
+  g.cp={kind:'skat', phase:'bid', hands, skat:deck.splice(0,2), V, M, H, bid:0, stage:1, sayer:M, hearer:V, w1:null, decl:null, game:null, trick:[], lead:V, won:{[V]:[],[M]:[],[H]:[]}, last:null, actor:M, orig:null, result:null};
+  g.cur=(d+2)%3; g.skatN=(g.skatN||0)+1;
+  g.log=[{n:(g.log[0]?.n||0)+1,t:`Neues Spiel – ${esc(P[d].name)} gibt. ${esc(P[(d+2)%3].name)} reizt ${esc(P[(d+1)%3].name)}.`},...g.log].slice(0,40); }
+const skTrump=()=>{ const t=G.cp.game&&G.cp.game.t; return 'cshd'.includes(t)?t:null; };
+function skEff(c){ const t=G.cp.game?G.cp.game.t:null; if(t!=='n'&&cr(c)==='B') return 'T'; const ts=skTrump(); if(ts&&cs(c)===ts) return 'T'; return cs(c); }
+function skPow(c){ const t=G.cp.game?G.cp.game.t:null;
+  if(t==='n') return ['7','8','9','10','B','D','K','A'].indexOf(cr(c));
+  if(cr(c)==='B') return 100+['d','h','s','c'].indexOf(cs(c));
+  const o=['7','8','9','D','K','10','A'].indexOf(cr(c)); return skEff(c)==='T'?50+o:o; }
+function skLegal(hand,c){ const cp=G.cp; if(!cp.trick.length) return true; const led=skEff(cp.trick[0].c); return hand.some(x=>skEff(x)===led)?skEff(c)===led:true; }
+function skSort(cards){ const g=G.cp.game; const t=g?g.t:null; const so='cshd';
+  const key=c=>{ if(t!=='n'&&cr(c)==='B') return [0,3-['d','h','s','c'].indexOf(cs(c))];
+    const ts='cshd'.includes(t)?t:null; const grp=ts&&cs(c)===ts?1:2+so.indexOf(cs(c));
+    const ord=t==='n'?['A','K','D','B','10','9','8','7']:['A','10','K','D','9','8','7']; return [grp,ord.indexOf(cr(c))]; };
+  return [...cards].sort((a,b)=>{ const x=key(a),y=key(b); return x[0]-y[0]||x[1]-y[1]; }); }
+function skNextBid(){ return BIDS.find(b=>b>G.cp.bid); }
+function skStageEnd(winner){ const cp=G.cp;
+  if(cp.stage===1){ cp.stage=2; cp.w1=winner; cp.sayer=cp.H; cp.hearer=winner; cpSetActor(cp.H); addLog(`${pName(cp.H)} reizt jetzt ${pName(winner)}${cp.bid?' ab '+cp.bid:''}.`); return; }
+  if(!cp.bid){ cp.phase='vh18'; cpSetActor(winner); return; }
+  skDeclarer(winner); }
+function skDeclarer(pid){ const cp=G.cp; cp.decl=pid; cp.phase='skat'; addLog(`${pName(pid)} spielt – gereizt bis ${cp.bid}.`); cpSetActor(pid); }
+function skEval(){ const cp=G.cp, g=cp.game, D=cp.decl;
+  const wonCards=cp.won[D]; const pts=wonCards.concat(cp.skat).reduce((a,c)=>a+AUG[cr(c)],0); const tricks=wonCards.length/3;
+  let win, value, txt;
+  if(g.t==='n'){ value=g.hand&&g.ouv?59:g.ouv?46:g.hand?35:23; win=tricks===0; txt=`Null${g.ouv?' ouvert':''}${g.hand?' Hand':''} = ${value}`; if(value<cp.bid) win=false; }
+  else { const seq=['cB','sB','hB','dB'].concat(skTrump()?['A','10','K','D','9','8','7'].map(r=>skTrump()+r):[]);
+    const has=c=>cp.orig.includes(c); const mit=has(seq[0]); let sp=0; for(const c of seq){ if(has(c)===mit) sp++; else break; }
+    const schn=pts>=90||pts<=30||g.schnA, schw=tricks===10||tricks===0||g.schwA;
+    const lv=sp+1+(g.hand?1:0)+(schn?1:0)+(g.schnA?1:0)+(schw?1:0)+(g.schwA?1:0);
+    value=SKBASE[g.t]*lv; win=pts>=61&&(!g.schnA||pts>=90)&&(!g.schwA||tricks===10);
+    txt=`${mit?'mit':'ohne'} ${sp}, ${lv} × ${SKBASE[g.t]} = ${value}`;
+    if(value<cp.bid){ win=false; value=SKBASE[g.t]*Math.ceil(cp.bid/SKBASE[g.t]); txt+=` – überreizt (gereizt ${cp.bid}), zählt ${value}`; } }
+  const delta=win?value:-2*value; const P=G.players.find(p=>p.id===D); P.score+=delta; if(win) P.wins=(P.wins||0)+1;
+  cp.result={win,pts,value,delta,txt,tricks}; cp.phase='done'; cp.actor=null; G.skatDealer=(G.skatDealer+1)%3;
+  addLog(`<b>${pName(D)} ${win?'gewinnt':'verliert'} ${SKGNAME[g.t]}${g.hand?' Hand':''} mit ${pts} Augen: ${delta>0?'+':''}${delta}.</b>`); sfx(win?'win':'bad'); }
+Object.assign(act,{
+  sbid(v){ if(!cpCan()) return; const cp=G.cp; v=+v; if(cp.phase!=='bid'||cp.actor!==cp.sayer||!(v>cp.bid)||!BIDS.includes(v)) return;
+    cp.bid=v; addLog(`${pName(cp.sayer)} sagt ${v}.`); cpSetActor(cp.hearer); commit(); },
+  shold(){ if(!cpCan()) return; const cp=G.cp; if(cp.phase!=='bid'||cp.actor!==cp.hearer) return; addLog(`${pName(cp.hearer)}: Ja.`); cpSetActor(cp.sayer); commit(); },
+  spass(){ if(!cpCan()) return; const cp=G.cp; if(cp.phase!=='bid') return; const me=cp.actor; addLog(`${pName(me)} passt.`);
+    skStageEnd(me===cp.sayer?cp.hearer:cp.sayer); commit(); },
+  s18(v){ if(!cpCan()) return; const cp=G.cp; if(cp.phase!=='vh18') return;
+    if(v==='1'){ cp.bid=18; skDeclarer(cp.actor); }
+    else { addLog('Alle passen – neu geben.'); G.skatDealer=(G.skatDealer+1)%3; skatDeal(G); cpReveal=null; }
+    commit(); },
+  sskat(v){ if(!cpCan()) return; const cp=G.cp; if(cp.phase!=='skat') return;
+    if(v==='hand'){ cp.hand=true; cp.orig=cp.hands[cp.decl].concat(cp.skat); cp.phase='declare'; addLog(`${pName(cp.decl)} spielt Hand.`); }
+    else { cp.hand=false; cp.hands[cp.decl]=cp.hands[cp.decl].concat(cp.skat); cp.orig=[...cp.hands[cp.decl]]; cp.skat=[]; cp.phase='drop'; addLog(`${pName(cp.decl)} nimmt den Skat auf.`); }
+    cpSel=[]; commit(); },
+  ssel(c){ if(!cpCan()) return; const cp=G.cp; const h=cp.hands[cp.actor]; if(!h.includes(c)) return;
+    if(cp.phase==='drop'){ cpSel=cpSel.includes(c)?cpSel.filter(x=>x!==c):cpSel.length<2?[...cpSel,c]:[cpSel[1],c]; render(); return; }
+    if(cp.phase!=='play') return;
+    if(!skLegal(h,c)){ cpSel=[c]; cp.msg='Du musst bedienen.'; render(); return; }
+    if(!cpSel.includes(c)){ cpSel=[c]; cp.msg=''; render(); return; }
+    cp.msg=''; cp.hands[cp.actor]=h.filter(x=>x!==c); cp.trick.push({pid:cp.actor,c}); PS(cp.actor).turns++; sfx('tick'); buzz(10);
+    if(cp.trick.length<3){ cpSetActor(G.players[(idxOf(cp.actor)+1)%3].id); commit(); return; }
+    const led=skEff(cp.trick[0].c); let best=cp.trick[0];
+    cp.trick.forEach(x=>{ const e=skEff(x.c), be=skEff(best.c); if((e==='T'&&be!=='T')||(e===be&&skPow(x.c)>skPow(best.c))) best=x; });
+    cp.won[best.pid].push(...cp.trick.map(x=>x.c)); cp.last={cards:cp.trick, w:best.pid}; cp.trick=[];
+    const ap=cp.last.cards.reduce((a,x)=>a+AUG[cr(x.c)],0);
+    addLog(`${pName(best.pid)} bekommt den Stich (${ap} Augen).`);
+    if(cp.game.t==='n'&&best.pid===cp.decl){ skEval(); commit(); return; }
+    if(!cp.hands[cp.V].length){ skEval(); commit(); return; }
+    cpSetActor(best.pid); commit(); },
+  sdrop(){ if(!cpCan()) return; const cp=G.cp; if(cp.phase!=='drop'||cpSel.length!==2) return;
+    cp.skat=[...cpSel]; cp.hands[cp.decl]=cp.hands[cp.decl].filter(c=>!cpSel.includes(c)); cp.phase='declare'; cpSel=[]; addLog(`${pName(cp.decl)} hat gedrückt.`); commit(); },
+  sopt(v){ if(!cpCan()) return; const [k,val]=v.split(':'); if(k==='t'){ cpOpt.t=val; if(val==='n'){ cpOpt.schnA=false; cpOpt.schwA=false; } } else cpOpt[k]=!cpOpt[k];
+    if(k==='schwA'&&cpOpt.schwA) cpOpt.schnA=true; if(k==='schnA'&&!cpOpt.schnA) cpOpt.schwA=false; render(); },
+  sdeclare(){ if(!cpCan()) return; const cp=G.cp; if(cp.phase!=='declare'||!cpOpt.t) return;
+    cp.game={t:cpOpt.t, hand:!!cp.hand, ouv:cpOpt.t==='n'&&!!cpOpt.ouv, schnA:!!(cp.hand&&cpOpt.t!=='n'&&cpOpt.schnA), schwA:!!(cp.hand&&cpOpt.t!=='n'&&cpOpt.schwA)};
+    cp.phase='play'; addLog(`<b>${pName(cp.decl)} spielt ${SKGNAME[cp.game.t]}${cp.game.ouv?' ouvert':''}${cp.game.hand?' Hand':''}${cp.game.schwA?', Schwarz angesagt':cp.game.schnA?', Schneider angesagt':''}.</b>`);
+    cpSetActor(cp.V); commit(); },
+  snext(){ const cp=G.cp; if(cp.phase!=='done'&&cp.phase!=='void') return; skatDeal(G); cpReveal=null; commit(); },
+  send(){ if(G.winner) return; const w=[...G.players].sort((a,b)=>b.score-a.score)[0]; G.winner=w.id; addLog(`<b>Liste beendet – ${esc(w.name)} gewinnt mit ${w.score} Punkten.</b>`); commit(); }
+});
+function skatPlay(){ const cp=G.cp, v=cpViewer(), can=cpCan();
+  const role=id=>id===cp.V?'Vorhand':id===cp.M?'Mittelhand':'Hinterhand';
+  let info='', table='', btns='', handAct=null, ok=null, cards=v?cp.hands[v]:[];
+  if(cp.phase==='bid'){ info=`Reizen: ${pName(cp.sayer)} sagt, ${pName(cp.hearer)} hört. ${cp.bid?'Gereizt bis <b>'+cp.bid+'</b>.':'Noch nichts gereizt.'}`;
+    if(can){ if(cp.actor===cp.sayer){ const nx=BIDS.filter(b=>b>cp.bid).slice(0,6); btns=`<div class="label">Reizen</div><div class="cchips">${nx.map(b=>`<button class="cchip" data-act="sbid" data-v="${b}">${b}</button>`).join('')}</div><button class="btn" data-act="spass">Passe</button>`; }
+      else btns=`<div class="row"><button class="btn primary" data-act="shold">Ja – ${cp.bid} halten</button><button class="btn" data-act="spass">Passe</button></div>`; } }
+  else if(cp.phase==='vh18'){ info=`Alle anderen haben gepasst. ${pName(cp.actor)} kann 18 spielen.`; if(can) btns=`<div class="row"><button class="btn primary" data-act="s18" data-v="1">18 spielen</button><button class="btn" data-act="s18" data-v="0">Passe – neu geben</button></div>`; }
+  else if(cp.phase==='skat'){ info=`${pName(cp.decl)} hat das Reizen gewonnen (${cp.bid}).`; if(can) btns=`<div class="row"><button class="btn primary" data-act="sskat" data-v="take">Skat aufnehmen</button><button class="btn" data-act="sskat" data-v="hand">Hand spielen</button></div>`;
+    table=`<div class="dtable"><div class="skatbox">${pcBack()}${pcBack()}<span class="muted small">Skat</span></div></div>`; }
+  else if(cp.phase==='drop'){ info=`${pName(cp.decl)} drückt zwei Karten.`; if(can){ handAct='ssel'; btns=`<button class="btn primary" data-act="sdrop" ${cpSel.length===2?'':'disabled'}>${cpSel.length===2?'Diese zwei drücken':'Zwei Karten zum Drücken antippen'}</button>`; } }
+  else if(cp.phase==='declare'){ info=`${pName(cp.decl)} sagt das Spiel an.`;
+    if(can){ const o=cpOpt; btns=`<div class="label">Spiel</div><div class="cchips">${[['c','♣ Kreuz'],['s','♠ Pik'],['h','♥ Herz'],['d','♦ Karo'],['g','Grand'],['n','Null']].map(([k,l])=>`<button class="cchip" data-act="sopt" data-v="t:${k}" aria-pressed="${o.t===k}">${l}</button>`).join('')}</div>
+      ${o.t==='n'?`<div class="cchips"><button class="cchip" data-act="sopt" data-v="ouv" aria-pressed="${!!o.ouv}">Ouvert</button></div>`:cp.hand&&o.t?`<div class="cchips"><button class="cchip" data-act="sopt" data-v="schnA" aria-pressed="${!!o.schnA}">Schneider angesagt</button><button class="cchip" data-act="sopt" data-v="schwA" aria-pressed="${!!o.schwA}">Schwarz angesagt</button></div>`:''}
+      <button class="btn primary" data-act="sdeclare" ${o.t?'':'disabled'}>Spiel ansagen</button>`; } }
+  else if(cp.phase==='play'){ const g=cp.game; info=`${pName(cp.decl)} spielt <b>${SKGNAME[g.t]}${g.ouv?' ouvert':''}${g.hand?' Hand':''}</b>. ${pName(cp.actor)} ist dran.`;
+    table=`<div class="dtable"><div class="trick">${cp.trick.map(x=>`<span class="tcard">${pcHTML(x.c)}<small>${pName(x.pid)}</small></span>`).join('')||'<span class="muted small">'+(cp.last?`Letzter Stich an ${pName(cp.last.w)}: `+cp.last.cards.map(x=>cName(x.c)).join(', '):'Neuer Stich')+'</span>'}</div></div>
+      ${g.ouv&&v!==cp.decl?`<div class="label">Offene Karten von ${pName(cp.decl)}</div>${handHTML(skSort(cp.hands[cp.decl]))}`:''}`;
+    if(can){ handAct='ssel'; ok=c=>skLegal(cp.hands[cp.actor],c); } }
+  else if(cp.phase==='done'){ const R0=cp.result;
+    info=`<b>${pName(cp.decl)} ${R0.win?'gewinnt':'verliert'}</b> ${SKGNAME[cp.game.t]}${cp.game.hand?' Hand':''} mit ${R0.pts} Augen – ${R0.txt}. <b>${R0.delta>0?'+':''}${R0.delta}</b>`;
+    table=`<div class="dtable"><div class="skatbox">${cp.skat.map(c=>pcHTML(c)).join('')}<span class="muted small">${cp.hand?'Skat':'Gedrückt'}</span></div></div>`;
+    btns=`<div class="row"><button class="btn primary" data-act="snext">Nächstes Spiel</button><button class="btn" data-act="send">Liste beenden</button></div>`; cards=[]; }
+  return {info, table, hand:v&&cards.length?handHTML(skSort(cards),{act:handAct,sel:cpSel,ok}):'', btns, msg:cp.msg};
+}
+
+/* ---------------- Gemeinsame Anzeige ---------------- */
+function playGameHTML(){ const r=R(), cp=G.cp, v=cpViewer();
+  const part=r.kind==='durak'?durakPlay():r.kind==='maumau'?maumauPlay():skatPlay();
+  const shared=G.code&&myPid()&&myPid()!=='*';
+  let cover='';
+  if(!G.winner&&cp.actor&&!v){
+    cover=shared?`<div class="hint">${pName(cp.actor)} ist dran. Warte kurz …</div>`
+      :`<button class="cover" data-act="cpshow"><span class="muted small">Handy weitergeben an</span><b>${pName(cp.actor)}</b><span class="btn primary">Ich bin ${pName(cp.actor)} – Karten zeigen</span><span class="muted small">Die anderen schauen bitte weg.</span></button>`; }
+  const myHand=shared&&!cpCan()&&cp.hands&&cp.hands[myPid()]?handHTML((r.kind==='durak'?dSort:r.kind==='maumau'?mSort:skSort)(cp.hands[myPid()])):'';
+  return `${gameTop(5)}
+  <section class="card turn playturn">
+    <div class="pinfo">${part.info}</div>
+    ${part.table}
+    ${cover||`${part.hand||myHand}${part.msg?`<div class="err">${esc(part.msg)}</div>`:''}${part.btns}`}
+    ${cp.draw?`<button class="btn primary big" data-act="again">Nochmal</button>`:''}
+  </section>${gameFooter()}`;
+}
+Object.assign(act,{ cpshow(){ cpReveal=G.cp.actor; cpSel=[]; cpTarget=null; render(); } });
+function playLabel(r,p){ if(r.kind==='durak') return (p.score||0)+'× Durak'; if(r.kind==='maumau') return (p.wins||0)+' Siege'; return fmt(p.score)+' Pkt.'; }
+function playBig(r,p){ if(r.kind==='skat') return fmt(p.score); return G.cp&&G.cp.hands?cpHand(p.id).length:0; }
+function playSub(r,p){ const cp=G.cp; if(!cp) return '';
+  if(r.kind==='durak'){ if(cp.out.includes(p.id)) return 'fertig'; return (p.id===cp.att?'greift an':p.id===cp.def?'verteidigt':'Karten')+((p.score||0)?` · ${p.score}× Durak`:''); }
+  if(r.kind==='maumau') return `Karten${p.wins?` · ${p.wins} ${p.wins===1?'Sieg':'Siege'}`:''}`;
+  if(cp.decl===p.id&&cp.phase!=='bid') return 'Alleinspieler';
+  return p.id===cp.V?'Vorhand':p.id===cp.M?'Mittelhand':'Hinterhand'; }
+function playStatus(r){ const cp=G.cp; if(!cp) return '';
+  if(r.kind==='durak') return `Trumpf ${SSYM[cp.trump]} ${SNAME[cp.trump]} · ${cp.deck.length} im Stapel`;
+  if(r.kind==='maumau') return `${cp.deck.length} im Stapel · 7 zieht zwei, 8 setzt aus, Bube wünscht`;
+  return cp.phase==='play'?`${SKGNAME[cp.game.t]}${cp.game.hand?' Hand':''} · ${10-cp.hands[cp.V].length}. Stich`:`Spiel ${G.skatN||1} · ${cp.bid?'gereizt bis '+cp.bid:'Reizen ab 18'}`; }
+function playRank(r){ const P=[...G.players]; if(r.kind==='durak') return P.sort((a,b)=>(a.score||0)-(b.score||0)); if(r.kind==='maumau') return P.sort((a,b)=>(b.wins||0)-(a.wins||0)||(a.score||0)-(b.score||0)); return P.sort((a,b)=>b.score-a.score); }
+function playRulesList(r){ return (GUIDE[r.id]||{}).steps||[]; }
 
 Object.assign(act, editActs, blockActs, shareActs, roundActs, bluffActs, boxActs, houseActs, tabActs, setActs, bustActs, shipActs, pokerActs, raceActs);
 if(!allTemplates()[prefs.tpl]) prefs.tpl='kubiki';
@@ -3185,6 +3542,7 @@ function tvStatus(r){
   if(isBluff(r)) return r.lives?`${r.lives} Leben pro Spieler`:'Strafpunkte';
   if(isRace(r)) return 'Wettrennen: '+raceSeq(r).join(' ');
   if(isCards(r)) return cardsStatus(r);
+  if(isPlay(r)) return playStatus(r);
   if(isDarts(r)) return r.game==='x01'?`${r.start} · ${r.dOut===false?'Single-Out':'Double-Out'} · 3 Pfeile pro Aufnahme`:r.game==='cricket'?'15–20 und Bull schließen · Punkte auf offenen Zahlen':'1 bis 20, dann Bull · 3 Pfeile pro Aufnahme';
   if(isBlock(r)) return `${r.fields.length} Felder pro Spieler`;
   return `Ziel ${r.exact?'genau ':''}${fmt(r.target)}`;
@@ -3195,6 +3553,7 @@ function tvSub(r,p){
   if(isRP(r)){ const c=G.rp.res[p.id], l=(G.rp.last||{})[p.id]; return c?esc(c.label):l?'zuletzt: '+esc(l.label):''; }
   if(isHouse(r)){ const c=G.house.res[p.id], l=(G.house.last||{})[p.id]; return c!=null?'Nr. '+c:l!=null?'zuletzt: '+l:''; }
   if(isCards(r)) return cardsSub(r,p);
+  if(isPlay(r)) return playSub(r,p);
   if(isDarts(r)) return r.game==='x01'?'Ø '+avg3(p):r.game==='cricket'?cClosed(p)+'/7 zu':`<span class="mini"><span style="width:${(p.pos||0)/21*100}%"></span></span>`;
   if(isRace(r)){ const n=raceSeq(r).length; return `<span class="mini"><span style="width:${(p.pos||0)/n*100}%"></span></span>`; }
   if(isBlock(r)) return `${filled(r,p)}/${r.fields.length} Felder`;
@@ -3204,9 +3563,9 @@ function tvSub(r,p){
 function tableViewHTML(){
   const r=R(), F=felt();
   const box=document.createElement('div'); box.innerHTML=gameHTML(); const turn=box.querySelector('section.turn');
-  const n=G.players.length; const size=isDarts(r)?(n<=2?'m':'s'):n<=4?'l':n<=6?'m':'s';
+  const n=G.players.length; const size=isPlay(r)?(n<=3?'m':'s'):isDarts(r)?(n<=2?'m':'s'):n<=4?'l':n<=6?'m':'s';
   const rank={}; rankOrder(r).forEach((p,i)=>rank[p.id]=i+1);
-  const tiles=G.players.map((p,i)=>{ const out=(isCards(r)&&r.kind==='schwimmen'&&p.lives<=0)||(isBluff(r)&&r.lives&&p.lives<=0)||(isRound(r)&&!roundActive().includes(i));
+  const tiles=G.players.map((p,i)=>{ const out=(isPlay(r)&&r.kind==='durak'&&G.cp&&G.cp.out.includes(p.id))||(isCards(r)&&r.kind==='schwimmen'&&p.lives<=0)||(isBluff(r)&&r.lives&&p.lives<=0)||(isRound(r)&&!roundActive().includes(i));
     return `<div class="tvtile ${i===G.cur&&!G.winner?'cur':''} ${out?'out':''}"><span class="tvrank">${rank[p.id]}.</span><span class="tvname">${esc(p.name)}</span><span class="tvscore">${scoreBig(r,p)}</span><span class="tvsub">${tvSub(r,p)}</span></div>`; }).join('');
   return `<div class="tv" style="${feltVars(F)}">
     <div class="tvhead"><div class="brand">${dieHTML(5,{attrs:'style="width:30px;height:30px;padding:4px"'})}<h1 class="${r.name.length>13?'long':''}">${esc(r.name)}</h1></div>
@@ -3267,7 +3626,7 @@ function metaOf(r){
   if(isShip(r)) return `5 Würfel · ${r.rolls} Würfe · ${r.wins} Rundensiege`;
   if(isPoker(r)) return `5 Würfel · ${r.rolls} Würfe · ${r.wins} Rundensiege`;
   if(isDarts(r)) return dartsMeta(r);
-  if(isCards(r)) return cardsMeta(r);
+  if(isCards(r)||isPlay(r)) return cardsMeta(r);
   if(isRace(r)) return `1 Würfel · ${r.back?'1–6 und zurück':'1–6'} · Wettrennen`;
   return `${r.dice} Würfel · Ziel ${r.exact?'genau ':''}${fmt(r.target)}`;
 }
@@ -3299,7 +3658,7 @@ function setupHTML(){
       <p class="muted small" style="margin:0">Schocken-Varianten: bei Schocken unter „Regeln“ anpassen.</p></div>`:''}`;
   }
   if(st==='cat'){
-    const nDice=Object.values(allTemplates()).filter(t=>!isDarts(t)&&!isCards(t)).length; const nCards=Object.values(allTemplates()).filter(isCards).length;
+    const nDice=Object.values(allTemplates()).filter(t=>!isDarts(t)&&!isCards(t)&&t.type!=='cardplay').length; const nCards=Object.values(allTemplates()).filter(t=>isCards(t)||(t.type==='cardplay')).length;
     const tile=(act,v,icon,title,sub,soon)=>`<button class="cattile${soon?' soon':''}" ${soon?'disabled aria-disabled="true"':`data-act="${act}" data-v="${v}"`}><span class="caticon" aria-hidden="true">${icon}</span><span class="cattxt"><b>${title}</b><span class="muted small">${sub}</span></span>${soon?'<span class="catsoon">bald</span>':'<span class="catgo" aria-hidden="true">›</span>'}</button>`;
     const icDie=`<svg viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="30" rx="7" fill="var(--paper)" stroke="currentColor" stroke-width="2.4"/><circle cx="13" cy="13" r="2.8" fill="currentColor"/><circle cx="20" cy="20" r="2.8" fill="currentColor"/><circle cx="27" cy="27" r="2.8" fill="currentColor"/></svg>`;
     const icCard=`<svg viewBox="0 0 40 40"><rect x="6" y="8" width="20" height="28" rx="3" fill="var(--paper)" stroke="currentColor" stroke-width="2.2" transform="rotate(-10 16 22)"/><rect x="14" y="5" width="20" height="28" rx="3" fill="var(--paper)" stroke="currentColor" stroke-width="2.4" transform="rotate(8 24 19)"/><path d="M24.5 14.5c-2.2-3-6 .2-3.6 2.9l3.3 3.6 3.6-3.4c2.5-2.6-1-6-3.3-3.1z" fill="var(--red, #c0392b)" transform="rotate(8 24 19)"/></svg>`;
@@ -3332,7 +3691,7 @@ function setupHTML(){
   }
   if(st==='info'){
     const t=tplOf(setup.infoId); const isC=!!custom[t.id];
-    return `${subHead(t.name,isDarts(t)?'darts':isCards(t)?'cards':'pick')}
+    return `${subHead(t.name,isDarts(t)?'darts':isCards(t)||isPlay(t)?'cards':'pick')}
     <section class="card">
       <p class="muted" style="margin:0 0 12px">${esc(t.tagline||metaOf(t))}</p>
       ${guideHTML(t)}
@@ -3348,7 +3707,7 @@ function setupHTML(){
   if(st==='players'){
     const tr=tplOf(prefs.tpl);
     const savedFree=prefs.saved.filter(n=>!setup.names.map(s=>s.trim()).includes(n));
-    const backTo=isDarts(tr)?'darts':isCards(tr)?'cards':'pick';
+    const backTo=isDarts(tr)?'darts':isCards(tr)||isPlay(tr)?'cards':'pick';
     return `${subHead('Wer spielt mit?',backTo)}
     <button class="gamechip" data-act="go" data-v="${backTo}"><span class="muted small">Spiel</span><b>${esc(tr.name)}</b><span class="muted small">ändern</span></button>
     <section class="card" style="display:flex;flex-direction:column;gap:10px">
@@ -3443,6 +3802,7 @@ function gameHTML(){
   if(isRace(R())) return raceGameHTML();
   if(isDarts(R())) return dartsGameHTML();
   if(isCards(R())) return cardsGameHTML();
+  if(isPlay(R())) return playGameHTML();
   const rs=R(), t=T(), p=G.players[G.cur];
   const order=G.players.map((pl,i)=>({...pl,i})).sort((a,b)=>b.score-a.score);
   const rank={}; order.forEach((pl,k)=>rank[pl.i]=k+1);
@@ -3517,7 +3877,7 @@ function panelHTML(){
   const wrap=(title,body,back)=>`<div class="overlay" role="dialog" aria-label="${esc(title)}" data-act="panel" data-v="" data-self="1"><div class="card stats">
     <div class="top">${back?`<button class="back" data-act="panel" data-v="menu" aria-label="Zurück zum Menü">←</button>`:''}<h2 style="font-size:22px;flex:1">${esc(title)}</h2>${close}</div>${body}</div></div>`;
   if(panel==='menu') return wrap('Menü',`<div class="menu">
-      <button class="mitem" data-act="panel" data-v="stats"><b>Statistik</b><span class="muted small">${isDarts(r)?'Aufnahmen, Bestwerte':isCards(r)?'Runden und Rundenbeste':'Würfel und Spieler'}</span></button>
+      <button class="mitem" data-act="panel" data-v="stats"><b>Statistik</b><span class="muted small">${isPlay(r)?'Spieler':isDarts(r)?'Aufnahmen, Bestwerte':isCards(r)?'Runden und Rundenbeste':'Würfel und Spieler'}</span></button>
       ${isCards(r)?`<button class="mitem" data-act="panel" data-v="cblock"><b>Spielblock</b><span class="muted small">alle Runden mit Punkten</span></button>`:''}
       ${isBlock(r)?`<button class="mitem" data-act="panel" data-v="block"><b>Spielblock</b><span class="muted small">alle Felder aller Spieler</span></button>`:''}
       <button class="mitem" data-act="panel" data-v="log"><b>Ganzer Verlauf</b><span class="muted small">${G.log.length} Einträge</span></button>
@@ -3535,7 +3895,7 @@ function panelHTML(){
 }
 function renderOverlay(){
   const ov=$('#ov');
-  if(G&&!G.winner&&isBluff(R())&&G.code&&!myPid()){ ov.innerHTML=whoamiHTML(); return; }
+  if(G&&!G.winner&&(isBluff(R())||isPlay(R()))&&G.code&&!myPid()){ ov.innerHTML=whoamiHTML(); return; }
   if(G&&panel==='table'){ ov.innerHTML=tableHTML(); return; }
   if(G&&panel){ ov.innerHTML=panelHTML(); return; }
   if(G&&showBlock){ ov.innerHTML=blockSheetHTML(); return; }
@@ -3572,16 +3932,16 @@ function statsHTML(){
   const cell=(x,k)=>`<td class="${['best','trip','stole'].includes(k)&&x[k]>0&&x[k]===best(k)&&pl.length>1?'hl':''}">${fmt(x[k])}</td>`;
   const quote=x=>x.turns?Math.round(x.niete/x.turns*100)+' %':'–';
   const rs=R();
-  const cols=isCards(rs)?[['turns','Runden'],['trip','Rundenbester']]:isDarts(rs)?(rs.game==='x01'?[['turns','Aufnahmen'],['best','Beste Aufnahme'],['trip','180er'],['niete','Überworfen']]:rs.game==='cricket'?[['turns','Aufnahmen'],['best','Meiste Treffer']]:[['turns','Aufnahmen'],['trip','Abgehakt']]):isRP(rs)?[['turns','Züge'],['trip','Rundensiege'],['niete','Drüber / leer']]:isRace(rs)?[['turns','Würfe'],['trip','Treffer']]:isBox(rs)?[['turns','Züge'],['trip','Box zu'],['best','Höchster Rest']]:isHouse(rs)?[['turns','Runden'],['trip','Rundensiege'],['best','Beste Nummer']]:isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
+  const cols=isPlay(rs)?[['turns','Karten gespielt']]:isCards(rs)?[['turns','Runden'],['trip','Rundenbester']]:isDarts(rs)?(rs.game==='x01'?[['turns','Aufnahmen'],['best','Beste Aufnahme'],['trip','180er'],['niete','Überworfen']]:rs.game==='cricket'?[['turns','Aufnahmen'],['best','Meiste Treffer']]:[['turns','Aufnahmen'],['trip','Abgehakt']]):isRP(rs)?[['turns','Züge'],['trip','Rundensiege'],['niete','Drüber / leer']]:isRace(rs)?[['turns','Würfe'],['trip','Treffer']]:isBox(rs)?[['turns','Züge'],['trip','Box zu'],['best','Höchster Rest']]:isHouse(rs)?[['turns','Runden'],['trip','Rundensiege'],['best','Beste Nummer']]:isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
     ...(rs.steal?[['stole','Geklaut'],['lost','Beklaut']]:[]), ...((rs.burn||[]).length?[['burned','Verbrannt']]:[])];
   return `<div class="overlay" role="dialog" aria-label="Statistik"><div class="card stats">
     <div class="top"><h2 style="font-size:22px">Statistik</h2><button class="btn small" data-act="closestats">Schließen</button></div>
-    ${isDarts(rs)||isCards(rs)?'':`<div class="label">Würfelverteilung</div>
+    ${isDarts(rs)||isCards(rs)||isPlay(rs)?'':`<div class="label">Würfelverteilung</div>
     ${dice}`}
     <div class="label" style="margin-top:6px">Spieler</div>
     <div class="tblwrap"><table class="tbl"><thead><tr><th>Spieler</th>${cols.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead>
     <tbody>${pl.map(x=>`<tr><td>${esc(x.p.name)}</td>${cols.map(([k])=>k==='quote'?`<td>${quote(x)}</td>`:cell(x,k)).join('')}</tr>`).join('')}</tbody></table></div>
-    <p class="muted" style="margin:0;font-size:13px">Rot = Bestwert${isDarts(rs)||isCards(rs)?'':isBluff(rs)?' bei Bluffs und Erwischt':isRound(rs)?' bei Schocks':isBlock(rs)?' bei bestem Feld und Kniffel':` bei bester Zug, Drillingen${rs.steal?' und Geklaut':''}`}. Die Statistik läuft über alle Runden dieses Spiels.</p>
+    <p class="muted" style="margin:0;font-size:13px">Rot = Bestwert${isDarts(rs)||isCards(rs)||isPlay(rs)?'':isBluff(rs)?' bei Bluffs und Erwischt':isRound(rs)?' bei Schocks':isBlock(rs)?' bei bestem Feld und Kniffel':` bei bester Zug, Drillingen${rs.steal?' und Geklaut':''}`}. Die Statistik läuft über alle Runden dieses Spiels.</p>
     <div class="row"><button class="btn ghost small" data-act="resetstats">Statistik zurücksetzen</button></div>
   </div></div>`;
 }
