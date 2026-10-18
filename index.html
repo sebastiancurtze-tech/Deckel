@@ -78,6 +78,22 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .cc.dead{opacity:.4}
 .dseq{display:flex;flex-wrap:wrap;gap:4px}
 .dseq .sq{min-width:26px}
+/* Kartenspiele */
+.cform{display:flex;flex-direction:column;gap:10px}
+.cchips{display:flex;flex-wrap:wrap;gap:6px}
+.cchip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:8px 13px;font-weight:600;font-size:15px}
+.cchip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tv .cchip[aria-pressed=true]{background:var(--tvacc);color:var(--tvaccink);border-color:transparent}
+.cins{display:flex;flex-direction:column;gap:6px}
+.cinrow{display:flex;align-items:center;gap:8px}
+.cinrow span{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cin{width:110px;font-family:var(--f-num);font-size:20px;text-align:right;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.cneg{min-width:40px;font-size:18px}
+.cstep{display:flex;align-items:center;gap:10px}
+.cstep span{flex:1;font-weight:600}
+.cstep b{min-width:28px;text-align:center;font-size:22px}
+.cprev{background:var(--zone-soft);border-radius:10px;padding:8px 12px;font-weight:600}
+.seg:has(button:nth-child(3)){grid-template-columns:1fr 1fr 1fr}
 /* Hilfsmittel */
 .tooltitle{font-family:var(--f-num);font-weight:800;font-size:24px;text-transform:uppercase;margin:0;color:var(--ink)}
 .tool .tvhead{justify-content:flex-start;gap:14px}
@@ -659,6 +675,7 @@ function rulesList(r){
   if(isPoker(r)) return pokerRulesList(r);
   if(isRace(r)) return raceRulesList(r);
   if(isDarts(r)) return dartsRulesList(r);
+  if(isCards(r)) return cardsRulesList(r);
   const L=[];
   const singles=Object.entries(r.singles).filter(([f,p])=>p).map(([f,p])=>`${f}er = ${fmt(p)}`).join(', ');
   L.push(`${r.dice} Würfel.${singles?' '+singles+'.':' Einzelne Würfel zählen nicht.'}`);
@@ -676,7 +693,7 @@ function rulesList(r){
 
 /* ---------- Zustand ---------- */
 const uid=()=>Math.random().toString(36).slice(2,9);
-function freshTurn(r){ if(r.type==='bust') return {total:0,rolls:0,last:null,sel:[],rollId:null}; if(r.type==='ship') return {set:[],cargo:null,last:null,rolls:0,sel:[],left:5,rollId:null}; if(r.type==='poker') return {dice:null,held:[],rolls:0,sel:[],left:5,rollId:null}; if(r.type==='race') return {sel:[]}; if(r.type==='darts') return {darts:[]}; if(r.type==='box') return {tiles:Array(r.tiles).fill(true),dice:null,sel:[],tsel:[],left:2,rollId:null}; if(r.type==='house') return {slots:[null,null,null],die:null,sel:[],rollId:null}; if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
+function freshTurn(r){ if(r.type==='bust') return {total:0,rolls:0,last:null,sel:[],rollId:null}; if(r.type==='ship') return {set:[],cargo:null,last:null,rolls:0,sel:[],left:5,rollId:null}; if(r.type==='poker') return {dice:null,held:[],rolls:0,sel:[],left:5,rollId:null}; if(r.type==='race') return {sel:[]}; if(r.type==='darts') return {darts:[]}; if(r.type==='cards') return {}; if(r.type==='box') return {tiles:Array(r.tiles).fill(true),dice:null,sel:[],tsel:[],left:2,rollId:null}; if(r.type==='house') return {slots:[null,null,null],die:null,sel:[],rollId:null}; if(r.type==='bluff') return {dice:null,blind:false,passed:false,believed:false,rollId:null}; return r.type==='block'||r.type==='round'?{pts:0,left:r.dice,sel:[],roll:null,picked:[],held:[],rolls:0,realRolls:1}:{pts:0,left:r.dice,sel:[],roll:null,picked:[]}; }
 function newGame(names,tplId){
   const rules=clone(tplOf(tplId));
   const extra=rules.type==='round'?{half:1, pool:rules.deckel, halfPlayers:[], halfLosers:[], round:{maxRolls:null,results:{},order:names.map((_,i)=>i)}}:rules.type==='bluff'?{bluff:{last:null,reveal:null}}:rules.type==='box'?{box:{round:1}}:rules.type==='house'?{house:{res:{},starter:0}}:['bust','ship','poker'].includes(rules.type)?{rp:{res:{},starter:0}}:rules.type==='race'?{raceLast:null}:rules.type==='darts'?{dartsLast:null}:{};
@@ -686,7 +703,7 @@ function newGame(names,tplId){
     turn:freshTurn(rules),
     log:[{n:1,t:esc(rules.name)+' gestartet – '+esc(names[0])+' fängt an.'}], hist:[], winner:null, stats:freshStats()};
 }
-function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } if(g.rules.type==='box') g.players.forEach(p=>{p.total=0;p.score=0;}); if(g.rules.type==='house'||['bust','ship','poker'].includes(g.rules.type)) g.players.forEach(p=>{p.wins=0;p.score=0;}); if(g.rules.type==='race') g.players.forEach(p=>{p.pos=0;p.score=0;}); if(g.rules.type==='darts') dartsInit(g); return g; }
+function finishNew(g){ if(g.rules.type==='round'){ g.halfPlayers=g.players.map(p=>p.id); g.players.forEach(p=>p.deckel=0); } if(g.rules.type==='bluff'){ g.players.forEach(p=>{p.lives=g.rules.lives; p.pen=0;}); } if(g.rules.type==='box') g.players.forEach(p=>{p.total=0;p.score=0;}); if(g.rules.type==='house'||['bust','ship','poker'].includes(g.rules.type)) g.players.forEach(p=>{p.wins=0;p.score=0;}); if(g.rules.type==='race') g.players.forEach(p=>{p.pos=0;p.score=0;}); if(g.rules.type==='darts') dartsInit(g); if(g.rules.type==='cards') cardsInit(g); return g; }
 function migrate(g){ if(g && !g.rules){ g.rules=clone(TEMPLATES.kubiki); } if(g && g.rules.id==='kubiki' && g.rules.forceTake===undefined) g.rules.forceTake=true; return g; }
 /* Welche Würfel eines Wurfs bringen Punkte? (für Vorauswahl bzw. Pflicht-Nehmen) */
 function scoringIdx(r,roll){
@@ -741,13 +758,14 @@ function recordEnd(){
   const r=R(), w=G.players.find(p=>p.id===G.winner); if(!w) return;
   let ranking;
   if(isRound(r)) ranking=[{n:w.name,v:'verloren'}];
+  else if(isLoserGame(r)) ranking=rankOrder(r).map(p=>({n:p.name,v:scoreLabel(r,p)}));
   else ranking=rankOrder(r).map(p=>({n:p.name,v:scoreLabel(r,p)}));
-  prefs.history=[{at:Date.now(), game:r.name, loserGame:isRound(r), who:w.name, players:G.players.map(p=>p.name), ranking}, ...(prefs.history||[])].slice(0,200);
+  prefs.history=[{at:Date.now(), game:r.name, loserGame:isLoserGame(r), who:w.name, players:G.players.map(p=>p.name), ranking}, ...(prefs.history||[])].slice(0,200);
   savePrefs();
 }
 function commit(){
   if(G.winner && !G.endKey){ G.endKey=uid(); recordEnd(); const w=G.players.find(p=>p.id===G.winner);
-    if(isRound(R())) celebrate('lose',w.name+' hat verloren','die nächste Runde geht auf '+w.name); else celebrate('win',w.name+' gewinnt!',R().name);
+    if(isLoserGame(R())) celebrate('lose',w.name+' hat verloren','die nächste Runde geht auf '+w.name); else celebrate('win',w.name+' gewinnt!',R().name);
     strokeLoser(); checkEndAch(); }
   checkGameAch();
   G.rev=(G.rev||0)+1; saveLocal(); render();
@@ -862,6 +880,8 @@ const act={
   undo(){ const h=G.hist||[]; if(!h.length) return; const prev=h[h.length-1]; const rest=h.slice(0,-1); const rev=G.rev; if(G.endKey&&!prev.winner&&(prefs.history||[]).length){ prefs.history=prefs.history.slice(1); savePrefs(); } G={...prev,hist:rest,rev}; commit(); },
   again(){
     G.endKey=null;
+    if(isCards(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[]; cardsInit(G); cdraft=null;
+      G.cur=(wi+1)%G.players.length; G.turn={}; addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' gibt.'); commit(); return; }
     if(isDarts(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[]; dartsInit(G);
       G.cur=(wi+1)%G.players.length; G.turn=freshTurn(R()); addLog('Neues Spiel – '+esc(G.players[G.cur].name)+' fängt an.'); commit(); return; }
     if(isRP(R())||isRace(R())){ const wi=Math.max(0,G.players.findIndex(p=>p.id===G.winner)); G.winner=null; G.hist=[];
@@ -896,7 +916,7 @@ const act={
   online(v){ setup.online=v==='1'; render(); },
   start(){
     const names=setup.names.map(s=>s.trim()).filter(Boolean);
-    const minP=isDarts(tplOf(prefs.tpl))?1:2; if(names.length<minP){setup.err=minP===1?'Mindestens einen Namen eintragen.':'Mindestens 2 Spieler eintragen.';render();return;}
+    const tt=tplOf(prefs.tpl), minP=tt.minP||(isDarts(tt)?1:2); if(names.length<minP){setup.err=minP===1?'Mindestens einen Namen eintragen.':`Mindestens ${minP} Spieler eintragen.`;render();return;} if(tt.maxP&&names.length>tt.maxP){setup.err=`${tt.name} geht mit höchstens ${tt.maxP} Spielern.`;render();return;}
     setup.err='';
     prefs.saved=[...names,...prefs.saved.filter(x=>!names.includes(x))].slice(0,40); savePrefs();
     if(setup.online && db){ createOnline(names,prefs.tpl).catch(()=>{setup.err='Spiel konnte nicht angelegt werden. Bitte noch einmal versuchen.';render();}); }
@@ -1918,6 +1938,7 @@ function rankOrder(r){
   if(isBox(r)) return P.sort((a,b)=>(a.total||0)-(b.total||0));
   if(isHouse(r)||isRP(r)) return P.sort((a,b)=>(b.wins||0)-(a.wins||0));
   if(isRace(r)) return P.sort((a,b)=>(b.pos||0)-(a.pos||0));
+  if(isCards(r)) return cardsRank(r);
   if(isDarts(r)) return r.game==='x01'?P.sort((a,b)=>a.score-b.score):r.game==='cricket'?P.sort((a,b)=>b.score-a.score||cClosed(b)-cClosed(a)):P.sort((a,b)=>(b.pos||0)-(a.pos||0));
   return P.sort((a,b)=>b.score-a.score);
 }
@@ -1927,6 +1948,7 @@ function scoreLabel(r,p){
   if(isBox(r)) return (p.total||0)+' Rest';
   if(isHouse(r)||isRP(r)) return (p.wins||0)+' Siege';
   if(isRace(r)) return (p.pos||0)+' von '+raceSeq(r).length;
+  if(isCards(r)) return cardsLabel(r,p);
   if(isDarts(r)) return r.game==='x01'?p.score+' Rest':r.game==='cricket'?p.score+' Pkt.':(p.pos||0)+' von 21';
   return fmt(p.score);
 }
@@ -1936,6 +1958,7 @@ function scoreBig(r,p){
   if(isBox(r)) return p.total||0;
   if(isHouse(r)||isRP(r)) return p.wins||0;
   if(isRace(r)) return (p.pos||0)+'/'+raceSeq(r).length;
+  if(isCards(r)) return cardsBig(r,p);
   if(isDarts(r)) return r.game==='atc'?numName(ATC_SEQ[Math.min(20,p.pos||0)]):p.score;
   return fmt(p.score);
 }
@@ -2070,7 +2093,7 @@ function checkEndAch(){
 /* ==========================================================
    WER SCHMEISST DIE RUNDE?
    ========================================================== */
-function loserOf(){ const r=R(); if(isRound(r)) return G.players.find(p=>p.id===G.winner); const o=rankOrder(r); return o.length>1?o[o.length-1]:null; }
+function loserOf(){ const r=R(); if(isLoserGame(r)) return G.players.find(p=>p.id===G.winner); const o=rankOrder(r); return o.length>1?o[o.length-1]:null; }
 function strokeLoser(){
   if(prefs.stroke===false) return; const L=loserOf(); if(!L) return;
   prefs.tab=prefs.tab||{}; prefs.tab[L.name]=(prefs.tab[L.name]||0)+1; savePrefs();
@@ -2178,7 +2201,7 @@ function tableHTML(){
   let play='';
   if(G.winner){
     const w=G.players.find(p=>p.id===G.winner);
-    play=`<section class="card turn tmwin"><div class="label">${isRound(r)?'Verloren':'Gewonnen'}</div><div class="crown">${esc(w.name)}</div>
+    play=`<section class="card turn tmwin"><div class="label">${isLoserGame(r)?'Verloren':'Gewonnen'}</div><div class="crown">${esc(w.name)}</div>
       <div class="row"><button class="btn" data-act="undo">Rückgängig</button><button class="btn primary" data-act="again" style="flex:2">Nochmal ${esc(r.name)}</button></div></section>`;
   } else {
     const box=document.createElement('div'); box.innerHTML=gameHTML(); const turn=box.querySelector('section.turn');
@@ -2703,10 +2726,10 @@ const TOOLS={
   coin:{n:'Münze werfen', d:'Kopf oder Zahl – mit Strichliste'},
   finger:{n:'Fingerwähler', d:'Alle Finger aufs Handy – einer wird ausgelost'},
   timer:{n:'Timer', d:'Sanduhr für Zugzeiten und Ratespiele'},
-  card:{n:'Karte ziehen', d:'Zufällige Karte aus 32 oder 52 Karten'}
+  card:{n:'Karte ziehen', d:'Zufällige Karte aus 32, 36 oder 52 Karten'}
 };
 const SUITS=[{s:'♣',n:'Kreuz',red:false},{s:'♠',n:'Pik',red:false},{s:'♥',n:'Herz',red:true},{s:'♦',n:'Karo',red:true}];
-function newDeck(size){ const ranks=size===32?['A','K','D','B','10','9','8','7']:['A','K','D','B','10','9','8','7','6','5','4','3','2'];
+function newDeck(size){ const ranks=size===32?['A','K','D','B','10','9','8','7']:size===36?['A','K','D','B','10','9','8','7','6']:['A','K','D','B','10','9','8','7','6','5','4','3','2'];
   const d=[]; SUITS.forEach((s,si)=>ranks.forEach(r=>d.push({r,si}))); for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; } return d; }
 let timerIv=null;
 function stopTimerTick(){ if(timerIv){ clearInterval(timerIv); timerIv=null; } }
@@ -2738,7 +2761,7 @@ function toolHTML(){
     <div class="row"><button class="btn" data-act="treset">Neu starten</button><button class="btn primary" data-act="ttoggle">${t.end?'Anhalten':'Start'}</button></div>`; }
   if(k==='card'){ const c=tool.card, top=c.drawn[0];
     const cardEl=x=>{ const S=SUITS[x.si]; return `<span class="pcard ${S.red?'red':''}" aria-label="${S.n} ${x.r}"><span class="pc-c">${x.r}<br>${S.s}</span><span class="pc-s">${S.s}</span><span class="pc-c pc-b">${x.r}<br>${S.s}</span></span>`; };
-    body=`<div class="seg" role="group" aria-label="Kartenspiel"><button data-act="cdeck" data-v="32" aria-pressed="${c.size===32}">32 Karten</button><button data-act="cdeck" data-v="52" aria-pressed="${c.size===52}">52 Karten</button></div>
+    body=`<div class="seg" role="group" aria-label="Kartenspiel"><button data-act="cdeck" data-v="32" aria-pressed="${c.size===32}">32 Karten</button><button data-act="cdeck" data-v="36" aria-pressed="${c.size===36}">36 Karten</button><button data-act="cdeck" data-v="52" aria-pressed="${c.size===52}">52 Karten</button></div>
     <button class="freezone" data-act="cdraw" ${c.deck.length?'':'disabled'} aria-label="Karte ziehen">
       ${top?`<span class="${recent(c.at)?'dealin':''}">${cardEl(top)}</span><span class="freesum"><b>${SUITS[top.si].n} ${({A:'Ass',K:'König',D:'Dame',B:'Bube'})[top.r]||top.r}</b></span>`:`<span class="pcard back"></span><span class="freehint">Tippen zum Ziehen</span>`}
     </button>
@@ -2783,7 +2806,7 @@ Object.assign(act,{
   toolgo(k){ if(!TOOLS[k]) return; tool={k,from:(view==='setup'&&setup.step)||'tools'};
     if(k==='coin') tool.coin={side:null,K:0,Z:0,at:0};
     if(k==='timer') tool.timer={dur:prefs.timerDur||60,end:null,left:null,done:false};
-    if(k==='card'){ const size=prefs.cardDeck===32?32:52; tool.card={size,deck:newDeck(size),drawn:[],at:0}; }
+    if(k==='card'){ const size=[32,36].includes(prefs.cardDeck)?prefs.cardDeck:52; tool.card={size,deck:newDeck(size),drawn:[],at:0}; }
     view='tool'; render(); window.scrollTo(0,0); },
   toolback(){ stopTimerTick(); clearTimeout(fTimer); view='setup'; setup.step=tool.from||'tools'; render(); window.scrollTo(0,0); },
   coinflip(){ const c=tool.coin; if(recent(c.at)) return; c.side=Math.random()<.5?'K':'Z'; c[c.side]++; c.at=Date.now(); sfx('tick'); buzz(20); render();
@@ -2797,8 +2820,328 @@ Object.assign(act,{
   treset(){ const t=tool.timer; t.done=false; t.left=null; t.end=Date.now()+t.dur*1000; t.lastBeep=null; stopTimerTick(); timerIv=setInterval(timerTick,200); render(); },
   cdraw(){ const c=tool.card; if(!c.deck.length) return; c.drawn.unshift(c.deck.pop()); c.at=Date.now(); sfx('tick'); buzz(15); render(); },
   cshuffle(){ const c=tool.card; c.deck=newDeck(c.size); c.drawn=[]; c.at=0; render(); },
-  cdeck(v){ const size=+v===32?32:52; prefs.cardDeck=size; savePrefs(); tool.card={size,deck:newDeck(size),drawn:[],at:0}; render(); }
+  cdeck(v){ const size=[32,36].includes(+v)?+v:52; prefs.cardDeck=size; savePrefs(); tool.card={size,deck:newDeck(size),drawn:[],at:0}; render(); }
 });
+
+/* ==========================================================
+   KARTENSPIELE
+   Gespielt wird mit echten Karten, Deckel rechnet und schreibt mit.
+   Der Spieler „am Zug“ ist hier der Geber; er wechselt nach jeder Runde.
+   ========================================================== */
+const DECKS={'32':'32 Karten · 7 bis Ass','36':'36 Karten · 6 bis Ass','48':'48 Karten · 9 bis Ass doppelt','52':'52 Karten · 2 bis Ass','110':'2 × 52 Karten + Joker','own':'eigenes Kartenspiel','any':'für jedes Spiel'};
+const CT=(id,o)=>{ TEMPLATES[id]={id, type:'cards', cat:'Karten', noEdit:true, ...o}; };
+CT('skat',{kind:'skat', name:'Skat', deck:'32', minP:3, maxP:4, seeger:false, tagline:'Spielwert ausrechnen lassen: Farbe, Buben, Hand, Schneider – Deckel führt die Liste.'});
+CT('skatsf',{kind:'skat', name:'Skat (Turnierwertung)', deck:'32', minP:3, maxP:4, seeger:true, tagline:'Seeger-Fabian: +50 für jedes gewonnene Spiel, −50 für verlorene, Bonus für die Gegner.'});
+CT('doppelkopf',{kind:'doko', name:'Doppelkopf', deck:'48', minP:4, maxP:5, tagline:'Re gegen Kontra – mit Ansagen, Sonderpunkten und Soli.'});
+CT('schafkopf',{kind:'schafkopf', name:'Schafkopf', deck:'32', minP:4, maxP:5, t1:10, t2:50, tagline:'Sauspiel, Wenz und Solo – abgerechnet in Cent nach bayerischem Tarif.'});
+CT('durak',{kind:'durak', name:'Durak', deck:'36', minP:2, maxP:6, target:5, loser:true, tagline:'Der russische Klassiker: Wer am Ende noch Karten hat, ist der Durak – der Dummkopf.'});
+CT('maumau',{kind:'sheet', entry:'winner0', dir:'low', target:100, name:'Mau-Mau', deck:'32', minP:2, maxP:6, tagline:'Wer zuerst alle Karten los ist, gewinnt die Runde. Die anderen schreiben ihre Restaugen auf.'});
+CT('schwimmen',{kind:'schwimmen', name:'Schwimmen (31)', deck:'32', minP:2, maxP:9, lives:3, tagline:'Drei Karten, möglichst 31 Punkte in einer Farbe – wer am wenigsten hat, verliert ein Leben.'});
+CT('romme',{kind:'sheet', entry:'winner0', dir:'low', target:500, handDouble:true, name:'Rommé', deck:'110', minP:2, maxP:6, tagline:'Auslegen, anlegen, ablegen – wer fertig ist, bekommt 0, die anderen zählen Minuspunkte.'});
+CT('canasta',{kind:'sheet', entry:'each', dir:'high', target:5000, neg:true, name:'Canasta', deck:'110', minP:2, maxP:6, tagline:'Punkte pro Runde eintragen – wer zuerst 5000 hat, gewinnt. Spielt ihr in Teams, tragt die Teams als Spieler ein.'});
+CT('herzen',{kind:'sheet', entry:'each', dir:'low', target:100, hearts:true, name:'Herzen', deck:'52', minP:3, maxP:6, tagline:'Stiche mit Herz und die Pik-Dame vermeiden – oder alle holen und den Mond schießen.'});
+CT('uno',{kind:'sheet', entry:'uno', dir:'high', target:500, name:'Uno', deck:'own', minP:2, maxP:10, tagline:'Wer zuerst keine Karten mehr hat, bekommt die Kartenpunkte aller anderen. Ziel: 500.'});
+CT('wizard',{kind:'wizard', name:'Wizard', deck:'own', minP:3, maxP:6, tagline:'Vor jeder Runde Stiche ansagen – Deckel rechnet Treffer und Fehler aus.'});
+CT('phase10',{kind:'phase10', name:'Phase 10', deck:'own', minP:2, maxP:6, tagline:'Phase für Phase – Deckel merkt sich, wer wo steht, und zählt die Minuspunkte.'});
+CT('punkteblock',{kind:'sheet', entry:'each', dir:'high', target:0, neg:true, name:'Freier Punkteblock', deck:'any', minP:1, maxP:10, tagline:'Für jedes andere Spiel: Punkte pro Runde eintragen, Deckel zählt zusammen.'});
+Object.assign(GUIDE,{
+  skat:{goal:'Als Alleinspieler mindestens 61 Augen holen – Deckel rechnet den Spielwert aus.', players:'3–4', time:'1–2 Std.',
+    steps:['Jeder bekommt 10 Karten, 2 liegen im Skat. Durch Reizen wird der Alleinspieler bestimmt.','Der Alleinspieler spielt gegen die beiden anderen und braucht mindestens 61 von 120 Augen.','Nach dem Spiel in Deckel eintragen: wer gespielt hat, welches Spiel, mit oder ohne wie viele Buben, Hand, Schneider, Schwarz – und ob gewonnen.','Spielwert = Grundwert × Stufen (Buben + 1 für das Spiel + Hand + Schneider …). Verlorene Spiele zählen doppelt minus.','Bei 4 Spielern setzt der Geber aus.'],
+    example:'Kreuz mit 2 Buben, Hand: (2 + 1 + 1) × 12 = 48 Punkte. Verloren wären es −96.', tip:'Grundwerte: Karo 9, Herz 10, Pik 11, Kreuz 12, Grand 24. Null 23, Null Hand 35, Null ouvert 46, Null ouvert Hand 59.'},
+  skatsf:{goal:'Wie Skat, aber mit Turnierwertung nach Seeger-Fabian.', players:'3–4', time:'1–2 Std.',
+    steps:['Gespielt wird normales Skat.','Gewonnene Spiele: Spielwert + 50 Punkte. Verlorene Spiele: doppelter Spielwert minus und zusätzlich −50.','Verliert der Alleinspieler, bekommt jeder Gegenspieler 40 Punkte (bei 4 Spielern 30).'],
+    example:'Grand mit 1, gewonnen: 2 × 24 = 48 + 50 = 98 Punkte.', tip:'So zählt auch, wer viele kleine Spiele sicher gewinnt.'},
+  doppelkopf:{goal:'Als Partei mehr als 120 von 240 Augen holen.', players:'4 (5 mit Aussetzen)', time:'1–2 Std.',
+    steps:['Wer die Kreuz-Damen hat, ist Re – die anderen sind Kontra. Bei einem Solo spielt einer allein gegen drei.','Re gewinnt mit mindestens 121 Augen.','In Deckel trägst du ein, wer Re war, wie viele Augen Re hatte, die Ansagen und die Sonderpunkte (Fuchs, Doppelkopf, Karlchen).','Punkte: 1 fürs Gewinnen, je 1 für keine 90, 60, 30, schwarz, je 2 für Re- und Kontra-Ansage, 1 für „gegen die Alten“.','Die Gewinner bekommen die Punkte, die Verlierer genauso viel minus. Beim Solo zählt der Solist dreifach.'],
+    example:'Re holt 160 Augen, Re wurde angesagt: 1 (gewonnen) + 1 (keine 90) + 2 (Re) = 4. Re-Spieler je +4, Kontra je −4.', tip:'Bei 5 Spielern setzt der Geber aus.'},
+  schafkopf:{goal:'Mit der eigenen Partei mindestens 61 Augen holen – abgerechnet wird in Geld.', players:'4 (5 mit Aussetzen)', time:'1–2 Std.',
+    steps:['Sauspiel: Der Spieler ruft eine Sau (Ass) – wer sie hat, spielt mit ihm.','Wenz und Farbsolo spielt einer allein gegen drei.','Tarif: Sauspiel 10 Cent, Solo und Wenz 50 Cent. Schneider und Schwarz je +10, Laufende ab 3 (Wenz ab 2) je +10.','Kontra und Re verdoppeln jeweils.','Beim Solo zahlen alle drei Gegner – oder bekommen jeder den Betrag.'],
+    example:'Sauspiel gewonnen mit Schneider: 10 + 10 = 20 Cent. Beide Gewinner bekommen 20 Cent, beide Verlierer zahlen 20 Cent.', tip:'Den Tarif könnt ihr euch mal 10 denken – 1 € statt 10 Cent spielt sich gleich.'},
+  durak:{goal:'Nicht als Letzte:r mit Karten auf der Hand übrig bleiben.', players:'2–6', time:'10–20 Min. pro Runde',
+    steps:['36 Karten, jeder bekommt 6. Die unterste Karte des Stapels bestimmt den Trumpf.','Der Angreifer legt eine Karte, der Verteidiger muss sie mit einer höheren derselben Farbe oder mit Trumpf schlagen.','Weitere Angreifer dürfen Karten mit gleichem Wert nachlegen. Kann der Verteidiger nicht schlagen, nimmt er alles auf.','Nach jedem Angriff wird auf 6 Karten nachgezogen. Ist der Stapel leer, spielt man die Hand leer.','Wer zuletzt noch Karten hat, ist der Durak. In Deckel antippen, wer es war.'],
+    example:'Trumpf ist Herz. Du wirst mit Pik 9 angegriffen: Pik 10 oder höher schlägt – oder jede Herz-Karte.', tip:'Wer zuerst 5-mal Durak war, hat verloren – das Ziel stellt ihr unter „Regeln“ nicht um, aber ihr könnt jederzeit abrechnen.'},
+  maumau:{goal:'Als Erste:r alle Karten loswerden.', players:'2–6', time:'5–10 Min. pro Runde',
+    steps:['Jeder bekommt 5 Karten. Gelegt wird gleiche Farbe oder gleicher Wert.','7: Der Nächste zieht 2. 8: Der Nächste setzt aus. Bube: Du wünschst dir eine Farbe.','Kannst du nicht legen, ziehst du eine Karte.','Bei der vorletzten Karte „Mau“ sagen, bei der letzten „Mau-Mau“.','In Deckel antippen, wer gewonnen hat, und für die anderen die Restaugen eintragen.'],
+    example:'Restaugen: Ass 11, Zehn 10, König 4, Dame 3, Bube 2, sonst die Zahl.', tip:'Wer zuerst über 100 Punkte kommt, beendet das Spiel – gewonnen hat dann, wer am wenigsten hat.'},
+  schwimmen:{goal:'Möglichst 31 Punkte in einer Farbe auf der Hand haben und nicht als Letzte:r im Spiel bleiben.', players:'2–9', time:'15–30 Min.',
+    steps:['Jeder hat 3 Karten, 3 liegen offen in der Mitte.','Reihum tauschst du eine oder alle drei Karten mit der Mitte – oder du klopfst, dann gibt es noch eine letzte Runde.','Gezählt werden die Augen einer Farbe: Ass 11, Bilder 10, sonst die Zahl. Drei Gleiche zählen 30,5.','Wer am wenigsten hat, verliert ein Leben. Wer 31 hat, legt sofort auf – dann verlieren alle anderen.','Mit 0 Leben „schwimmst“ du noch. Wer dann verliert, ist raus. Der Letzte gewinnt.'],
+    example:'Herz Ass, Herz König, Herz 9 = 11 + 10 + 9 = 30.', tip:'Mehrere Verlierer gleichzeitig? Einfach alle antippen.'},
+  romme:{goal:'Als Erste:r alle Karten auslegen und ablegen.', players:'2–6', time:'15–30 Min. pro Runde',
+    steps:['Jeder bekommt 13 Karten (Startspieler 14). Du ziehst eine Karte und legst am Ende eine ab.','Ausgelegt werden Sätze (3–4 gleiche Werte) und Reihen (mindestens 3 aufeinanderfolgende einer Farbe). Das erste Auslegen braucht 40 Punkte.','Joker ersetzen jede Karte.','Wer alle Karten los ist, hat die Runde gewonnen und bekommt 0.','Die anderen zählen ihre Handkarten als Minuspunkte: Joker 20, Ass 11, Bilder 10, sonst die Zahl.'],
+    example:'Du hast noch König, 7 und Joker: 10 + 7 + 20 = 37 Minuspunkte.', tip:'Hand-Rommé (alles auf einmal ausgelegt) verdoppelt die Minuspunkte der anderen.'},
+  canasta:{goal:'Als Erste:r 5000 Punkte erreichen.', players:'2–6 (meist 4 in Teams)', time:'1–2 Std.',
+    steps:['Gespielt wird mit 2 × 52 Karten und 4 Jokern. Ziel sind Canastas: 7 gleiche Karten.','Am Ende der Runde zählt jede Partei ihre ausgelegten Karten plus Prämien, minus Handkarten.','Die Ergebnisse trägst du pro Runde in Deckel ein – auch negative.','Spielt ihr in Teams, tragt beim Start die Teams als Spieler ein.'],
+    example:'Reine Canasta 500, gemischte 300, Ausmachen 100, rote Dreien je 100.', tip:'Mit dem ±-Knopf trägst du Minuspunkte ein.'},
+  herzen:{goal:'Möglichst wenige Punkte sammeln.', players:'3–6', time:'30–60 Min.',
+    steps:['Alle 52 Karten werden verteilt. Es muss Farbe bedient werden.','Jede Herz-Karte in deinen Stichen zählt 1 Punkt, die Pik-Dame 13.','Pro Runde gibt es zusammen 26 Punkte. Trag ein, wie viele jeder hat.','Mondschuss: Holt einer alle 26, bekommt er 0 und alle anderen je 26 – das erkennt Deckel automatisch.','Kommt jemand über 100, ist Schluss. Wer am wenigsten hat, gewinnt.'],
+    example:'Anna 13 (Pik-Dame), Ben 9, Chris 4 – zusammen 26.', tip:'Vor jeder Runde drei Karten an den Nachbarn weitergeben.'},
+  uno:{goal:'Als Erste:r 500 Punkte erreichen.', players:'2–10', time:'30–60 Min.',
+    steps:['Jeder bekommt 7 Karten. Gelegt wird gleiche Farbe, gleiche Zahl oder gleiches Symbol.','Bei der vorletzten Karte „Uno“ rufen.','Wer zuerst keine Karten mehr hat, gewinnt die Runde.','Er bekommt die Kartenwerte der anderen: Zahlen = Augen, Aktionskarten 20, schwarze Karten 50.'],
+    example:'Ben hat noch eine 7 und +2, Chris eine Farbwahl: 7 + 20 + 50 = 77 Punkte für den Gewinner.', tip:'Trag für jeden Verlierer seine Handpunkte ein – Deckel rechnet zusammen.'},
+  wizard:{goal:'Genau so viele Stiche machen, wie man angesagt hat.', players:'3–6', time:'45–90 Min.',
+    steps:['In Runde 1 gibt es 1 Karte, in Runde 2 zwei – bis alle Karten verteilt sind.','Vor jeder Runde sagt jeder an, wie viele Stiche er macht. Erst die Ansagen eintragen.','Nach der Runde die tatsächlichen Stiche eintragen.','Richtig angesagt: 20 Punkte + 10 je Stich. Falsch: −10 je Stich Unterschied.'],
+    example:'2 angesagt, 2 gemacht: 40 Punkte. 2 angesagt, 0 gemacht: −20.', tip:'Zauberer gewinnen immer, Narren verlieren immer.'},
+  phase10:{goal:'Als Erste:r alle 10 Phasen schaffen.', players:'2–6', time:'45–90 Min.',
+    steps:['Jede Runde versucht jeder seine aktuelle Phase auszulegen (z. B. 2 Drillinge).','Wer seine Phase geschafft hat, ist in der nächsten Runde eine Phase weiter.','Wer zuerst alle Karten los ist, beendet die Runde. Die anderen zählen ihre Restkarten als Minuspunkte: 1–9 = 5, 10–12 = 10, Aussetzen 15, Joker 25.','Wer zuerst Phase 10 schafft, gewinnt. Schaffen es mehrere, gewinnt der mit den wenigsten Minuspunkten.'],
+    example:'Anna schafft Phase 3 und hat noch zwei Karten (7 und 11): 5 + 10 = 15 Minuspunkte.', tip:'In Deckel tippst du an, wer seine Phase geschafft hat.'},
+  punkteblock:{goal:'Punkte für jedes beliebige Spiel aufschreiben.', players:'1–10', time:'beliebig',
+    steps:['Nach jeder Runde für jeden die Punkte eintragen.','Deckel zählt zusammen und zeigt die Rangfolge.','Mit „Abrechnen“ beendest du das Spiel.'],
+    tip:'Mit dem ±-Knopf trägst du Minuspunkte ein.'}
+});
+const isCards=r=>r&&r.type==='cards';
+const isLoserGame=r=>isRound(r)||(isCards(r)&&!!r.loser);
+const eur=c=>(c/100).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+const sgn=n=>n>0?'+'+fmt(n):fmt(n);
+const pnum=s=>{ const t=String(s??'').replace(/[^\d-]/g,''); if(!t||t==='-') return null; const v=parseInt(t,10); return isNaN(v)?null:v; };
+const wizRounds=()=>Math.floor(60/G.players.length);
+function cardsInit(g){ const r=g.rules; g.cards={rounds:[],bids:null};
+  g.players.forEach(p=>{ p.score=0; if(r.kind==='schwimmen') p.lives=r.lives+1; if(r.kind==='phase10') p.phase=0; }); }
+function cardsSitOut(){ const r=R(), n=G.players.length; return ((r.kind==='skat'&&n===4)||(r.kind==='doko'&&n===5)||(r.kind==='schafkopf'&&n===5))?G.cur:-1; }
+function cardsActive(){ const s=cardsSitOut(); return G.players.filter((p,i)=>i!==s&&!(R().kind==='schwimmen'&&p.lives<=0)); }
+function cardsRulesList(r){
+  const g=GUIDE[r.id]; const L=[DECKS[r.deck]?'Karten: '+DECKS[r.deck]+'.':''].filter(Boolean);
+  if(r.kind==='sheet'){ L.push(r.entry==='uno'?'Der Rundensieger bekommt die Handpunkte aller anderen.':r.entry==='winner0'?'Der Rundensieger bekommt 0, die anderen ihre Restpunkte.':'Pro Runde trägt jeder seine Punkte ein.');
+    if(r.target) L.push(r.dir==='low'?`Kommt jemand auf ${fmt(r.target)} oder mehr, ist Schluss – die wenigsten Punkte gewinnen.`:`Wer zuerst ${fmt(r.target)} Punkte hat, gewinnt.`); else L.push('Mit „Abrechnen“ endet das Spiel, die meisten Punkte gewinnen.'); }
+  if(r.kind==='skat') L.push('Spielwert = Grundwert × (Buben + 1 + Hand + Schneider + angesagt + Schwarz + angesagt + Ouvert).','Verlorene Spiele zählen doppelt minus.'+(r.seeger?' Seeger-Fabian: ±50 je Spiel, Gegner +40 (bei 4 Spielern +30), wenn der Alleinspieler verliert.':''),'Bei 4 Spielern setzt der Geber aus. Mit „Abrechnen“ endet die Liste.');
+  if(r.kind==='doko') L.push('Re gewinnt ab 121 Augen. 1 Punkt fürs Gewinnen, je 1 für keine 90/60/30/schwarz, je 2 für Re- und Kontra-Ansage, 1 für „gegen die Alten“, dazu Sonderpunkte.','Solo: Der Solist bekommt oder zahlt dreifach.','Bei 5 Spielern setzt der Geber aus.');
+  if(r.kind==='schafkopf') L.push(`Tarif: Sauspiel ${r.t1} Cent, Solo und Wenz ${r.t2} Cent. Schneider, Schwarz und jeder Laufende je +${r.t1} Cent.`,'Laufende zählen ab 3 (beim Wenz ab 2). Kontra und Re verdoppeln.','Bei 5 Spielern setzt der Geber aus.');
+  if(r.kind==='durak') L.push('Pro Runde antippen, wer der Durak ist.',`Wer zuerst ${r.target}-mal Durak war, hat verloren.`);
+  if(r.kind==='schwimmen') L.push(`Jeder hat ${r.lives} Leben und darf danach noch einmal „schwimmen“.`,'Pro Runde antippen, wer verloren hat. Wer schwimmend verliert, ist raus. Der Letzte gewinnt.');
+  if(r.kind==='wizard') L.push('Runde 1 mit einer Karte, dann jede Runde eine mehr, bis alle 60 Karten verteilt sind.','Richtig angesagt: 20 + 10 je Stich. Falsch: −10 je Stich Unterschied.');
+  if(r.kind==='phase10') L.push('Pro Runde antippen, wer seine Phase geschafft hat, und Minuspunkte eintragen.','Wer zuerst Phase 10 schafft, gewinnt – bei mehreren die wenigsten Minuspunkte.');
+  return L;
+}
+const cardsMeta=r=>DECKS[r.deck]+(r.minP===r.maxP?'':` · ${r.minP}–${r.maxP} Spieler`);
+function cardsRank(r){ const P=[...G.players];
+  if(r.kind==='schwimmen') return P.sort((a,b)=>b.lives-a.lives);
+  if(r.kind==='phase10') return P.sort((a,b)=>b.phase-a.phase||a.score-b.score);
+  if(r.kind==='durak'||(r.kind==='sheet'&&r.dir==='low')) return P.sort((a,b)=>a.score-b.score);
+  return P.sort((a,b)=>b.score-a.score); }
+function cardsLabel(r,p){
+  if(r.kind==='schwimmen') return p.lives<=0?'raus':p.lives===1?'schwimmt':(p.lives-1)+' Leben';
+  if(r.kind==='phase10') return 'Phase '+Math.min(10,p.phase+1)+' · '+p.score;
+  if(r.kind==='durak') return p.score+'× Durak';
+  if(r.kind==='schafkopf') return eur(p.score);
+  return fmt(p.score)+' Pkt.'; }
+function cardsBig(r,p){
+  if(r.kind==='schwimmen') return p.lives<=0?'–':p.lives===1?'🏊':p.lives-1;
+  if(r.kind==='phase10') return Math.min(10,p.phase+1);
+  if(r.kind==='schafkopf') return eur(p.score);
+  return fmt(p.score); }
+function cardsSub(r,p){
+  const last=G.cards.rounds[G.cards.rounds.length-1]; const d=last&&last.d[p.id];
+  if(r.kind==='schwimmen') return p.lives>1?`<span class="lives">${Array.from({length:r.lives},(_,k)=>`<i class="${k<p.lives-1?'on':''}"></i>`).join('')}</span>`:p.lives===1?'schwimmt':'raus';
+  if(r.kind==='phase10') return `${p.score} Minus`;
+  if(r.kind==='wizard'&&G.cards.bids) return 'Ansage '+(G.cards.bids[p.id]??'–');
+  if(cardsSitOut()===G.players.indexOf(p)) return 'setzt aus';
+  if(d) return r.kind==='schafkopf'?(d>0?'+':'')+eur(d):r.kind==='durak'?'zuletzt Durak':'zuletzt '+sgn(d);
+  return ''; }
+function cardsStatus(r){
+  const n=G.cards.rounds.length+1;
+  if(r.kind==='wizard') return `Runde ${Math.min(n,wizRounds())} von ${wizRounds()} · ${Math.min(n,wizRounds())} ${n===1?'Karte':'Karten'} pro Spieler`;
+  if(r.kind==='durak') return `Runde ${n} · wer ${r.target}-mal Durak ist, verliert`;
+  if(r.kind==='schwimmen') return `Runde ${n} · ${r.lives} Leben und Schwimmen`;
+  if(r.kind==='phase10') return `Runde ${n} · wer zuerst Phase 10 schafft, gewinnt`;
+  if(r.kind==='sheet'&&r.target) return `Runde ${n} · ${r.dir==='low'?'bis '+fmt(r.target)+', wenig ist gut':'Ziel '+fmt(r.target)}`;
+  return `${r.kind==='skat'||r.kind==='doko'||r.kind==='schafkopf'?'Spiel':'Runde'} ${n} · ${DECKS[r.deck]}`; }
+/* ---- Eingabe-Entwurf (nicht im Spielstand, damit Tippen nichts neu zeichnet) ---- */
+let cdraft=null;
+function cd(){ const k=G.rules.id+'|'+G.cards.rounds.length+'|'+(G.cards.bids?1:0)+'|'+(G.code||'')+'|'+G.players.map(p=>p.id).join(); if(!cdraft||cdraft.k!==k) cdraft={k,v:{},sel:[],err:''}; return cdraft; }
+function skatValue(d,r){
+  const BASE={karo:9,herz:10,pik:11,kreuz:12,grand:24};
+  if(d.game==='null'){ const v=d.hand&&d.ouv?59:d.ouv?46:d.hand?35:23; return {v, txt:`Null${d.ouv?' ouvert':''}${d.hand?' Hand':''} = ${v}`}; }
+  const g=BASE[d.game]; if(!g) return null;
+  const st=(d.sp||1)+1+(d.hand?1:0)+(d.schn||d.schnA||d.schw||d.schwA?1:0)+(d.schnA?1:0)+(d.schw||d.schwA?1:0)+(d.schwA?1:0)+(d.ouv?1:0);
+  return {v:g*st, txt:`${st} × ${g} = ${g*st}`};
+}
+function dokoValue(d){
+  const aug=pnum(d.v.aug); if(aug==null||aug<0||aug>240) return null;
+  const reWin=aug>=121, w=reWin?aug:240-aug, l=240-w;
+  let pts=1+(l<90?1:0)+(l<60?1:0)+(l<30?1:0)+(l===0?1:0)+(d.reA?2:0)+(d.koA?2:0)+(!reWin&&!d.solo?1:0);
+  let S=(reWin?pts:-pts)+(d.solo?0:(d.sRe||0)-(d.sKo||0));
+  return {reWin, pts, S};
+}
+function schafValue(d,r){
+  const base=d.art==='sau'?r.t1:r.t2; const minL=d.art==='wenz'?2:3;
+  let v=base+(d.schn||d.schw?r.t1:0)+(d.schw?r.t1:0)+((d.lauf||0)>=minL?d.lauf*r.t1:0);
+  if(d.kontra) v*=2; if(d.kontra&&d.re) v*=2; return v; }
+function cardsCommitRound(deltas,note,extra){
+  const r=R(); pushHist();
+  G.cards.rounds.push({n:G.cards.rounds.length+1,d:deltas,note});
+  G.players.forEach(p=>{ p.score+=deltas[p.id]||0; });
+  if(extra) extra();
+  const best=Math.max(...Object.values(deltas).concat([0]));
+  G.players.forEach(p=>{ const ps=PS(p.id); ps.turns++; if(r.kind!=='durak'&&best>0&&deltas[p.id]===best) ps.trip++; });
+  addLog(note); G.cards.bids=null; cdraft=null;
+  // Ende?
+  let w=null;
+  if(r.kind==='sheet'&&r.target&&G.players.some(p=>p.score>=r.target)) w=cardsRank(r)[0];
+  if(r.kind==='wizard'&&G.cards.rounds.length>=wizRounds()) w=cardsRank(r)[0];
+  if(r.kind==='durak'){ const L=G.players.find(p=>p.score>=r.target); if(L) w=L; }
+  if(r.kind==='schwimmen'){ const alive=G.players.filter(p=>p.lives>0); if(alive.length===1) w=alive[0]; }
+  if(r.kind==='phase10'){ const done=G.players.filter(p=>p.phase>=10); if(done.length) w=done.sort((a,b)=>a.score-b.score)[0]; }
+  if(w){ G.winner=w.id; addLog(r.loser?`<b>${esc(w.name)} ist ${r.target}-mal Durak und hat verloren!</b>`:`<b>${esc(w.name)} gewinnt ${esc(r.name)}!</b>`); commit(); return; }
+  let nx=(G.cur+1)%G.players.length; if(r.kind==='schwimmen'){ for(let k=0;k<G.players.length&&G.players[nx].lives<=0;k++) nx=(nx+1)%G.players.length; }
+  G.cur=nx; sfx('good'); commit();
+}
+function cardsSave(){
+  const r=R(), d=cd(), AP=cardsActive(), nm=id=>esc((G.players.find(p=>p.id===id)||{}).name||''); d.err='';
+  const fail=m=>{ d.err=m; render(); };
+  const deltas={}; G.players.forEach(p=>deltas[p.id]=0);
+  if(r.kind==='sheet'){
+    if(r.entry==='each'){ for(const p of AP){ const v=pnum(d.v[p.id]); if(v==null&&d.v[p.id]!==undefined&&String(d.v[p.id]).trim()!=='') return fail('Bitte nur Zahlen eintragen.'); deltas[p.id]=(v||0)*(d.neg&&d.neg[p.id]?-1:1); }
+      if(r.hearts){ const sum=AP.reduce((a,p)=>a+deltas[p.id],0); const moon=AP.find(p=>deltas[p.id]===26);
+        if(moon&&sum===26){ AP.forEach(p=>deltas[p.id]=p===moon?0:26); return cardsCommitRound(deltas,`${nm(moon.id)} schießt den Mond! Alle anderen bekommen 26.`); }
+        if(sum!==26) return fail(`Zusammen müssen es 26 Punkte sein (gerade ${sum}).`); }
+      return cardsCommitRound(deltas,`Runde ${G.cards.rounds.length+1}: `+AP.map(p=>`${esc(p.name)} ${sgn(deltas[p.id])}`).join(', ')); }
+    const win=d.win; if(!win) return fail('Erst antippen, wer die Runde gewonnen hat.');
+    let sum=0; for(const p of AP){ if(p.id===win) continue; const v=pnum(d.v[p.id]); if(v==null) return fail('Für '+p.name+' fehlen noch die Punkte.'); sum+=v; deltas[p.id]=v*(r.entry==='winner0'&&d.hand?2:1); }
+    if(r.entry==='uno'){ AP.forEach(p=>deltas[p.id]=p.id===win?sum:0); return cardsCommitRound(deltas,`${nm(win)} gewinnt die Runde und bekommt ${sum} Punkte.`); }
+    return cardsCommitRound(deltas,`${nm(win)} ist fertig${d.hand?' – mit Hand-Rommé!':'.'} `+AP.filter(p=>p.id!==win).map(p=>`${esc(p.name)} ${sgn(deltas[p.id])}`).join(', '));
+  }
+  if(r.kind==='skat'){
+    if(!d.decl) return fail('Wer hat gespielt?'); if(!d.game) return fail('Welches Spiel?'); if(d.won==null) return fail('Gewonnen oder verloren?');
+    const sv=skatValue(d,r); let v=d.won?sv.v:-2*sv.v; if(r.seeger) v+=d.won?50:-50; deltas[d.decl]=v;
+    if(r.seeger&&!d.won) AP.forEach(p=>{ if(p.id!==d.decl) deltas[p.id]=G.players.length>=4?30:40; });
+    const GN={karo:'Karo',herz:'Herz',pik:'Pik',kreuz:'Kreuz',grand:'Grand',null:'Null'};
+    return cardsCommitRound(deltas,`${nm(d.decl)} ${d.won?'gewinnt':'verliert'} ${GN[d.game]}${d.game!=='null'?` ${d.mit==='ohne'?'ohne':'mit'} ${d.sp||1}`:''}${d.hand?' Hand':''} – ${sgn(v)}.`);
+  }
+  if(r.kind==='doko'){
+    const need=d.solo?1:2; const re=d.sel.filter(id=>AP.some(p=>p.id===id));
+    if(re.length!==need) return fail(d.solo?'Wer hat das Solo gespielt?':'Wer war Re? Bitte zwei Spieler antippen.');
+    const dv=dokoValue(d); if(!dv) return fail('Augen von Re: eine Zahl von 0 bis 240.');
+    AP.forEach(p=>{ const isRe=re.includes(p.id); deltas[p.id]=isRe?(d.solo?3*dv.S:dv.S):-dv.S; });
+    return cardsCommitRound(deltas,`${d.solo?'Solo von '+nm(re[0]):'Re ('+re.map(nm).join(' & ')+')'} ${dv.reWin?'gewinnt':'verliert'} mit ${pnum(d.v.aug)} Augen – ${dv.pts} ${dv.pts===1?'Punkt':'Punkte'}.`);
+  }
+  if(r.kind==='schafkopf'){
+    if(!d.art) return fail('Welches Spiel?'); if(!d.sp) return fail('Wer hat gespielt?'); if(d.art==='sau'&&(!d.mit||d.mit===d.sp)) return fail('Wer war der Mitspieler?'); if(d.won==null) return fail('Gewonnen oder verloren?');
+    const v=schafValue(d,r)*(d.won?1:-1);
+    AP.forEach(p=>{ const team=p.id===d.sp||(d.art==='sau'&&p.id===d.mit); deltas[p.id]=d.art==='sau'?(team?v:-v):(p.id===d.sp?3*v:-v); });
+    const AN={sau:'Sauspiel',wenz:'Wenz',solo:'Solo'};
+    return cardsCommitRound(deltas,`${AN[d.art]} von ${nm(d.sp)}${d.art==='sau'?' mit '+nm(d.mit):''} ${d.won?'gewonnen':'verloren'} – ${eur(Math.abs(v))}${d.art!=='sau'?' von jedem':''}.`);
+  }
+  if(r.kind==='durak'){
+    if(!d.who) return fail('Wer ist der Durak?'); deltas[d.who]=1;
+    return cardsCommitRound(deltas,`${nm(d.who)} ist der Durak${d.pog?' – mit Schulterklappen!':'.'}`);
+  }
+  if(r.kind==='schwimmen'){
+    const L=d.sel.filter(id=>AP.some(p=>p.id===id)); if(!L.length) return fail('Wer hat verloren?'); if(L.length>=AP.length) return fail('Mindestens einer muss übrig bleiben.');
+    return cardsCommitRound(deltas,L.map(id=>{ const p=G.players.find(x=>x.id===id); return esc(p.name)+(p.lives===1?' ist raus':p.lives===2?' schwimmt jetzt':' verliert ein Leben'); }).join(', ')+'.',()=>L.forEach(id=>{ const p=G.players.find(x=>x.id===id); p.lives--; }));
+  }
+  if(r.kind==='phase10'){
+    for(const p of AP){ const v=pnum(d.v[p.id]); if(v==null&&String(d.v[p.id]??'').trim()!=='') return fail('Bitte nur Zahlen eintragen.'); deltas[p.id]=v||0; }
+    const done=d.sel;
+    return cardsCommitRound(deltas,(done.length?done.map(id=>`${nm(id)} schafft Phase ${G.players.find(p=>p.id===id).phase+1}`).join(', '):'Keiner schafft seine Phase')+'.',()=>done.forEach(id=>{ G.players.find(p=>p.id===id).phase++; }));
+  }
+  if(r.kind==='wizard'){
+    const k=G.cards.rounds.length+1;
+    if(!G.cards.bids){ const bids={}; G.players.forEach(p=>bids[p.id]=d.v['b'+p.id]||0); pushHist(); G.cards.bids=bids; cdraft=null;
+      const sum=Object.values(bids).reduce((a,b)=>a+b,0); addLog(`Runde ${k}: ${sum} Stiche angesagt bei ${k} ${k===1?'Karte':'Karten'}.`); commit(); return; }
+    const tr={}; G.players.forEach(p=>tr[p.id]=d.v['t'+p.id]||0); const sum=Object.values(tr).reduce((a,b)=>a+b,0);
+    if(sum!==k) return fail(`Zusammen müssen es ${k} ${k===1?'Stich':'Stiche'} sein (gerade ${sum}).`);
+    G.players.forEach(p=>{ const b=G.cards.bids[p.id]; deltas[p.id]=b===tr[p.id]?20+10*b:-10*Math.abs(b-tr[p.id]); });
+    return cardsCommitRound(deltas,`Runde ${k}: `+G.players.map(p=>`${esc(p.name)} ${sgn(deltas[p.id])}`).join(', '));
+  }
+}
+Object.assign(act,{
+  cpick(v){ const d=cd(); const [key,id]=v.split(':'); if(key==='sel'){ d.sel=d.sel.includes(id)?d.sel.filter(x=>x!==id):[...d.sel,id]; if(R().kind==='doko'&&d.solo) d.sel=[id]; } else d[key]=d[key]===id?null:id; d.err=''; render(); },
+  cset(v){ const d=cd(); const i=v.indexOf(':'), key=v.slice(0,i), val=v.slice(i+1);
+    if(val==='tog') d[key]=!d[key]; else if(val==='1'||val==='0') d[key]=val==='1'; else d[key]=val;
+    if(key==='solo') d.sel=d.sel.slice(0,d.solo?1:2); d.err=''; render(); },
+  cstep(v){ const d=cd(); const [key,delta,min,max]=v.split(':'); const cur=key.startsWith('b')||key.startsWith('t')?(d.v[key]||0):(d[key]??+min);
+    const nv=Math.min(+max,Math.max(+min,cur+(+delta))); if(key.startsWith('b')||key.startsWith('t')) d.v[key]=nv; else d[key]=nv; render(); },
+  cneg(id){ const d=cd(); d.neg=d.neg||{}; d.neg[id]=!d.neg[id]; render(); },
+  csave(){ if(G.winner) return; cardsSave(); },
+  cnone(){ if(G.winner) return; cardsCommitRound(Object.fromEntries(G.players.map(p=>[p.id,0])),'Unentschieden – kein Durak in dieser Runde.'); },
+  cend(){ if(G.winner) return; const r=R(); pushHist(); const o=cardsRank(r); const w=r.loser?o[o.length-1]:o[0]; G.winner=w.id; addLog(r.loser?`<b>Abgerechnet: ${esc(w.name)} war am häufigsten Durak.</b>`:`<b>Abgerechnet: ${esc(w.name)} gewinnt ${esc(r.name)}!</b>`); commit(); }
+});
+function cardsFormHTML(){
+  const r=R(), d=cd(), AP=cardsActive();
+  if(r.kind==='doko'&&d.solo===undefined) d.solo=false; if(r.kind==='skat'&&!d.mit) d.mit='mit';
+  const chip=(key,id,label,on)=>`<button class="cchip" data-act="cpick" data-v="${key}:${id}" aria-pressed="${!!on}">${label}</button>`;
+  const pchips=(key,list,isOn)=>`<div class="cchips">${list.map(p=>chip(key,p.id,esc(p.name),isOn(p))).join('')}</div>`;
+  const opt=(key,val,label)=>`<button class="cchip" data-act="cset" data-v="${key}:${val}" aria-pressed="${String(d[key])===String(val==='1'?true:val==='0'?false:val)}">${label}</button>`;
+  const tog=(key,label)=>`<button class="cchip" data-act="cset" data-v="${key}:tog" aria-pressed="${!!d[key]}">${label}</button>`;
+  const step=(key,val,min,max,label)=>`<div class="cstep"><span>${label}</span><button class="btn small" data-act="cstep" data-v="${key}:-1:${min}:${max}" aria-label="weniger">−</button><b class="num">${val}</b><button class="btn small" data-act="cstep" data-v="${key}:1:${min}:${max}" aria-label="mehr">+</button></div>`;
+  const inp=(p,ph)=>`<label class="cinrow"><span>${esc(p.name)}</span>${r.neg?`<button class="btn small cneg" data-act="cneg" data-v="${p.id}" aria-pressed="${!!(d.neg&&d.neg[p.id])}" aria-label="Minus">${d.neg&&d.neg[p.id]?'−':'+'}</button>`:''}<input class="cin" type="text" inputmode="numeric" data-cin="${p.id}" value="${esc(d.v[p.id]??'')}" placeholder="${ph}" autocomplete="off"></label>`;
+  const L=(t)=>`<div class="label">${t}</div>`;
+  let body='', btn='Runde eintragen';
+  if(r.kind==='sheet'){
+    if(r.entry==='each') body=`${L('Punkte dieser Runde')}<div class="cins">${AP.map(p=>inp(p,'0')).join('')}</div>${r.hearts?'<p class="muted small" style="margin:0">Zusammen 26. Hat einer alle 26, erkennt Deckel den Mondschuss.</p>':''}`;
+    else body=`${L('Wer hat die Runde gewonnen?')}${pchips('win',AP,p=>d.win===p.id)}
+      ${d.win?`${L(r.entry==='uno'?'Handpunkte der anderen':'Restpunkte der anderen')}<div class="cins">${AP.filter(p=>p.id!==d.win).map(p=>inp(p,'Punkte')).join('')}</div>`:''}
+      ${r.handDouble&&d.win?`<div class="cchips">${tog('hand','Hand-Rommé (doppelt)')}</div>`:''}`;
+  }
+  if(r.kind==='skat'){ btn='Spiel eintragen';
+    const sv=d.game?skatValue(d,r):null;
+    body=`${L('Alleinspieler')}${pchips('decl',AP,p=>d.decl===p.id)}
+    ${L('Spiel')}<div class="cchips">${[['karo','♦ Karo'],['herz','♥ Herz'],['pik','♠ Pik'],['kreuz','♣ Kreuz'],['grand','Grand'],['null','Null']].map(([k,l])=>opt('game',k,l)).join('')}</div>
+    ${d.game&&d.game!=='null'?`<div class="cchips">${opt('mit','mit','mit')}${opt('mit','ohne','ohne')}</div>${step('sp',d.sp||1,1,d.game==='grand'?4:11,'Buben (Spitzen)')}
+      <div class="cchips">${tog('hand','Hand')}${tog('schn','Schneider')}${tog('schnA','Schneider angesagt')}${tog('schw','Schwarz')}${tog('schwA','Schwarz angesagt')}${tog('ouv','Ouvert')}</div>`:''}
+    ${d.game==='null'?`<div class="cchips">${tog('hand','Hand')}${tog('ouv','Ouvert')}</div>`:''}
+    ${L('Ergebnis')}<div class="cchips">${opt('won','1','Gewonnen')}${opt('won','0','Verloren')}</div>
+    ${sv?`<div class="cprev">Spielwert ${sv.txt}${d.won!=null?` → <b>${sgn((d.won?sv.v:-2*sv.v)+(r.seeger?(d.won?50:-50):0))}</b>`:''}</div>`:''}`; }
+  if(r.kind==='doko'){ btn='Spiel eintragen';
+    const dv=d.v.aug!=null&&String(d.v.aug).trim()!==''?dokoValue(d):null;
+    body=`<div class="cchips">${opt('solo','0','Normalspiel')}${opt('solo','1','Solo')}</div>
+    ${L(d.solo?'Solist':'Re-Partei (zwei antippen)')}${pchips('sel',AP,p=>d.sel.includes(p.id))}
+    ${L('Augen von Re')}<div class="cins"><label class="cinrow"><span>Re</span><input class="cin" type="text" inputmode="numeric" data-cin="aug" value="${esc(d.v.aug??'')}" placeholder="0–240" autocomplete="off"></label></div>
+    ${L('Ansagen')}<div class="cchips">${tog('reA','Re angesagt')}${tog('koA','Kontra angesagt')}</div>
+    ${d.solo?'':`${L('Sonderpunkte (Fuchs, Doppelkopf, Karlchen)')}${step('sRe',d.sRe||0,0,9,'Re')}${step('sKo',d.sKo||0,0,9,'Kontra')}`}
+    ${dv?`<div class="cprev">${dv.reWin?'Re':'Kontra'} gewinnt · ${dv.pts} ${dv.pts===1?'Punkt':'Punkte'}${d.solo?' (Solist dreifach)':''}</div>`:''}`; }
+  if(r.kind==='schafkopf'){ btn='Spiel eintragen';
+    body=`${L('Spiel')}<div class="cchips">${opt('art','sau','Sauspiel')}${opt('art','wenz','Wenz')}${opt('art','solo','Farbsolo')}</div>
+    ${L('Spieler')}${pchips('sp',AP,p=>d.sp===p.id)}
+    ${d.art==='sau'?`${L('Mitspieler (hat die gerufene Sau)')}${pchips('mit',AP.filter(p=>p.id!==d.sp),p=>d.mit===p.id)}`:''}
+    ${L('Ergebnis')}<div class="cchips">${opt('won','1','Gewonnen')}${opt('won','0','Verloren')}${tog('schn','Schneider')}${tog('schw','Schwarz')}${tog('kontra','Kontra')}${d.kontra?tog('re','Re'):''}</div>
+    ${step('lauf',d.lauf||0,0,8,'Laufende')}
+    ${d.art&&d.won!=null?`<div class="cprev">${eur(schafValue(d,r))}${d.art==='sau'?' pro Spieler':' von jedem Gegner'} → ${d.won?'Spieler bekommt':'Spieler zahlt'}</div>`:''}`; }
+  if(r.kind==='durak'){ btn='Durak eintragen';
+    body=`${L('Wer ist der Durak?')}${pchips('who',AP,p=>d.who===p.id)}<div class="cchips">${tog('pog','mit Schulterklappen (zwei Sechsen)')}</div>
+    <button class="btn ghost small" data-act="cnone" style="align-self:flex-start">Unentschieden – kein Durak</button>`; }
+  if(r.kind==='schwimmen'){ btn='Leben abziehen';
+    body=`${L('Wer hat verloren? (auch mehrere)')}${pchips('sel',AP,p=>d.sel.includes(p.id))}<p class="muted small" style="margin:0">Hat einer 31 aufgelegt, alle anderen antippen.</p>`; }
+  if(r.kind==='phase10'){
+    body=`${L('Wer hat seine Phase geschafft?')}<div class="cchips">${AP.map(p=>chip('sel',p.id,`${esc(p.name)} · Phase ${p.phase+1}`,d.sel.includes(p.id))).join('')}</div>
+    ${L('Minuspunkte dieser Runde')}<div class="cins">${AP.map(p=>inp(p,'0')).join('')}</div>`; }
+  if(r.kind==='wizard'){ const k=G.cards.rounds.length+1;
+    if(!G.cards.bids){ btn='Ansagen fertig'; const sum=G.players.reduce((a,p)=>a+(d.v['b'+p.id]||0),0);
+      body=`${L(`Ansagen für Runde ${k} (${k} ${k===1?'Karte':'Karten'})`)}${G.players.map(p=>step('b'+p.id,d.v['b'+p.id]||0,0,k,esc(p.name))).join('')}<p class="muted small" style="margin:0">Zusammen ${sum} angesagt bei ${k} ${k===1?'Stich':'Stichen'}.</p>`; }
+    else { const sum=G.players.reduce((a,p)=>a+(d.v['t'+p.id]||0),0);
+      body=`${L(`Gemachte Stiche in Runde ${k}`)}${G.players.map(p=>step('t'+p.id,d.v['t'+p.id]||0,0,k,`${esc(p.name)} <small class="muted">(angesagt ${G.cards.bids[p.id]})</small>`)).join('')}<p class="muted small" style="margin:0">Zusammen ${sum} von ${k}.</p>`; } }
+  const so=cardsSitOut();
+  return `<div class="cform">${so>=0?`<p class="muted small" style="margin:0">${esc(G.players[so].name)} gibt und setzt aus.</p>`:''}${body}
+    ${d.err?`<div class="err">${esc(d.err)}</div>`:''}
+    <button class="btn primary big" data-act="csave">${btn}</button>
+    ${G.cards.rounds.length?`<button class="btn ghost small" data-act="cend">${r.loser?'Abrechnen und beenden':'Abrechnen – Spiel beenden'}</button>`:''}</div>`;
+}
+function cardsGameHTML(){
+  const r=R(), p=G.players[G.cur];
+  const board=`<section class="card" style="padding:8px 12px"><ol class="log">${cardsRank(r).map(x=>`<li><span>${esc(x.name)}</span><b class="num" style="margin-left:auto">${cardsLabel(r,x)}</b></li>`).join('')}</ol></section>`;
+  return `${gameTop(5)}${board}
+  <section class="card turn cturn">
+    <div class="turnhead"><div><div class="label">Gibt</div><h2>${esc(p.name)}</h2></div><div class="stat"><div class="label">${r.kind==='skat'||r.kind==='doko'||r.kind==='schafkopf'?'Spiel':'Runde'}</div><div class="big num">${G.cards.rounds.length+1}</div></div></div>
+    ${cardsFormHTML()}
+  </section>${gameFooter()}`;
+}
+function cardsBlockHTML(){
+  const r=R(), R0=G.cards.rounds; const fmtD=v=>r.kind==='schafkopf'?(v?eur(v):'·'):v?sgn(v):'·';
+  if(!R0.length) return '<p class="muted" style="margin:0">Noch keine Runde eingetragen.</p>';
+  return `<div class="tblwrap"><table class="tbl" style="min-width:${Math.max(0,60+G.players.length*64)}px"><thead><tr><th>#</th>${G.players.map(p=>`<th>${esc(p.name)}</th>`).join('')}</tr></thead>
+    <tbody>${R0.map(x=>`<tr><td>${x.n}</td>${G.players.map(p=>`<td>${r.kind==='durak'?(x.d[p.id]?'D':'·'):fmtD(x.d[p.id]||0)}</td>`).join('')}</tr>`).join('')}
+    <tr><td><b>Σ</b></td>${G.players.map(p=>`<td><b>${r.kind==='schafkopf'?eur(p.score):r.kind==='schwimmen'?cardsLabel(r,p):fmt(p.score)}</b></td>`).join('')}</tr></tbody></table></div>`;
+}
+function cardsPageHTML(){
+  const all=Object.values(allTemplates()).filter(isCards);
+  const grp=[['Ohne 2 bis 5 – Skatblatt & Co.',['32','36','48']],['Mit 2 bis 5 – volles Blatt',['52','110']],['Eigene Karten',['own']],['Für jedes Spiel',['any']]];
+  return `${subHead('Kartenspiele','cat')}
+  <p class="muted small" style="margin:-4px 0 0">Gespielt wird mit echten Karten – Deckel rechnet und schreibt mit.</p>
+  ${grp.map(([label,ds])=>{ const list=all.filter(t=>ds.includes(t.deck)); if(!list.length) return ''; return `<div class="label" style="margin-top:4px">${label}</div><div class="glist">${list.map(t=>`
+    <div class="grow">
+      <button class="gpick" data-act="tpl" data-v="${t.id}"><b>${esc(t.name)}</b><span class="muted small">${esc(cardsMeta(t))}</span></button>
+      <button class="ginfo" data-act="info" data-v="${t.id}" aria-label="Anleitung zu ${esc(t.name)}">Anleitung</button>
+    </div>`).join('')}</div>`; }).join('')}`;
+}
 
 Object.assign(act, editActs, blockActs, shareActs, roundActs, bluffActs, boxActs, houseActs, tabActs, setActs, bustActs, shipActs, pokerActs, raceActs);
 if(!allTemplates()[prefs.tpl]) prefs.tpl='kubiki';
@@ -2841,6 +3184,7 @@ function tvStatus(r){
   if(isRP(r)) return `Ziel: ${r.wins} Rundensiege`;
   if(isBluff(r)) return r.lives?`${r.lives} Leben pro Spieler`:'Strafpunkte';
   if(isRace(r)) return 'Wettrennen: '+raceSeq(r).join(' ');
+  if(isCards(r)) return cardsStatus(r);
   if(isDarts(r)) return r.game==='x01'?`${r.start} · ${r.dOut===false?'Single-Out':'Double-Out'} · 3 Pfeile pro Aufnahme`:r.game==='cricket'?'15–20 und Bull schließen · Punkte auf offenen Zahlen':'1 bis 20, dann Bull · 3 Pfeile pro Aufnahme';
   if(isBlock(r)) return `${r.fields.length} Felder pro Spieler`;
   return `Ziel ${r.exact?'genau ':''}${fmt(r.target)}`;
@@ -2850,6 +3194,7 @@ function tvSub(r,p){
   if(isBluff(r)){ if(r.lives&&p.lives<=0) return 'raus'; return (myPid()===p.id?'<b>du</b> ':'')+(r.lives?`<span class="lives">${Array.from({length:r.lives},(_,k)=>`<i class="${k<p.lives?'on':''}"></i>`).join('')}</span>`:''); }
   if(isRP(r)){ const c=G.rp.res[p.id], l=(G.rp.last||{})[p.id]; return c?esc(c.label):l?'zuletzt: '+esc(l.label):''; }
   if(isHouse(r)){ const c=G.house.res[p.id], l=(G.house.last||{})[p.id]; return c!=null?'Nr. '+c:l!=null?'zuletzt: '+l:''; }
+  if(isCards(r)) return cardsSub(r,p);
   if(isDarts(r)) return r.game==='x01'?'Ø '+avg3(p):r.game==='cricket'?cClosed(p)+'/7 zu':`<span class="mini"><span style="width:${(p.pos||0)/21*100}%"></span></span>`;
   if(isRace(r)){ const n=raceSeq(r).length; return `<span class="mini"><span style="width:${(p.pos||0)/n*100}%"></span></span>`; }
   if(isBlock(r)) return `${filled(r,p)}/${r.fields.length} Felder`;
@@ -2861,7 +3206,7 @@ function tableViewHTML(){
   const box=document.createElement('div'); box.innerHTML=gameHTML(); const turn=box.querySelector('section.turn');
   const n=G.players.length; const size=isDarts(r)?(n<=2?'m':'s'):n<=4?'l':n<=6?'m':'s';
   const rank={}; rankOrder(r).forEach((p,i)=>rank[p.id]=i+1);
-  const tiles=G.players.map((p,i)=>{ const out=(isBluff(r)&&r.lives&&p.lives<=0)||(isRound(r)&&!roundActive().includes(i));
+  const tiles=G.players.map((p,i)=>{ const out=(isCards(r)&&r.kind==='schwimmen'&&p.lives<=0)||(isBluff(r)&&r.lives&&p.lives<=0)||(isRound(r)&&!roundActive().includes(i));
     return `<div class="tvtile ${i===G.cur&&!G.winner?'cur':''} ${out?'out':''}"><span class="tvrank">${rank[p.id]}.</span><span class="tvname">${esc(p.name)}</span><span class="tvscore">${scoreBig(r,p)}</span><span class="tvsub">${tvSub(r,p)}</span></div>`; }).join('');
   return `<div class="tv" style="${feltVars(F)}">
     <div class="tvhead"><div class="brand">${dieHTML(5,{attrs:'style="width:30px;height:30px;padding:4px"'})}<h1 class="${r.name.length>13?'long':''}">${esc(r.name)}</h1></div>
@@ -2922,6 +3267,7 @@ function metaOf(r){
   if(isShip(r)) return `5 Würfel · ${r.rolls} Würfe · ${r.wins} Rundensiege`;
   if(isPoker(r)) return `5 Würfel · ${r.rolls} Würfe · ${r.wins} Rundensiege`;
   if(isDarts(r)) return dartsMeta(r);
+  if(isCards(r)) return cardsMeta(r);
   if(isRace(r)) return `1 Würfel · ${r.back?'1–6 und zurück':'1–6'} · Wettrennen`;
   return `${r.dice} Würfel · Ziel ${r.exact?'genau ':''}${fmt(r.target)}`;
 }
@@ -2953,7 +3299,7 @@ function setupHTML(){
       <p class="muted small" style="margin:0">Schocken-Varianten: bei Schocken unter „Regeln“ anpassen.</p></div>`:''}`;
   }
   if(st==='cat'){
-    const nDice=Object.values(allTemplates()).filter(t=>!isDarts(t)).length;
+    const nDice=Object.values(allTemplates()).filter(t=>!isDarts(t)&&!isCards(t)).length; const nCards=Object.values(allTemplates()).filter(isCards).length;
     const tile=(act,v,icon,title,sub,soon)=>`<button class="cattile${soon?' soon':''}" ${soon?'disabled aria-disabled="true"':`data-act="${act}" data-v="${v}"`}><span class="caticon" aria-hidden="true">${icon}</span><span class="cattxt"><b>${title}</b><span class="muted small">${sub}</span></span>${soon?'<span class="catsoon">bald</span>':'<span class="catgo" aria-hidden="true">›</span>'}</button>`;
     const icDie=`<svg viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="30" rx="7" fill="var(--paper)" stroke="currentColor" stroke-width="2.4"/><circle cx="13" cy="13" r="2.8" fill="currentColor"/><circle cx="20" cy="20" r="2.8" fill="currentColor"/><circle cx="27" cy="27" r="2.8" fill="currentColor"/></svg>`;
     const icCard=`<svg viewBox="0 0 40 40"><rect x="6" y="8" width="20" height="28" rx="3" fill="var(--paper)" stroke="currentColor" stroke-width="2.2" transform="rotate(-10 16 22)"/><rect x="14" y="5" width="20" height="28" rx="3" fill="var(--paper)" stroke="currentColor" stroke-width="2.4" transform="rotate(8 24 19)"/><path d="M24.5 14.5c-2.2-3-6 .2-3.6 2.9l3.3 3.6 3.6-3.4c2.5-2.6-1-6-3.3-3.1z" fill="var(--red, #c0392b)" transform="rotate(8 24 19)"/></svg>`;
@@ -2962,12 +3308,13 @@ function setupHTML(){
     return `${subHead('Was spielt ihr?','home')}
     <div class="catlist">
       ${tile('go','pick',icDie,'Würfelspiele',`${nDice} Spiele – Kubiki, Kniffel, Schocken, Mäxchen …`)}
-      ${tile('','',icCard,'Kartenspiele','Skat, Doppelkopf, Rommé, Uno …',true)}
+      ${tile('go','cards',icCard,'Kartenspiele',`${nCards} Spiele – Skat, Doppelkopf, Durak, Rommé, Uno …`)}
       ${tile('go','darts',icDart,'Darts','501, 301, Cricket, Around the Clock')}
       ${tile('go','tools',icFree,'Hilfsmittel','Würfel, Münze, Fingerwähler, Timer, Karte ziehen')}
     </div>`;
   }
   if(st==='tools') return toolsPageHTML();
+  if(st==='cards') return cardsPageHTML();
   if(st==='darts'){
     const list=Object.values(allTemplates()).filter(isDarts);
     return `${subHead('Darts','cat')}
@@ -2985,7 +3332,7 @@ function setupHTML(){
   }
   if(st==='info'){
     const t=tplOf(setup.infoId); const isC=!!custom[t.id];
-    return `${subHead(t.name,isDarts(t)?'darts':'pick')}
+    return `${subHead(t.name,isDarts(t)?'darts':isCards(t)?'cards':'pick')}
     <section class="card">
       <p class="muted" style="margin:0 0 12px">${esc(t.tagline||metaOf(t))}</p>
       ${guideHTML(t)}
@@ -3001,8 +3348,9 @@ function setupHTML(){
   if(st==='players'){
     const tr=tplOf(prefs.tpl);
     const savedFree=prefs.saved.filter(n=>!setup.names.map(s=>s.trim()).includes(n));
-    return `${subHead('Wer spielt mit?',isDarts(tr)?'darts':'pick')}
-    <button class="gamechip" data-act="go" data-v="${isDarts(tr)?'darts':'pick'}"><span class="muted small">Spiel</span><b>${esc(tr.name)}</b><span class="muted small">ändern</span></button>
+    const backTo=isDarts(tr)?'darts':isCards(tr)?'cards':'pick';
+    return `${subHead('Wer spielt mit?',backTo)}
+    <button class="gamechip" data-act="go" data-v="${backTo}"><span class="muted small">Spiel</span><b>${esc(tr.name)}</b><span class="muted small">ändern</span></button>
     <section class="card" style="display:flex;flex-direction:column;gap:10px">
       <div class="plist">${setup.names.map((n,i)=>`
         <div class="pline"><span class="num muted" style="font-size:18px;text-align:center">${i+1}</span>
@@ -3094,6 +3442,7 @@ function gameHTML(){
   if(isPoker(R())) return pokerGameHTML();
   if(isRace(R())) return raceGameHTML();
   if(isDarts(R())) return dartsGameHTML();
+  if(isCards(R())) return cardsGameHTML();
   const rs=R(), t=T(), p=G.players[G.cur];
   const order=G.players.map((pl,i)=>({...pl,i})).sort((a,b)=>b.score-a.score);
   const rank={}; order.forEach((pl,k)=>rank[pl.i]=k+1);
@@ -3168,13 +3517,15 @@ function panelHTML(){
   const wrap=(title,body,back)=>`<div class="overlay" role="dialog" aria-label="${esc(title)}" data-act="panel" data-v="" data-self="1"><div class="card stats">
     <div class="top">${back?`<button class="back" data-act="panel" data-v="menu" aria-label="Zurück zum Menü">←</button>`:''}<h2 style="font-size:22px;flex:1">${esc(title)}</h2>${close}</div>${body}</div></div>`;
   if(panel==='menu') return wrap('Menü',`<div class="menu">
-      <button class="mitem" data-act="panel" data-v="stats"><b>Statistik</b><span class="muted small">${isDarts(r)?'Aufnahmen, Bestwerte':'Würfel und Spieler'}</span></button>
+      <button class="mitem" data-act="panel" data-v="stats"><b>Statistik</b><span class="muted small">${isDarts(r)?'Aufnahmen, Bestwerte':isCards(r)?'Runden und Rundenbeste':'Würfel und Spieler'}</span></button>
+      ${isCards(r)?`<button class="mitem" data-act="panel" data-v="cblock"><b>Spielblock</b><span class="muted small">alle Runden mit Punkten</span></button>`:''}
       ${isBlock(r)?`<button class="mitem" data-act="panel" data-v="block"><b>Spielblock</b><span class="muted small">alle Felder aller Spieler</span></button>`:''}
       <button class="mitem" data-act="panel" data-v="log"><b>Ganzer Verlauf</b><span class="muted small">${G.log.length} Einträge</span></button>
       <button class="mitem" data-act="panel" data-v="rules"><b>Anleitung & Regeln</b><span class="muted small">${esc(r.name)}</span></button>
       <button class="mitem" data-act="panel" data-v="colors"><b>Tisch & Würfel</b><span class="muted small">${esc(felt().n)} · ${esc((DICE[prefs.dice]||DICE.weiss).n)}</span></button>
       <button class="mitem" data-act="panel" data-v="leave"><b>Spiel verlassen</b><span class="muted small">zurück zum Start</span></button>
     </div>`);
+  if(panel==='cblock') return wrap('Spielblock',cardsBlockHTML(),1);
   if(panel==='rules') return wrap(r.name,`${guideHTML(r)}${guideOf(r)?'<div class="label" style="margin-top:6px">Alle Regeln</div>':''}<ul class="rules">${rulesList(r).map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`,1);
   if(panel==='colors') return wrap('Tisch & Würfel',`<div class="label">Tischfarbe</div>${feltSwatches()}<div class="label" style="margin-top:8px">Würfelfarbe</div>${swatchesHTML()}`,1);
   if(panel==='log') return wrap('Verlauf',`<ol class="log">${G.log.map(l=>`<li><span class="num">${l.n}</span><span>${l.t}</span></li>`).join('')}</ol>`,1);
@@ -3193,7 +3544,7 @@ function renderOverlay(){
   const w=G.players.find(p=>p.id===G.winner);
   const order=rankOrder(R());
   ov.innerHTML=`<div class="overlay" role="dialog" aria-label="Spielende"><div class="card">
-    <div class="label">${isRound(R())?'Verloren – die nächste Runde geht auf':'Gewonnen'}</div><div class="crown">${esc(w.name)}</div>
+    <div class="label">${isRound(R())?'Verloren – die nächste Runde geht auf':isLoserGame(R())?'Verloren':'Gewonnen'}</div><div class="crown">${esc(w.name)}</div>
     ${isRound(R())?`<p class="muted" style="margin:0">Hälften verloren: ${(G.halfLosers||[]).map(id=>esc((G.players.find(p=>p.id===id)||{}).name||'')).join(', ')}</p>`
       :`<ol class="log">${order.map((p,i)=>`<li><span class="num">${i+1}.</span><span style="flex:1">${esc(p.name)}</span><b class="num" style="font-size:18px">${scoreLabel(R(),p)}</b></li>`).join('')}</ol>`}
     <div class="row"><button class="btn" data-act="undo">Rückgängig</button>${isBlock(R())?'<button class="btn" data-act="block">Spielblock</button>':''}<button class="btn" data-act="stats">Statistik</button></div>
@@ -3221,16 +3572,16 @@ function statsHTML(){
   const cell=(x,k)=>`<td class="${['best','trip','stole'].includes(k)&&x[k]>0&&x[k]===best(k)&&pl.length>1?'hl':''}">${fmt(x[k])}</td>`;
   const quote=x=>x.turns?Math.round(x.niete/x.turns*100)+' %':'–';
   const rs=R();
-  const cols=isDarts(rs)?(rs.game==='x01'?[['turns','Aufnahmen'],['best','Beste Aufnahme'],['trip','180er'],['niete','Überworfen']]:rs.game==='cricket'?[['turns','Aufnahmen'],['best','Meiste Treffer']]:[['turns','Aufnahmen'],['trip','Abgehakt']]):isRP(rs)?[['turns','Züge'],['trip','Rundensiege'],['niete','Drüber / leer']]:isRace(rs)?[['turns','Würfe'],['trip','Treffer']]:isBox(rs)?[['turns','Züge'],['trip','Box zu'],['best','Höchster Rest']]:isHouse(rs)?[['turns','Runden'],['trip','Rundensiege'],['best','Beste Nummer']]:isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
+  const cols=isCards(rs)?[['turns','Runden'],['trip','Rundenbester']]:isDarts(rs)?(rs.game==='x01'?[['turns','Aufnahmen'],['best','Beste Aufnahme'],['trip','180er'],['niete','Überworfen']]:rs.game==='cricket'?[['turns','Aufnahmen'],['best','Meiste Treffer']]:[['turns','Aufnahmen'],['trip','Abgehakt']]):isRP(rs)?[['turns','Züge'],['trip','Rundensiege'],['niete','Drüber / leer']]:isRace(rs)?[['turns','Würfe'],['trip','Treffer']]:isBox(rs)?[['turns','Züge'],['trip','Box zu'],['best','Höchster Rest']]:isHouse(rs)?[['turns','Runden'],['trip','Rundensiege'],['best','Beste Nummer']]:isBluff(rs)?[['turns','Ansagen'],['niete','Verloren'],['trip','Bluffs durchgekommen'],['stole','Bluffer erwischt']]:isRound(rs)?[['turns','Würfe'],['trip','Schocks'],['niete','Runden verloren'],['lost','Deckel kassiert'],['burned','Hälften verloren']]:isBlock(rs)?[['turns','Züge'],['niete','Gestrichen'],['best','Bestes Feld'],['trip','Kniffel']]:[['turns','Züge'],['niete','Nieten'],['quote','Nietenquote'],['best','Bester Zug'],['trip','Drillinge'],
     ...(rs.steal?[['stole','Geklaut'],['lost','Beklaut']]:[]), ...((rs.burn||[]).length?[['burned','Verbrannt']]:[])];
   return `<div class="overlay" role="dialog" aria-label="Statistik"><div class="card stats">
     <div class="top"><h2 style="font-size:22px">Statistik</h2><button class="btn small" data-act="closestats">Schließen</button></div>
-    ${isDarts(rs)?'':`<div class="label">Würfelverteilung</div>
+    ${isDarts(rs)||isCards(rs)?'':`<div class="label">Würfelverteilung</div>
     ${dice}`}
     <div class="label" style="margin-top:6px">Spieler</div>
     <div class="tblwrap"><table class="tbl"><thead><tr><th>Spieler</th>${cols.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead>
     <tbody>${pl.map(x=>`<tr><td>${esc(x.p.name)}</td>${cols.map(([k])=>k==='quote'?`<td>${quote(x)}</td>`:cell(x,k)).join('')}</tr>`).join('')}</tbody></table></div>
-    <p class="muted" style="margin:0;font-size:13px">Rot = Bestwert${isDarts(rs)?'':isBluff(rs)?' bei Bluffs und Erwischt':isRound(rs)?' bei Schocks':isBlock(rs)?' bei bestem Feld und Kniffel':` bei bester Zug, Drillingen${rs.steal?' und Geklaut':''}`}. Die Statistik läuft über alle Runden dieses Spiels.</p>
+    <p class="muted" style="margin:0;font-size:13px">Rot = Bestwert${isDarts(rs)||isCards(rs)?'':isBluff(rs)?' bei Bluffs und Erwischt':isRound(rs)?' bei Schocks':isBlock(rs)?' bei bestem Feld und Kniffel':` bei bester Zug, Drillingen${rs.steal?' und Geklaut':''}`}. Die Statistik läuft über alle Runden dieses Spiels.</p>
     <div class="row"><button class="btn ghost small" data-act="resetstats">Statistik zurücksetzen</button></div>
   </div></div>`;
 }
@@ -3327,6 +3678,7 @@ document.addEventListener('input',e=>{
   if(e.target.id==='importtxt') setup.importTxt=e.target.value;
   if(e.target.id==='tabname') setup.tabName=e.target.value;
   if(e.target.id==='restoretxt') setup.restoreTxt=e.target.value;
+  if(e.target.matches('.cin')&&cdraft) cdraft.v[e.target.dataset.cin]=e.target.value;
   if(E && e.target.matches('[data-path]')) editorInput(e.target);
 });
 document.addEventListener('keydown',e=>{
