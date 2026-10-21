@@ -1,7 +1,7 @@
 {
   "name": "Deckel – Punkte zählen",
   "short_name": "Deckel",
-  "description": "Punkte zählen für eure Spieleabende – mit euren Hausregeln.",
+  "description": "Würfelspiele, Kartenspiele und Darts für eure Spieleabende – zählen, spielen, Hausregeln.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
@@ -10,8 +10,26 @@
   "background_color": "#e9eef0",
   "theme_color": "#14233a",
   "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
-    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/Deckel/",
+  "categories": [
+    "games",
+    "entertainment"
   ]
 }

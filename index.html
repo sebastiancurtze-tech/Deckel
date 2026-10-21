@@ -3208,7 +3208,7 @@ const PT=(id,o)=>{ TEMPLATES[id]={id, type:'cardplay', cat:'Karten', noEdit:true
 PT('pdurak',{kind:'durak', name:'Durak', deck:'36', minP:2, maxP:6, loser:true, tagline:'Mit digitalen Karten: angreifen, schlagen, aufnehmen – wer zuletzt Karten hat, ist der Durak.'});
 PT('pmaumau',{kind:'maumau', name:'Mau-Mau', deck:'32', minP:2, maxP:6, tagline:'Mit digitalen Karten: Farbe auf Farbe, Wert auf Wert. 7 zieht zwei, 8 setzt aus, Bube wünscht.'});
 PT('pskat',{kind:'skat', name:'Skat', deck:'32', minP:3, maxP:3, tagline:'Mit digitalen Karten: reizen, Skat aufnehmen, drücken, Stiche spielen – Deckel rechnet ab.'});
-const HOWTO=['Am Handy: Wer dran ist, bekommt das Handy und tippt auf „Karten zeigen“. Die anderen schauen weg.','Karte antippen hebt sie an, nochmal antippen spielt sie. Erlaubte Karten sind hell, die anderen abgedunkelt.','Mit „Mehrere Handys“ (in der Claude-App) hat jeder seine Karten auf dem eigenen Handy.'];
+const HOWTO=['Am Handy: Wer dran ist, bekommt das Handy und tippt auf „Karten zeigen“. Die anderen schauen weg.','Karte antippen hebt sie an, nochmal antippen spielt sie. Erlaubte Karten sind hell, die anderen abgedunkelt.','Bald: Mit „Mehrere Handys“ hat jeder seine Karten auf dem eigenen Handy.'];
 Object.assign(GUIDE,{
   pdurak:{...GUIDE.durak, steps:[...GUIDE.durak.steps.slice(0,4),'Wer zuletzt noch Karten hat, ist der Durak.',...HOWTO,'Angreifen: eine oder mehrere Karten gleichen Werts antippen und „Legen“. Verteidigen: Karte antippen, die schlägt – sonst „Aufnehmen“.'],
     tip:'Nach dem Aufnehmen dürfen die Angreifer noch passende Karten nachschieben.'},
@@ -3721,9 +3721,9 @@ function setupHTML(){
     </section>
     <div class="seg" role="group" aria-label="Geräte">
       <button data-act="online" data-v="0" aria-pressed="${!setup.online}">Ein Handy</button>
-      <button data-act="online" data-v="1" aria-pressed="${setup.online}" ${canOnline?'':'disabled'}>Mehrere Handys</button>
+      <button data-act="online" data-v="1" aria-pressed="${setup.online}" ${canOnline?'':'disabled'}>Mehrere Handys${canOnline?'':' <span class="tag">bald</span>'}</button>
     </div>
-    <p class="muted small" style="margin:-4px 0 0">${setup.online?'Ihr bekommt einen Code zum Koppeln. Alle sehen den Stand live.':canOnline?'Das Handy geht reihum oder liegt in der Mitte.':'Mehrere Handys koppeln kommt in einer späteren Version.'}</p>
+    <p class="muted small" style="margin:-4px 0 0">${setup.online?'Ihr bekommt einen Code zum Koppeln. Alle sehen den Stand live.':canOnline?'Das Handy geht reihum oder liegt in der Mitte.':'Bald: Jeder spielt am eigenen Handy und sieht nur seine eigenen Karten – kommt mit einem der nächsten Updates.'}</p>
     ${setup.err?`<div class="err">${esc(setup.err)}</div>`:''}
     <button class="btn ghost" data-act="draw">Wer fängt an? Auslosen</button>
     <button class="btn primary big" data-act="start">Los geht's</button>`;
